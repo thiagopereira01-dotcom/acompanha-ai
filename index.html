@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AcompanhAí · Sistema de Ocorrência Escolar</title>
+<title>Acompanha-aí · Sistema de Ocorrência Escolar</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%237A1420' stroke='%23141414' stroke-width='4'/><text x='50' y='66' font-size='46' text-anchor='middle' fill='%23F4F2ED' font-family='serif' font-weight='700'>A</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -888,7 +888,7 @@
     <div class="capa-content">
       <div class="capa-seal">A</div>
       <div class="capa-kicker">Sistema de Ocorrência Escolar</div>
-      <h1>AcompanhAí</h1>
+      <h1>Acompanha-aí</h1>
       <div class="capa-accent"></div>
       <p class="capa-tagline">Do registro em sala à comunicação com a família — a gestão escolar mais simples, rápida e transparente do seu dia a dia.</p>
       <button class="capa-btn" id="btnComecar" type="button">Começar</button>
@@ -904,7 +904,7 @@
 
     <div class="login-card">
       <div class="login-seal">A</div>
-      <h1>AcompanhAí</h1>
+      <h1>Acompanha-aí</h1>
       <p class="login-sub">Sistema de Ocorrência Escolar</p>
 
       <div class="role-tabs" id="roleTabs">
@@ -937,7 +937,7 @@
     <div class="letterhead">
       <div class="seal">A</div>
       <div class="letterhead-text">
-        <h1>AcompanhAí</h1>
+        <h1>Acompanha-aí</h1>
         <p>Registro de Ocorrência Escolar</p>
       </div>
       <div class="letterhead-meta">
@@ -1401,7 +1401,7 @@
     // ============================================================
     function montarMsgWhatsApp(oc) {
       return encodeURIComponent(
-        `*AcompanhAí — Ocorrência Escolar*\n\n` +
+        `*Acompanha-aí — Ocorrência Escolar*\n\n` +
         `Protocolo: ${oc.protocolo}\n` +
         `Data: ${oc.data}\n` +
         `Professor: ${oc.professor}\n` +
@@ -1497,7 +1497,7 @@
       if (!ultimaOcorrencia) { mostrarToast('Nenhuma ocorrência para copiar', 'error'); return; }
       const oc = ultimaOcorrencia;
       const texto = `
-Ocorrência Escolar — AcompanhAí
+Ocorrência Escolar — Acompanha-aí
 Protocolo: ${oc.protocolo}
 Data: ${oc.data}
 Professor: ${oc.professor}
@@ -1537,7 +1537,7 @@ Email do Responsável: ${oc.email}
           td:first-child{ font-weight:bold; width:150px; color:#333; }
           .footer{ margin-top:30px; font-size:.8rem; color:#777; }
         </style></head><body>
-          <h1>AcompanhAí</h1>
+          <h1>Acompanha-aí</h1>
           <div class="sub">Registro de Ocorrência Escolar</div>
           <table>
             <tr><td>Protocolo</td><td>${oc.protocolo}</td></tr>
@@ -1549,7 +1549,7 @@ Email do Responsável: ${oc.email}
             <tr><td>Descrição</td><td>${oc.descricao}</td></tr>
             <tr><td>Email Responsável</td><td>${oc.email}</td></tr>
           </table>
-          <div class="footer">Gerado pelo AcompanhAí em ${formatarData()}</div>
+          <div class="footer">Gerado pelo Acompanha-aí em ${formatarData()}</div>
         </body></html>
       `;
       const w = window.open('', '_blank');
