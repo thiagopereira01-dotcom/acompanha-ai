@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='%23E53935'/><stop offset='1' stop-color='%237A1010'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23g)'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='%23FFF5F5' font-family='system-ui' font-weight='700'>A</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Outfit:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Manrope:wght@500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
   :root{
@@ -38,7 +38,7 @@
     --radius-sm:10px;
     --shadow-1:0 1px 2px rgba(122,16,16,.06), 0 4px 12px rgba(122,16,16,.05);
     --shadow-2:0 12px 40px rgba(122,16,16,.14);
-    --font-display:'Syne', sans-serif;
+    --font-display:'Manrope', sans-serif;
     --font-ui:'Outfit', system-ui, sans-serif;
     --font-mono:'JetBrains Mono', monospace;
     font-size:16px;
@@ -120,9 +120,9 @@
   .capa-content{
     position:relative;
     z-index:1;
-    max-width:520px;
+    max-width:560px;
     text-align:center;
-    color:#F4FBFA;
+    color:#FFF8F7;
     animation:capa-rise .9s cubic-bezier(.22,1,.36,1) both;
   }
   @keyframes capa-rise{
@@ -131,17 +131,18 @@
   }
 
   .capa-mark{
-    width:72px;height:72px;
-    margin:0 auto 28px;
-    border-radius:20px;
+    width:64px;height:64px;
+    margin:0 auto 26px;
+    border-radius:18px;
     background:var(--grad-brand);
-    border:1px solid rgba(255,255,255,.22);
+    border:1px solid rgba(255,255,255,.28);
     display:flex;align-items:center;justify-content:center;
     font-family:var(--font-display);
     font-weight:800;
-    font-size:2.1rem;
+    font-size:1.75rem;
+    letter-spacing:-.04em;
     color:#fff;
-    box-shadow:0 12px 36px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25);
+    box-shadow:0 12px 36px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.28);
     animation:capa-mark-in 1s .15s cubic-bezier(.22,1,.36,1) both;
   }
   @keyframes capa-mark-in{
@@ -149,33 +150,65 @@
     to{ opacity:1; transform:none; }
   }
 
-  .capa-content h1{
+  .capa-kicker{
+    font-family:var(--font-ui);
+    font-size:.72rem;
+    font-weight:600;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:rgba(255,200,190,.75);
+    margin-bottom:14px;
+  }
+
+  .capa-brand{
     font-family:var(--font-display);
     font-weight:800;
-    font-size:clamp(2.6rem, 8vw, 4rem);
-    letter-spacing:-.03em;
-    line-height:1.05;
-    text-shadow:0 8px 40px rgba(229,57,53,.45);
+    font-size:clamp(2.4rem, 7.5vw, 3.6rem);
+    letter-spacing:-.045em;
+    line-height:1.08;
+    margin:0;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:baseline;
+    gap:0;
+  }
+  .capa-brand .brand-main{
+    color:#FFF8F7;
+    font-weight:700;
+  }
+  .capa-brand .brand-sep{
+    color:rgba(255,255,255,.35);
+    font-weight:500;
+    margin:0 .06em;
+  }
+  .capa-brand .brand-accent{
+    background:linear-gradient(120deg, #FFB59E 0%, #FF6B4A 45%, #FF8A80 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    font-weight:800;
   }
 
   .capa-content .capa-tagline{
-    margin-top:18px;
-    font-size:1.08rem;
+    margin-top:20px;
+    font-family:var(--font-ui);
+    font-size:1.05rem;
     font-weight:400;
-    line-height:1.65;
-    color:rgba(255,245,245,.82);
-    max-width:400px;
+    line-height:1.7;
+    color:rgba(255,245,245,.78);
+    max-width:380px;
     margin-left:auto;
     margin-right:auto;
   }
 
   .capa-btn{
-    margin-top:36px;
+    margin-top:34px;
     padding:15px 42px;
     font-family:var(--font-ui);
     font-size:1rem;
     font-weight:600;
-    letter-spacing:.02em;
+    letter-spacing:.01em;
     color:#fff;
     background:var(--grad-btn);
     border:none;
@@ -197,10 +230,11 @@
   .capa-btn:active{ transform:translateY(0); }
 
   .capa-footer{
-    margin-top:28px;
-    font-size:.75rem;
-    letter-spacing:.14em;
-    color:rgba(244,251,250,.38);
+    margin-top:26px;
+    font-family:var(--font-ui);
+    font-size:.72rem;
+    letter-spacing:.12em;
+    color:rgba(255,245,245,.35);
     text-transform:uppercase;
     font-weight:500;
   }
@@ -1287,7 +1321,7 @@
     .topbar-text h1{ font-size:1.1rem; }
     .form-card, .sidebar-card{ padding:20px 16px 22px; }
     .login-card{ padding:28px 20px 24px; }
-    .capa-content h1{ font-size:2.4rem; }
+    .capa-brand{ font-size:2.2rem; }
     .brand-mark{ width:40px; height:40px; flex-basis:40px; font-size:1.1rem; border-radius:10px; }
   }
 </style>
@@ -1302,7 +1336,10 @@
 
     <div class="capa-content">
       <div class="capa-mark">A</div>
-      <h1>Acompanha-Aí</h1>
+      <p class="capa-kicker">Sistema de ocorrência escolar</p>
+      <h1 class="capa-brand">
+        <span class="brand-main">Acompanha</span><span class="brand-sep">-</span><span class="brand-accent">Aí</span>
+      </h1>
       <p class="capa-tagline">Do registro em sala à comunicação com a família — gestão escolar simples, rápida e transparente.</p>
       <button class="capa-btn" id="btnComecar" type="button">Começar</button>
       <div class="capa-footer">Professores · Coordenação · Direção</div>
@@ -2624,14 +2661,46 @@
     // ============================================================
     //  PROTOCOLO / DATA
     // ============================================================
-    function gerarProtocolo() {
+    function gerarProtocolo(nivelFinal) {
       const now = new Date();
       const dia = String(now.getDate()).padStart(2, '0');
       const mes = String(now.getMonth() + 1).padStart(2, '0');
       const ano = now.getFullYear();
       const rand = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-      const prefixo = nivelSelecionado === 'verde' ? 'VD' : nivelSelecionado === 'amarelo' ? 'AM' : 'VM';
+      const n = nivelFinal || nivelSelecionado;
+      const prefixo = n === 'verde' ? 'VD' : n === 'amarelo' ? 'AM' : 'VM';
       return `${prefixo}-${ano}${mes}${dia}-${rand}`;
+    }
+
+    function normalizarTexto(t) {
+      return String(t || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function ehMesmoAluno(oc, dados, turma) {
+      if (dados.alunoId && oc.alunoId) return oc.alunoId === dados.alunoId;
+      if (dados.ra && oc.ra && normalizarTexto(dados.ra) === normalizarTexto(oc.ra)) return true;
+      return normalizarTexto(oc.aluno) === normalizarTexto(dados.aluno) &&
+        normalizarTexto(oc.turma) === normalizarTexto(turma);
+    }
+
+    function verdesAnterioresDoAluno(dados, turma) {
+      return ocorrencias.filter(oc => oc.nivel === 'verde' && ehMesmoAluno(oc, dados, turma));
+    }
+
+    function avaliarRecorrenciaVerde(nivel, dados, turma) {
+      if (nivel !== 'verde') {
+        return { nivel, reclassificado: false, verdesAnteriores: 0 };
+      }
+      const anteriores = verdesAnterioresDoAluno(dados, turma);
+      if (anteriores.length >= 1) {
+        return {
+          nivel: 'amarelo',
+          reclassificado: true,
+          verdesAnteriores: anteriores.length,
+          motivo: `Reincidência: o aluno já possui ${anteriores.length} ocorrência(s) Verde. Reclassificada automaticamente para Amarelo.`
+        };
+      }
+      return { nivel: 'verde', reclassificado: false, verdesAnteriores: 0 };
     }
 
     function formatarData() {
@@ -2919,25 +2988,38 @@
 
       await new Promise(r => setTimeout(r, 300 + Math.random() * 500));
 
-      const info = NIVEIS[nivelSelecionado];
       const dadosAluno = resolverDadosAluno();
+      const turmaVal = turmaInput.value.trim();
+      const recorrencia = avaliarRecorrenciaVerde(nivelSelecionado, dadosAluno, turmaVal);
+      const nivelFinal = recorrencia.nivel;
+      const info = NIVEIS[nivelFinal];
+
+      let tipoFinal = resolverTipo();
+      if (recorrencia.reclassificado && tipoFinal && !tipoFinal.toLowerCase().includes('reincid')) {
+        // mantém o tipo escolhido; marca reincidência no registro
+      }
+
       const ocorrencia = {
-        protocolo: gerarProtocolo(),
+        protocolo: gerarProtocolo(nivelFinal),
         data: formatarData(),
         professor: professorInput.value.trim(),
         aluno: dadosAluno.aluno,
         alunoId: dadosAluno.alunoId,
         ra: dadosAluno.ra,
         alunoManual: !!dadosAluno.manual,
-        turma: turmaInput.value.trim(),
-        nivel: nivelSelecionado,
-        tipo: resolverTipo(),
+        turma: turmaVal,
+        nivel: nivelFinal,
+        nivelOriginal: nivelSelecionado,
+        reclassificado: !!recorrencia.reclassificado,
+        motivoReclassificacao: recorrencia.motivo || '',
+        verdesAnteriores: recorrencia.verdesAnteriores || 0,
+        tipo: tipoFinal,
         descricao: descricaoInput.value.trim(),
         email: emailInput.value.trim(),
         celular: celularInput.value.trim(),
         tutorId: dadosAluno.tutorId,
         tutorNome: dadosAluno.tutorNome,
-        direcionadoGestao: nivelSelecionado !== 'verde',
+        direcionadoGestao: nivelFinal !== 'verde',
         providencias: [...info.providencias],
         responsavel: info.responsavel
       };
@@ -2955,16 +3037,21 @@
           ? `direcionada ao tutor ${ocorrencia.tutorNome} e à gestão`
           : 'direcionada à gestão';
       }
+      if (ocorrencia.reclassificado) {
+        statusFluxo = 'reclassificada Verde → Amarelo por reincidência · ' + statusFluxo;
+      }
       if (ocorrencia.nivel === 'vermelho') statusFluxo = 'atendimento imediato · ' + statusFluxo;
       protocoloDiv.textContent = `Protocolo ${ocorrencia.protocolo} · ${statusFluxo} · ${ocorrencia.data}`;
 
-      const toastMsgTexto = ocorrencia.tutorNome
-        ? `${labelNivel(ocorrencia)} ${ocorrencia.protocolo}: tutor ${ocorrencia.tutorNome} + gestão`
-        : ocorrencia.nivel === 'vermelho'
-          ? `Vermelho ${ocorrencia.protocolo}: gestão imediata`
-          : ocorrencia.nivel === 'amarelo'
-            ? `Amarelo ${ocorrencia.protocolo}: encaminhada à gestão`
-            : `Verde ${ocorrencia.protocolo} registrada`;
+      const toastMsgTexto = ocorrencia.reclassificado
+        ? `Reincidência: ${ocorrencia.protocolo} ajustada para Amarelo`
+        : ocorrencia.tutorNome
+          ? `${labelNivel(ocorrencia)} ${ocorrencia.protocolo}: tutor ${ocorrencia.tutorNome} + gestão`
+          : ocorrencia.nivel === 'vermelho'
+            ? `Vermelho ${ocorrencia.protocolo}: gestão imediata`
+            : ocorrencia.nivel === 'amarelo'
+              ? `Amarelo ${ocorrencia.protocolo}: encaminhada à gestão`
+              : `Verde ${ocorrencia.protocolo} registrada`;
       mostrarToast(toastMsgTexto);
       renderizarHistorico();
       renderizarTutorInbox();
