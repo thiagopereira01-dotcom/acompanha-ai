@@ -2,6 +2,27 @@
 
 Sistema de ocorrências escolares (Verde / Amarelo / Vermelho).
 
+## Primeiro acesso (admin)
+
+Em instalação nova (sem dados salvos), use:
+
+- Usuário: `admin`
+- Senha provisória: `Admin@Temp1`
+
+No primeiro login a troca de senha é **obrigatória**. Depois, cadastre professores na aba **Usuários**.
+
+### Regras de senha
+
+- Mínimo 8 caracteres
+- Maiúscula, minúscula, número e caractere especial
+- Diferente do usuário e das senhas recentes
+
+### Recuperação
+
+- **Esqueci a senha** na tela de login (exige e-mail cadastrado; envia via EmailJS se configurado)
+- **Trocar senha** no topo do app (usuário logado)
+- Admin pode **Redefinir senha** na lista de usuários (gera provisória + troca obrigatória no próximo acesso)
+
 ## Persistência (Render estático)
 
 ### Configurar a nuvem uma vez

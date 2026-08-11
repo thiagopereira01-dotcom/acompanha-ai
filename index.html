@@ -419,18 +419,115 @@
   .login-btn:hover{ filter:brightness(1.06); }
   .login-btn:active{ transform:translateY(1px); }
 
-  .login-hint{
-    margin-top:20px;
-    padding:12px 14px;
-    border-radius:12px;
-    background:rgba(255,255,255,.07);
-    border:1px solid rgba(255,255,255,.12);
-    font-size:.76rem;
-    line-height:1.55;
-    color:rgba(244,251,250,.78);
+  .login-links{
+    margin-top:16px;
     text-align:center;
   }
-  .login-hint strong{ color:#fff; font-weight:600; }
+  .login-links button{
+    background:none;
+    border:none;
+    color:rgba(255,255,255,.85);
+    font:inherit;
+    font-size:.82rem;
+    font-weight:600;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    cursor:pointer;
+    padding:4px;
+  }
+  .login-links button:hover{ color:#fff; }
+
+  .auth-overlay{
+    position:fixed;
+    inset:0;
+    z-index:1200;
+    background:rgba(40,8,8,.55);
+    backdrop-filter:blur(6px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .auth-overlay.hidden{ display:none; }
+  .auth-modal{
+    width:100%;
+    max-width:420px;
+    background:var(--surface);
+    border-radius:18px;
+    border:1px solid var(--line);
+    box-shadow:0 24px 60px rgba(80,10,10,.28);
+    padding:24px 22px 20px;
+    animation:capa-rise .35s cubic-bezier(.22,1,.36,1) both;
+  }
+  .auth-modal h2{
+    font-family:'Outfit',sans-serif;
+    font-size:1.25rem;
+    color:var(--ink);
+    margin:0 0 6px;
+  }
+  .auth-modal-sub{
+    font-size:.82rem;
+    color:var(--ink-soft);
+    line-height:1.5;
+    margin:0 0 16px;
+  }
+  .auth-modal .form-group{ margin-bottom:12px; }
+  .auth-modal label{
+    display:block;
+    font-size:.78rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin-bottom:5px;
+  }
+  .auth-modal input{
+    width:100%;
+    padding:11px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:var(--bg);
+    font:inherit;
+    font-size:.9rem;
+    color:var(--ink);
+  }
+  .auth-modal input:focus{
+    outline:none;
+    border-color:var(--primary);
+    box-shadow:0 0 0 3px var(--primary-tint);
+  }
+  .auth-modal-actions{
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+    margin-top:8px;
+  }
+  .pwd-rules{
+    list-style:none;
+    margin:8px 0 0;
+    padding:0;
+    display:grid;
+    gap:4px;
+  }
+  .pwd-rules li{
+    font-size:.72rem;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .pwd-rules li::before{
+    content:'○';
+    font-size:.7rem;
+    color:var(--ink-soft);
+  }
+  .pwd-rules li.ok{ color:var(--primary-deep); }
+  .pwd-rules li.ok::before{ content:'●'; color:var(--primary); }
+  .pwd-hint{
+    font-size:.72rem;
+    color:var(--ink-soft);
+    margin-top:4px;
+    line-height:1.4;
+  }
 
   /* ============================================================
      APP SHELL
@@ -515,17 +612,26 @@
   .role-pill.professor{ background:var(--primary-tint); color:var(--primary-deep); }
   .role-pill.admin{ background:var(--neutral-tint); color:var(--neutral); }
 
-  .btn-sair{
+  .btn-sair,
+  .btn-conta{
     font-size:.78rem;
     font-weight:600;
-    color:var(--danger);
-    background:var(--danger-tint);
     border:none;
     padding:7px 14px;
     border-radius:999px;
     transition:filter .15s;
   }
+  .btn-sair{
+    color:var(--danger);
+    background:var(--danger-tint);
+  }
   .btn-sair:hover{ filter:brightness(0.96); }
+  .btn-conta{
+    color:var(--ink-soft);
+    background:var(--bg);
+    border:1px solid var(--line);
+  }
+  .btn-conta:hover{ filter:brightness(0.97); }
 
   /* ===== LAYOUT ===== */
   .layout{
@@ -983,16 +1089,36 @@
     margin-bottom:10px;
     font-weight:500;
   }
-  .providencias-box ul{
+  .providencias-box ul,
+  .check-list{
     margin:0;
-    padding-left:18px;
+    padding:0;
+    list-style:none;
+    display:grid;
+    gap:6px;
+  }
+  .check-list label.check-row{
+    align-items:flex-start;
+    gap:10px;
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid transparent;
+    background:rgba(255,255,255,.45);
+    cursor:pointer;
     font-size:.8rem;
-    color:var(--ink);
-    line-height:1.55;
+    line-height:1.4;
+  }
+  .check-list label.check-row:hover{
+    border-color:var(--line);
+  }
+  .check-list input[type="checkbox"]{
+    margin-top:2px;
+    flex:0 0 auto;
   }
   .providencias-box.verde{ border-color:#A8D9BE; background:#F2FAF5; }
   .providencias-box.amarelo{ border-color:#E6D0A0; background:#FFFBF2; }
   .providencias-box.vermelho{ border-color:#E8B4B4; background:#FDF6F6; }
+  .providencias-box .error-msg{ margin-top:8px; }
 
   .alerta-fluxo{
     display:none;
@@ -1260,15 +1386,29 @@
   }
   .lista-item strong{ display:block; color:var(--ink); margin-bottom:2px; }
   .lista-item .meta{ color:var(--ink-soft); font-size:.75rem; line-height:1.4; }
-  .btn-item-del{
+  .lista-item-actions{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    align-items:stretch;
+  }
+  .btn-item-del,
+  .btn-item-reset{
     flex:0 0 auto;
     font-size:.72rem;
     font-weight:700;
-    color:var(--danger);
-    background:var(--danger-tint);
     border:none;
     padding:5px 10px;
     border-radius:999px;
+    white-space:nowrap;
+  }
+  .btn-item-del{
+    color:var(--danger);
+    background:var(--danger-tint);
+  }
+  .btn-item-reset{
+    color:var(--primary-deep);
+    background:var(--primary-tint);
   }
 
   .aluno-busca-wrap{ position:relative; }
@@ -1408,8 +1548,8 @@
         <button type="submit" class="login-btn">Entrar</button>
       </form>
 
-      <div class="login-hint" id="loginHint">
-        Acesso de demonstração — usuário <strong>professor</strong> / senha <strong>professor123</strong>
+      <div class="login-links">
+        <button type="button" id="btnEsqueciSenha">Esqueci a senha</button>
       </div>
     </div>
   </div>
@@ -1429,6 +1569,7 @@
           <strong id="userNome"></strong>
           <span class="role-pill" id="userRoleBadge"></span>
         </div>
+        <button class="btn-conta" id="btnTrocarSenha" type="button">Trocar senha</button>
         <button class="btn-sair" id="btnSair" type="button">Sair</button>
       </div>
     </div>
@@ -1519,24 +1660,24 @@
 
           <div class="alerta-fluxo" id="alertaFluxo"></div>
 
-          <div class="providencias-box" id="providenciasBox">
-            <h4 id="providenciasTitulo"></h4>
-            <div class="prov-meta" id="providenciasMeta"></div>
-            <ul id="providenciasLista"></ul>
-          </div>
-
           <div class="form-group">
-            <label for="tipo">Exemplo / tipo</label>
-            <select id="tipo" required disabled>
-              <option value="">Selecione o nível primeiro...</option>
-            </select>
-            <span class="error-msg" id="tipo-error">Selecione um tipo</span>
+            <label>Exemplo / tipo <span class="opt">(um ou mais)</span></label>
+            <div class="check-list" id="tiposLista" aria-label="Tipos da ocorrência"></div>
+            <span class="error-msg" id="tipo-error">Selecione ao menos um tipo</span>
           </div>
 
           <div class="form-group hidden" id="outroGrupo">
             <label for="outroExemplo">Exemplo do docente</label>
             <input type="text" id="outroExemplo" placeholder="Descreva o exemplo observado em sala" autocomplete="off">
             <span class="error-msg" id="outro-error">Informe o exemplo do docente</span>
+          </div>
+
+          <div class="providencias-box" id="providenciasBox">
+            <h4 id="providenciasTitulo"></h4>
+            <div class="prov-meta" id="providenciasMeta"></div>
+            <p class="prov-meta" style="margin-top:-4px;">Selecione as providências a serem tomadas</p>
+            <div class="check-list" id="providenciasLista" aria-label="Providências"></div>
+            <span class="error-msg" id="prov-error">Selecione ao menos uma providência</span>
           </div>
 
           <div class="form-group">
@@ -1670,8 +1811,14 @@
               <input type="text" id="novoUserLogin" placeholder="login" required autocomplete="off">
             </div>
             <div class="form-group">
-              <label for="novoUserSenha">Senha</label>
-              <input type="text" id="novoUserSenha" placeholder="senha" required autocomplete="off">
+              <label for="novoUserEmail">E-mail institucional</label>
+              <input type="email" id="novoUserEmail" placeholder="usuario@escola.com" autocomplete="off">
+              <p class="pwd-hint">Usado para recuperação de senha (recomendado).</p>
+            </div>
+            <div class="form-group">
+              <label for="novoUserSenha">Senha provisória</label>
+              <input type="text" id="novoUserSenha" placeholder="Gerar ou digitar" required autocomplete="off">
+              <p class="pwd-hint">O usuário será obrigado a trocar no primeiro acesso.</p>
             </div>
             <div class="form-group">
               <label for="novoUserRole">Perfil</label>
@@ -1687,6 +1834,7 @@
               </label>
             </div>
             <div class="manage-actions span-2">
+              <button type="button" class="btn-ghost-sm" id="btnGerarSenhaUser">Gerar senha provisória</button>
               <button type="submit" class="btn-primary-sm">Salvar usuário</button>
             </div>
           </form>
@@ -1861,6 +2009,99 @@
     </div>
   </div>
 
+  <div class="auth-overlay hidden" id="authOverlay" aria-hidden="true">
+    <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authModalTitulo">
+      <h2 id="authModalTitulo">Alterar senha</h2>
+      <p class="auth-modal-sub" id="authModalSub">Defina uma nova senha para continuar.</p>
+      <form id="formTrocaSenha" novalidate>
+        <div class="form-group" id="grupoSenhaAtual">
+          <label for="senhaAtual">Senha atual</label>
+          <input type="password" id="senhaAtual" autocomplete="current-password">
+        </div>
+        <div class="form-group">
+          <label for="senhaNova">Nova senha</label>
+          <input type="password" id="senhaNova" required autocomplete="new-password">
+          <ul class="pwd-rules" id="pwdRules">
+            <li data-rule="len">Mínimo de 8 caracteres</li>
+            <li data-rule="upper">Pelo menos 1 letra maiúscula</li>
+            <li data-rule="lower">Pelo menos 1 letra minúscula</li>
+            <li data-rule="num">Pelo menos 1 número</li>
+            <li data-rule="special">Pelo menos 1 caractere especial (!@#$%&*?)</li>
+            <li data-rule="diff">Diferente do usuário e da senha atual</li>
+          </ul>
+        </div>
+        <div class="form-group">
+          <label for="senhaNova2">Confirmar nova senha</label>
+          <input type="password" id="senhaNova2" required autocomplete="new-password">
+        </div>
+        <span class="error-msg" id="troca-error">Não foi possível alterar a senha</span>
+        <div class="auth-modal-actions">
+          <button type="button" class="btn-ghost-sm" id="btnCancelarTroca">Cancelar</button>
+          <button type="submit" class="btn-primary-sm">Salvar nova senha</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="auth-overlay hidden" id="forgotOverlay" aria-hidden="true">
+    <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="forgotTitulo">
+      <h2 id="forgotTitulo">Recuperar senha</h2>
+      <p class="auth-modal-sub">Informe seu usuário e o e-mail cadastrado. Se o EmailJS estiver ativo, enviaremos uma senha provisória.</p>
+      <form id="formEsqueciSenha" novalidate>
+        <div class="form-group">
+          <label for="forgotUser">Usuário</label>
+          <input type="text" id="forgotUser" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="forgotEmail">E-mail cadastrado</label>
+          <input type="email" id="forgotEmail" required autocomplete="email">
+        </div>
+        <span class="error-msg" id="forgot-error">Não foi possível recuperar a senha</span>
+        <div class="auth-modal-actions">
+          <button type="button" class="btn-ghost-sm" id="btnCancelarForgot">Cancelar</button>
+          <button type="submit" class="btn-primary-sm">Enviar senha provisória</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="auth-overlay hidden" id="adminPwdOverlay" aria-hidden="true">
+    <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="adminPwdTitulo">
+      <h2 id="adminPwdTitulo">Alterar senha do usuário</h2>
+      <p class="auth-modal-sub" id="adminPwdSub">Defina uma nova senha para este usuário.</p>
+      <form id="formAdminPwd" novalidate>
+        <div class="form-group">
+          <label for="adminPwdNova">Nova senha</label>
+          <input type="password" id="adminPwdNova" required autocomplete="new-password">
+          <ul class="pwd-rules" id="adminPwdRules">
+            <li data-rule="len">Mínimo de 8 caracteres</li>
+            <li data-rule="upper">Pelo menos 1 letra maiúscula</li>
+            <li data-rule="lower">Pelo menos 1 letra minúscula</li>
+            <li data-rule="num">Pelo menos 1 número</li>
+            <li data-rule="special">Pelo menos 1 caractere especial (!@#$%&*?)</li>
+            <li data-rule="diff">Diferente do usuário</li>
+          </ul>
+        </div>
+        <div class="form-group">
+          <label for="adminPwdNova2">Confirmar nova senha</label>
+          <input type="password" id="adminPwdNova2" required autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label class="check-row">
+            <input type="checkbox" id="adminPwdForceChange" checked>
+            Exigir troca de senha no próximo login
+          </label>
+        </div>
+        <span class="error-msg" id="admin-pwd-error">Não foi possível alterar a senha</span>
+        <div class="auth-modal-actions">
+          <button type="button" class="btn-ghost-sm" id="btnGerarAdminPwd">Gerar senha</button>
+          <button type="button" class="btn-ghost-sm" id="btnCancelarAdminPwd">Cancelar</button>
+          <button type="submit" class="btn-primary-sm">Salvar senha</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="toast">
     <span class="toast-icon"></span>
     <span id="toastMsg"></span>
@@ -1892,8 +2133,16 @@
     }
 
     const USUARIOS_PADRAO = [
-      { id:'u_admin', usuario:'admin', senha:'admin123', role:'admin', nome:'Administrador(a)', tutor:false },
-      { id:'u_prof', usuario:'professor', senha:'professor123', role:'professor', nome:'Professor(a)', tutor:true }
+      {
+        id: 'u_admin',
+        usuario: 'admin',
+        senha: 'Admin@Temp1',
+        role: 'admin',
+        nome: 'Administrador(a)',
+        tutor: false,
+        email: '',
+        mustChangePassword: true
+      }
     ];
 
     let usuarios = carregarJSON(STORE_KEYS.usuarios, USUARIOS_PADRAO);
@@ -1904,6 +2153,140 @@
     let nivelSelecionado = '';
     let alunoModoManual = false;
     let alunoSelecionado = null;
+    let usuarioPendenteTroca = null;
+    let modoTrocaSenha = 'voluntario'; // voluntario | obrigatorio
+    let falhasLogin = 0;
+    let bloqueioLoginAte = 0;
+
+    // ============================================================
+    //  SEGURANÇA DE SENHA
+    // ============================================================
+    function gerarSalt() {
+      const a = new Uint8Array(16);
+      crypto.getRandomValues(a);
+      return Array.from(a).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function hashSenha(senha, salt) {
+      const data = new TextEncoder().encode(salt + '::' + senha);
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function gerarSenhaProvisoria() {
+      const U = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+      const L = 'abcdefghijkmnopqrstuvwxyz';
+      const N = '23456789';
+      const S = '@#$%&*!';
+      const all = U + L + N + S;
+      const pick = (set) => set[Math.floor(Math.random() * set.length)];
+      let chars = [pick(U), pick(L), pick(N), pick(S)];
+      for (let i = 0; i < 6; i++) chars.push(pick(all));
+      for (let i = chars.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [chars[i], chars[j]] = [chars[j], chars[i]];
+      }
+      return chars.join('');
+    }
+
+    function validarRegrasSenha(senha, opts = {}) {
+      const s = senha || '';
+      const usuario = (opts.usuario || '').toLowerCase();
+      const atual = opts.senhaAtual || '';
+      return {
+        len: s.length >= 8,
+        upper: /[A-Z]/.test(s),
+        lower: /[a-z]/.test(s),
+        num: /[0-9]/.test(s),
+        special: /[!@#$%&*?._\-+=]/.test(s),
+        diff: !!s && s !== atual && (!usuario || s.toLowerCase() !== usuario)
+      };
+    }
+
+    function senhaAtendeRegras(senha, opts = {}) {
+      const r = validarRegrasSenha(senha, opts);
+      return Object.values(r).every(Boolean);
+    }
+
+    function mensagemRegrasSenha() {
+      return 'A senha precisa ter no mínimo 8 caracteres, com maiúscula, minúscula, número e caractere especial.';
+    }
+
+    async function senhaCorresponde(u, senha) {
+      if (!u) return false;
+      if (u.senhaHash && u.salt) {
+        const h = await hashSenha(senha, u.salt);
+        return h === u.senhaHash;
+      }
+      return typeof u.senha === 'string' && u.senha === senha;
+    }
+
+    async function senhaJaUsada(u, novaSenha) {
+      if (!u) return false;
+      if (await senhaCorresponde(u, novaSenha)) return true;
+      const hist = Array.isArray(u.senhasAnteriores) ? u.senhasAnteriores : [];
+      for (const item of hist) {
+        if (!item || !item.salt || !item.hash) continue;
+        const h = await hashSenha(novaSenha, item.salt);
+        if (h === item.hash) return true;
+      }
+      return false;
+    }
+
+    async function definirSenhaUsuario(u, novaSenha) {
+      const hist = Array.isArray(u.senhasAnteriores) ? [...u.senhasAnteriores] : [];
+      if (u.senhaHash && u.salt) {
+        hist.push({ salt: u.salt, hash: u.senhaHash });
+      }
+      const salt = gerarSalt();
+      const senhaHash = await hashSenha(novaSenha, salt);
+      u.salt = salt;
+      u.senhaHash = senhaHash;
+      u.senhasAnteriores = hist.slice(-3);
+      u.mustChangePassword = false;
+      u.senhaAlteradaEm = new Date().toISOString();
+      delete u.senha;
+    }
+
+    async function migrarUsuarios() {
+      let mudou = false;
+      for (const u of usuarios) {
+        if (typeof u.email !== 'string') {
+          u.email = '';
+          mudou = true;
+        }
+        if (typeof u.mustChangePassword !== 'boolean') {
+          u.mustChangePassword = false;
+          mudou = true;
+        }
+        if (!Array.isArray(u.senhasAnteriores)) {
+          u.senhasAnteriores = [];
+          mudou = true;
+        }
+        if (u.senha && !u.senhaHash) {
+          u.salt = gerarSalt();
+          u.senhaHash = await hashSenha(u.senha, u.salt);
+          delete u.senha;
+          mudou = true;
+        }
+        if (typeof u.usuario === 'string') {
+          const low = u.usuario.toLowerCase();
+          if (u.usuario !== low) {
+            u.usuario = low;
+            mudou = true;
+          }
+        }
+      }
+      if (mudou) salvarUsuarios();
+    }
+
+    function atualizarChecklistSenha(senha, opts = {}) {
+      const rules = validarRegrasSenha(senha, opts);
+      document.querySelectorAll('#pwdRules [data-rule]').forEach(li => {
+        li.classList.toggle('ok', !!rules[li.dataset.rule]);
+      });
+      return rules;
+    }
 
     function carregarJSON(chave, padrao) {
       try {
@@ -1955,7 +2338,7 @@
         renderizarHistorico();
         renderizarTutorInbox();
       }
-      atualizarLoginHint();
+      void migrarUsuarios();
       if (!opts.silencioso) {
         mostrarToast('Dados carregados' + (origem ? ' (' + origem + ')' : ''));
       }
@@ -2261,7 +2644,7 @@
         `Turma: ${oc.turma}\n` +
         `Professor(a): ${oc.professor}\n` +
         `Tutor(a): ${oc.tutorNome || '—'}\n` +
-        `Tipo: ${oc.tipo}\n` +
+        `Tipo: ${formatarListaTipos(oc)}\n` +
         `Descrição: ${oc.descricao}\n\n` +
         `Este é um aviso automático do sistema Acompanha-Aí.\n` +
         `Em caso de dúvidas, entre em contato com a escola.\n\n` +
@@ -2279,7 +2662,7 @@
         ra: oc.ra || '',
         turma: oc.turma || '',
         tutor: oc.tutorNome || '—',
-        tipo: oc.tipo || '',
+        tipo: formatarListaTipos(oc),
         descricao: oc.descricao || '',
         message
       };
@@ -2386,10 +2769,15 @@
     function professoresTutores() {
       return usuarios.filter(u => u.role === 'professor' && u.tutor);
     }
-    function encontrarUsuario(usuario, senha, role) {
-      return usuarios.find(u =>
-        u.usuario === usuario && u.senha === senha && (!role || u.role === role)
+    async function encontrarUsuario(usuario, senha, role) {
+      const login = String(usuario || '').trim().toLowerCase();
+      const candidatos = usuarios.filter(u =>
+        u.usuario === login && (!role || u.role === role)
       );
+      for (const u of candidatos) {
+        if (await senhaCorresponde(u, senha)) return u;
+      }
+      return null;
     }
     function nomeTutorPorId(tutorId) {
       const t = usuarios.find(u => u.id === tutorId);
@@ -2406,8 +2794,9 @@
     const loginUser = document.getElementById('loginUser');
     const loginPass = document.getElementById('loginPass');
     const loginError = document.getElementById('login-error');
-    const loginHint = document.getElementById('loginHint');
     const btnSair = document.getElementById('btnSair');
+    const btnTrocarSenha = document.getElementById('btnTrocarSenha');
+    const btnEsqueciSenha = document.getElementById('btnEsqueciSenha');
     const userNomeEl = document.getElementById('userNome');
     const userRoleBadge = document.getElementById('userRoleBadge');
     const layoutEl = document.getElementById('layout');
@@ -2415,41 +2804,260 @@
     const sidebarCard = document.getElementById('sidebarCard');
     const tutorInboxCard = document.getElementById('tutorInboxCard');
     const tutorInboxLista = document.getElementById('tutorInboxLista');
+    const authOverlay = document.getElementById('authOverlay');
+    const forgotOverlay = document.getElementById('forgotOverlay');
+    const formTrocaSenha = document.getElementById('formTrocaSenha');
+    const formEsqueciSenha = document.getElementById('formEsqueciSenha');
+    const trocaError = document.getElementById('troca-error');
+    const forgotError = document.getElementById('forgot-error');
 
     let perfilSelecionado = 'professor';
 
-    function atualizarLoginHint() {
-      const demo = usuarios.find(u => u.role === perfilSelecionado) || USUARIOS_PADRAO.find(u => u.role === perfilSelecionado);
-      if (demo) {
-        loginHint.innerHTML = `Acesso de demonstração — usuário <strong>${demo.usuario}</strong> / senha <strong>${demo.senha}</strong>`;
-      }
+    function loginBloqueado() {
+      return Date.now() < bloqueioLoginAte;
     }
-    atualizarLoginHint();
+
+    function registrarFalhaLogin() {
+      falhasLogin += 1;
+      if (falhasLogin >= 5) {
+        bloqueioLoginAte = Date.now() + 30000;
+        falhasLogin = 0;
+        return true;
+      }
+      return false;
+    }
+
+    function abrirModalTrocaSenha(modo, usuarioRef) {
+      modoTrocaSenha = modo;
+      usuarioPendenteTroca = usuarioRef || null;
+      const titulo = document.getElementById('authModalTitulo');
+      const sub = document.getElementById('authModalSub');
+      const grupoAtual = document.getElementById('grupoSenhaAtual');
+      const btnCancelar = document.getElementById('btnCancelarTroca');
+      formTrocaSenha.reset();
+      trocaError.classList.remove('show');
+      atualizarChecklistSenha('', { usuario: (usuarioRef || sessaoAtual || {}).usuario || '' });
+
+      if (modo === 'obrigatorio') {
+        titulo.textContent = 'Troca de senha obrigatória';
+        sub.textContent = 'Este é o seu primeiro acesso (ou a senha foi redefinida). Crie uma senha segura para continuar.';
+        grupoAtual.classList.add('hidden');
+        btnCancelar.classList.add('hidden');
+      } else {
+        titulo.textContent = 'Trocar senha';
+        sub.textContent = 'Informe a senha atual e defina uma nova senha seguindo as regras de segurança.';
+        grupoAtual.classList.remove('hidden');
+        btnCancelar.classList.remove('hidden');
+      }
+      authOverlay.classList.remove('hidden');
+      authOverlay.setAttribute('aria-hidden', 'false');
+      setTimeout(() => {
+        const foco = modo === 'obrigatorio'
+          ? document.getElementById('senhaNova')
+          : document.getElementById('senhaAtual');
+        if (foco) foco.focus();
+      }, 50);
+    }
+
+    function fecharModalTrocaSenha() {
+      if (modoTrocaSenha === 'obrigatorio') return;
+      authOverlay.classList.add('hidden');
+      authOverlay.setAttribute('aria-hidden', 'true');
+      formTrocaSenha.reset();
+      trocaError.classList.remove('show');
+      usuarioPendenteTroca = null;
+    }
+
+    function abrirModalEsqueci() {
+      formEsqueciSenha.reset();
+      forgotError.classList.remove('show');
+      forgotOverlay.classList.remove('hidden');
+      forgotOverlay.setAttribute('aria-hidden', 'false');
+      document.getElementById('forgotUser').focus();
+    }
+
+    function fecharModalEsqueci() {
+      forgotOverlay.classList.add('hidden');
+      forgotOverlay.setAttribute('aria-hidden', 'true');
+      formEsqueciSenha.reset();
+      forgotError.classList.remove('show');
+    }
+
+    document.getElementById('senhaNova').addEventListener('input', () => {
+      const u = usuarioPendenteTroca || (sessaoAtual && usuarios.find(x => x.id === sessaoAtual.id));
+      atualizarChecklistSenha(document.getElementById('senhaNova').value, {
+        usuario: u ? u.usuario : '',
+        senhaAtual: document.getElementById('senhaAtual').value
+      });
+    });
+    document.getElementById('senhaAtual').addEventListener('input', () => {
+      const u = usuarioPendenteTroca || (sessaoAtual && usuarios.find(x => x.id === sessaoAtual.id));
+      atualizarChecklistSenha(document.getElementById('senhaNova').value, {
+        usuario: u ? u.usuario : '',
+        senhaAtual: document.getElementById('senhaAtual').value
+      });
+    });
+
+    document.getElementById('btnCancelarTroca').addEventListener('click', fecharModalTrocaSenha);
+    document.getElementById('btnCancelarForgot').addEventListener('click', fecharModalEsqueci);
+    btnEsqueciSenha.addEventListener('click', abrirModalEsqueci);
+    btnTrocarSenha.addEventListener('click', () => {
+      if (!sessaoAtual) return;
+      const u = usuarios.find(x => x.id === sessaoAtual.id);
+      if (!u) return;
+      abrirModalTrocaSenha('voluntario', u);
+    });
+
+    formTrocaSenha.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      trocaError.classList.remove('show');
+      const u = usuarioPendenteTroca || (sessaoAtual && usuarios.find(x => x.id === sessaoAtual.id));
+      if (!u) {
+        trocaError.textContent = 'Sessão inválida. Faça login novamente.';
+        trocaError.classList.add('show');
+        return;
+      }
+
+      const atual = document.getElementById('senhaAtual').value;
+      const nova = document.getElementById('senhaNova').value;
+      const nova2 = document.getElementById('senhaNova2').value;
+
+      if (modoTrocaSenha === 'voluntario') {
+        if (!atual || !(await senhaCorresponde(u, atual))) {
+          trocaError.textContent = 'Senha atual incorreta.';
+          trocaError.classList.add('show');
+          return;
+        }
+      }
+
+      if (!senhaAtendeRegras(nova, { usuario: u.usuario, senhaAtual: atual })) {
+        trocaError.textContent = mensagemRegrasSenha();
+        trocaError.classList.add('show');
+        atualizarChecklistSenha(nova, { usuario: u.usuario, senhaAtual: atual });
+        return;
+      }
+      if (nova !== nova2) {
+        trocaError.textContent = 'A confirmação não confere com a nova senha.';
+        trocaError.classList.add('show');
+        return;
+      }
+      if (await senhaJaUsada(u, nova)) {
+        trocaError.textContent = 'Não reutilize as últimas senhas. Escolha outra.';
+        trocaError.classList.add('show');
+        return;
+      }
+
+      await definirSenhaUsuario(u, nova);
+      salvarUsuarios();
+      modoTrocaSenha = 'voluntario';
+      authOverlay.classList.add('hidden');
+      authOverlay.setAttribute('aria-hidden', 'true');
+      formTrocaSenha.reset();
+
+      if (appWrap.classList.contains('hidden')) {
+        sessaoAtual = { id: u.id, role: u.role, nome: u.nome, tutor: !!u.tutor, usuario: u.usuario };
+        await entrarNoApp(sessaoAtual);
+      }
+      usuarioPendenteTroca = null;
+      mostrarToast('Senha atualizada com sucesso!');
+    });
+
+    formEsqueciSenha.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      forgotError.classList.remove('show');
+      const login = document.getElementById('forgotUser').value.trim().toLowerCase();
+      const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+      const u = usuarios.find(x => x.usuario === login);
+
+      if (!u || !u.email || u.email.trim().toLowerCase() !== email || !validarEmail(email)) {
+        forgotError.textContent = 'Usuário ou e-mail não conferem com o cadastro. Peça ao administrador para redefinir a senha.';
+        forgotError.classList.add('show');
+        return;
+      }
+
+      const provisoria = gerarSenhaProvisoria();
+      await definirSenhaUsuario(u, provisoria);
+      u.mustChangePassword = true;
+      salvarUsuarios();
+
+      let enviado = false;
+      if (typeof emailjsConfigurado === 'function' && emailjsConfigurado()) {
+        try {
+          initEmailJS();
+          const cfg = getEmailjsConfig();
+          await emailjs.send(cfg.serviceId, cfg.templateId, {
+            to_email: u.email,
+            to_name: u.nome || 'Usuário',
+            subject: 'Acompanha-Aí — Senha provisória',
+            message:
+              'Olá, ' + (u.nome || u.usuario) + '.\n\n' +
+              'Foi solicitada a recuperação de senha no Acompanha-Aí.\n\n' +
+              'Usuário: ' + u.usuario + '\n' +
+              'Senha provisória: ' + provisoria + '\n\n' +
+              'No próximo login você deverá criar uma nova senha.\n' +
+              'Se você não solicitou, avise a administração da escola.'
+          });
+          enviado = true;
+        } catch (_) {
+          enviado = false;
+        }
+      }
+
+      fecharModalEsqueci();
+      if (enviado) {
+        mostrarToast('Senha provisória enviada para o e-mail cadastrado.');
+      } else {
+        alert(
+          'Recuperação concluída.\n\n' +
+          'O e-mail automático não está disponível (configure EmailJS) ou falhou.\n\n' +
+          'Senha provisória (anote agora):\n' + provisoria +
+          '\n\nNo próximo login será obrigatório trocar a senha.'
+        );
+        mostrarToast('Senha provisória gerada. Anote-a na tela exibida.');
+      }
+    });
 
     roleTabs.addEventListener('click', (e) => {
       const btn = e.target.closest('.role-tab');
       if (!btn) return;
       perfilSelecionado = btn.dataset.role;
       [...roleTabs.children].forEach(b => b.classList.toggle('active', b === btn));
-      atualizarLoginHint();
       loginError.classList.remove('show');
       loginUser.classList.remove('is-invalid');
       loginPass.classList.remove('is-invalid');
     });
 
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const usuarioDigitado = loginUser.value.trim();
+      if (loginBloqueado()) {
+        const seg = Math.ceil((bloqueioLoginAte - Date.now()) / 1000);
+        loginError.textContent = 'Muitas tentativas. Aguarde ' + seg + 's e tente novamente.';
+        loginError.classList.add('show');
+        return;
+      }
+
+      const usuarioDigitado = loginUser.value.trim().toLowerCase();
       const senhaDigitada = loginPass.value;
-      const u = encontrarUsuario(usuarioDigitado, senhaDigitada, perfilSelecionado);
+      const u = await encontrarUsuario(usuarioDigitado, senhaDigitada, perfilSelecionado);
 
       if (u) {
+        falhasLogin = 0;
         loginError.classList.remove('show');
         loginUser.classList.remove('is-invalid');
         loginPass.classList.remove('is-invalid');
+        loginError.textContent = 'Usuário ou senha inválidos para este perfil';
         sessaoAtual = { id: u.id, role: u.role, nome: u.nome, tutor: !!u.tutor, usuario: u.usuario };
-        entrarNoApp(sessaoAtual);
+        if (u.mustChangePassword) {
+          loginScreen.classList.add('hidden');
+          abrirModalTrocaSenha('obrigatorio', u);
+          return;
+        }
+        await entrarNoApp(sessaoAtual);
       } else {
+        const bloqueou = registrarFalhaLogin();
+        loginError.textContent = bloqueou
+          ? 'Muitas tentativas. Aguarde 30s e tente novamente.'
+          : 'Usuário ou senha inválidos para este perfil';
         loginError.classList.add('show');
         loginUser.classList.add('is-invalid');
         loginPass.classList.add('is-invalid');
@@ -2458,10 +3066,13 @@
 
     btnSair.addEventListener('click', () => {
       sessaoAtual = null;
+      usuarioPendenteTroca = null;
       appWrap.classList.add('hidden');
+      authOverlay.classList.add('hidden');
       loginScreen.classList.remove('hidden');
       loginForm.reset();
       loginError.classList.remove('show');
+      loginError.textContent = 'Usuário ou senha inválidos para este perfil';
     });
 
     function aplicarPermissoes(sessao) {
@@ -2515,6 +3126,8 @@
       }
     }
 
+    void migrarUsuarios();
+
     // ============================================================
     //  ADMIN TABS
     // ============================================================
@@ -2542,16 +3155,34 @@
       if (!isProf) tutorCheck.checked = false;
     });
 
-    formUsuario.addEventListener('submit', (e) => {
+    document.getElementById('btnGerarSenhaUser').addEventListener('click', () => {
+      document.getElementById('novoUserSenha').value = gerarSenhaProvisoria();
+      mostrarToast('Senha provisória gerada. Anote e informe ao usuário.');
+    });
+
+    formUsuario.addEventListener('submit', async (e) => {
       e.preventDefault();
       const nome = document.getElementById('novoUserNome').value.trim();
       const login = document.getElementById('novoUserLogin').value.trim().toLowerCase();
-      const senha = document.getElementById('novoUserSenha').value;
+      const email = document.getElementById('novoUserEmail').value.trim();
+      let senha = document.getElementById('novoUserSenha').value;
       const role = document.getElementById('novoUserRole').value;
       const tutor = document.getElementById('novoUserTutor').checked && role === 'professor';
 
-      if (!nome || !login || !senha) {
-        mostrarToast('Preencha nome, usuário e senha', 'error');
+      if (!nome || !login) {
+        mostrarToast('Preencha nome e usuário', 'error');
+        return;
+      }
+      if (email && !validarEmail(email)) {
+        mostrarToast('Informe um e-mail válido', 'error');
+        return;
+      }
+      if (!senha) {
+        senha = gerarSenhaProvisoria();
+        document.getElementById('novoUserSenha').value = senha;
+      }
+      if (!senhaAtendeRegras(senha, { usuario: login })) {
+        mostrarToast(mensagemRegrasSenha(), 'error');
         return;
       }
       if (usuarios.some(u => u.usuario.toLowerCase() === login)) {
@@ -2559,12 +3190,29 @@
         return;
       }
 
-      usuarios.push({ id: uid('u'), usuario: login, senha, role, nome, tutor });
+      const novo = {
+        id: uid('u'),
+        usuario: login,
+        role,
+        nome,
+        tutor,
+        email,
+        mustChangePassword: true,
+        senhasAnteriores: []
+      };
+      await definirSenhaUsuario(novo, senha);
+      novo.mustChangePassword = true;
+      usuarios.push(novo);
       salvarUsuarios();
       formUsuario.reset();
       renderizarListaUsuarios();
       preencherSelectTutores();
-      atualizarLoginHint();
+      alert(
+        'Usuário cadastrado.\n\n' +
+        'Login: ' + login + '\n' +
+        'Senha provisória: ' + senha + '\n\n' +
+        'Entregue esses dados ao usuário. No primeiro acesso ele deverá trocar a senha.'
+      );
       mostrarToast('Usuário cadastrado!');
     });
 
@@ -2577,14 +3225,26 @@
         <div class="lista-item">
           <div>
             <strong>${escaparHtml(u.nome)}</strong>
-            <div class="meta">@${escaparHtml(u.usuario)} · ${u.role === 'admin' ? 'Administrador' : 'Professor'}${u.tutor ? ' · Tutor' : ''}</div>
+            <div class="meta">@${escaparHtml(u.usuario)} · ${u.role === 'admin' ? 'Administrador' : 'Professor'}${u.tutor ? ' · Tutor' : ''}${u.email ? ' · ' + escaparHtml(u.email) : ''}${u.mustChangePassword ? ' · Troca de senha pendente' : ''}</div>
           </div>
-          <button type="button" class="btn-item-del" data-del-user="${u.id}">Excluir</button>
+          <div class="lista-item-actions">
+            <button type="button" class="btn-item-reset" data-reset-user="${u.id}">Alterar senha</button>
+            <button type="button" class="btn-item-del" data-del-user="${u.id}">Excluir</button>
+          </div>
         </div>
       `).join('');
     }
 
-    listaUsuarios.addEventListener('click', (e) => {
+    listaUsuarios.addEventListener('click', async (e) => {
+      const resetBtn = e.target.closest('[data-reset-user]');
+      if (resetBtn) {
+        const id = resetBtn.dataset.resetUser;
+        const alvo = usuarios.find(u => u.id === id);
+        if (!alvo) return;
+        abrirModalAdminPwd(alvo);
+        return;
+      }
+
       const btn = e.target.closest('[data-del-user]');
       if (!btn) return;
       const id = btn.dataset.delUser;
@@ -2606,8 +3266,96 @@
       renderizarListaUsuarios();
       renderizarListaAlunos();
       preencherSelectTutores();
-      atualizarLoginHint();
       mostrarToast('Usuário excluído');
+    });
+
+    let usuarioAdminPwd = null;
+    const adminPwdOverlay = document.getElementById('adminPwdOverlay');
+    const formAdminPwd = document.getElementById('formAdminPwd');
+    const adminPwdError = document.getElementById('admin-pwd-error');
+
+    function atualizarChecklistAdminPwd(senha, usuario) {
+      const rules = validarRegrasSenha(senha, { usuario: usuario || '' });
+      document.querySelectorAll('#adminPwdRules [data-rule]').forEach(li => {
+        li.classList.toggle('ok', !!rules[li.dataset.rule]);
+      });
+    }
+
+    function abrirModalAdminPwd(u) {
+      usuarioAdminPwd = u;
+      document.getElementById('adminPwdSub').textContent =
+        'Usuário: @' + u.usuario + ' · ' + u.nome;
+      formAdminPwd.reset();
+      document.getElementById('adminPwdForceChange').checked = true;
+      adminPwdError.classList.remove('show');
+      atualizarChecklistAdminPwd('', u.usuario);
+      adminPwdOverlay.classList.remove('hidden');
+      adminPwdOverlay.setAttribute('aria-hidden', 'false');
+      document.getElementById('adminPwdNova').focus();
+    }
+
+    function fecharModalAdminPwd() {
+      adminPwdOverlay.classList.add('hidden');
+      adminPwdOverlay.setAttribute('aria-hidden', 'true');
+      formAdminPwd.reset();
+      adminPwdError.classList.remove('show');
+      usuarioAdminPwd = null;
+    }
+
+    document.getElementById('btnCancelarAdminPwd').addEventListener('click', fecharModalAdminPwd);
+    document.getElementById('btnGerarAdminPwd').addEventListener('click', () => {
+      const gerada = gerarSenhaProvisoria();
+      document.getElementById('adminPwdNova').value = gerada;
+      document.getElementById('adminPwdNova2').value = gerada;
+      document.getElementById('adminPwdForceChange').checked = true;
+      atualizarChecklistAdminPwd(gerada, (usuarioAdminPwd && usuarioAdminPwd.usuario) || '');
+      mostrarToast('Senha gerada. Confira e salve.');
+    });
+    document.getElementById('adminPwdNova').addEventListener('input', () => {
+      atualizarChecklistAdminPwd(
+        document.getElementById('adminPwdNova').value,
+        (usuarioAdminPwd && usuarioAdminPwd.usuario) || ''
+      );
+    });
+
+    formAdminPwd.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      adminPwdError.classList.remove('show');
+      const u = usuarioAdminPwd;
+      if (!u) {
+        adminPwdError.textContent = 'Usuário inválido.';
+        adminPwdError.classList.add('show');
+        return;
+      }
+      const nova = document.getElementById('adminPwdNova').value;
+      const nova2 = document.getElementById('adminPwdNova2').value;
+      const forcar = document.getElementById('adminPwdForceChange').checked;
+
+      if (!senhaAtendeRegras(nova, { usuario: u.usuario })) {
+        adminPwdError.textContent = mensagemRegrasSenha();
+        adminPwdError.classList.add('show');
+        atualizarChecklistAdminPwd(nova, u.usuario);
+        return;
+      }
+      if (nova !== nova2) {
+        adminPwdError.textContent = 'A confirmação não confere com a nova senha.';
+        adminPwdError.classList.add('show');
+        return;
+      }
+      if (await senhaJaUsada(u, nova)) {
+        adminPwdError.textContent = 'Não reutilize as últimas senhas deste usuário.';
+        adminPwdError.classList.add('show');
+        return;
+      }
+
+      await definirSenhaUsuario(u, nova);
+      u.mustChangePassword = !!forcar;
+      salvarUsuarios();
+      renderizarListaUsuarios();
+      fecharModalAdminPwd();
+      mostrarToast(forcar
+        ? 'Senha alterada. O usuário deverá trocá-la no próximo login.'
+        : 'Senha do usuário alterada com sucesso.');
     });
 
     // ============================================================
@@ -2967,7 +3715,7 @@
             <span class="item-nome">${escaparHtml(oc.aluno)}</span>
             <span class="badge ${info.badge}">${info.label}</span>
           </div>
-          <div class="item-sub">${escaparHtml(oc.tipo)} · ${escaparHtml(oc.turma)} · Prof. ${escaparHtml(oc.professor)}</div>
+          <div class="item-sub">${escaparHtml(formatarListaTipos(oc))} · ${escaparHtml(oc.turma)} · Prof. ${escaparHtml(oc.professor)}</div>
           <div class="item-data">${escaparHtml(oc.data)} · ${escaparHtml(oc.protocolo)}</div>
         `;
         item.addEventListener('click', () => mostrarDetalhes(oc));
@@ -3066,7 +3814,7 @@
     const turmaInput = document.getElementById('turma');
     const nivelInput = document.getElementById('nivel');
     const nivelGrid = document.getElementById('nivelGrid');
-    const tipoInput = document.getElementById('tipo');
+    const tiposLista = document.getElementById('tiposLista');
     const outroGrupo = document.getElementById('outroGrupo');
     const outroExemploInput = document.getElementById('outroExemplo');
     const descricaoInput = document.getElementById('descricao');
@@ -3106,7 +3854,6 @@
     const campos = [
       { el: professorInput, error: 'professor-error' },
       { el: turmaInput, error: 'turma-error' },
-      { el: tipoInput, error: 'tipo-error' },
       { el: outroExemploInput, error: 'outro-error' },
       { el: descricaoInput, error: 'descricao-error' },
       { el: emailInput, error: 'email-error' },
@@ -3116,30 +3863,43 @@
     dataAtualEl.textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
 
     // ============================================================
-    //  SELEÇÃO DE NÍVEL
+    //  SELEÇÃO DE NÍVEL / TIPOS / PROVIDÊNCIAS
     // ============================================================
+    function montarCheckList(container, itens, name) {
+      container.innerHTML = itens.map((txt, i) => `
+        <label class="check-row">
+          <input type="checkbox" name="${name}" value="${escaparHtml(txt)}" data-idx="${i}"${txt === OUTRO_EXEMPLO ? ' data-outro="true"' : ''}>
+          <span>${escaparHtml(txt)}</span>
+        </label>
+      `).join('');
+    }
+
+    function valoresCheckList(container) {
+      return [...container.querySelectorAll('input[type="checkbox"]:checked')].map(i => i.value);
+    }
+
     function selecionarNivel(nivel) {
       if (!NIVEIS[nivel]) return;
       nivelSelecionado = nivel;
       nivelInput.value = nivel;
       nivelGrid.classList.remove('is-invalid');
       document.getElementById('nivel-error').classList.remove('show');
+      document.getElementById('tipo-error').classList.remove('show');
+      document.getElementById('prov-error').classList.remove('show');
 
       [...nivelGrid.querySelectorAll('.nivel-card')].forEach(card => {
         card.classList.toggle('active', card.dataset.nivel === nivel);
       });
 
       const info = NIVEIS[nivel];
-      tipoInput.disabled = false;
-      tipoInput.innerHTML = '<option value="">Selecione...</option>' +
-        info.exemplos.map(ex => `<option value="${ex}">${ex}</option>`).join('');
+      montarCheckList(tiposLista, info.exemplos, 'tipoOc');
       outroGrupo.classList.add('hidden');
       outroExemploInput.value = '';
 
       providenciasBox.className = 'providencias-box show ' + nivel;
       providenciasTitulo.textContent = info.titulo;
       providenciasMeta.textContent = info.responsavel;
-      providenciasLista.innerHTML = info.providencias.map(p => `<li>${p}</li>`).join('');
+      montarCheckList(providenciasLista, info.providencias, 'provOc');
 
       if (info.alerta) {
         alertaFluxo.className = 'alerta-fluxo show ' + nivel;
@@ -3167,21 +3927,46 @@
       selecionarNivel(card.dataset.nivel);
     });
 
-    tipoInput.addEventListener('change', () => {
-      const isOutro = tipoInput.value === OUTRO_EXEMPLO;
-      outroGrupo.classList.toggle('hidden', !isOutro);
-      if (!isOutro) {
+    tiposLista.addEventListener('change', () => {
+      const hasOutro = !!tiposLista.querySelector('input[data-outro="true"]:checked');
+      outroGrupo.classList.toggle('hidden', !hasOutro);
+      if (!hasOutro) {
         outroExemploInput.value = '';
         outroExemploInput.classList.remove('is-invalid');
         document.getElementById('outro-error').classList.remove('show');
       }
+      document.getElementById('tipo-error').classList.remove('show');
     });
 
-    function resolverTipo() {
-      if (tipoInput.value === OUTRO_EXEMPLO) {
-        return outroExemploInput.value.trim() || OUTRO_EXEMPLO;
-      }
-      return tipoInput.value;
+    providenciasLista.addEventListener('change', () => {
+      document.getElementById('prov-error').classList.remove('show');
+    });
+
+    function resolverTipos() {
+      return valoresCheckList(tiposLista).map(t => {
+        if (t === OUTRO_EXEMPLO) return outroExemploInput.value.trim() || OUTRO_EXEMPLO;
+        return t;
+      });
+    }
+
+    function resolverProvidencias() {
+      return valoresCheckList(providenciasLista);
+    }
+
+    function formatarListaTipos(oc) {
+      if (Array.isArray(oc.tipos) && oc.tipos.length) return oc.tipos.join('; ');
+      return oc.tipo || '';
+    }
+
+    function tiposDaOcorrencia(oc) {
+      if (Array.isArray(oc.tipos) && oc.tipos.length) return oc.tipos;
+      if (oc.tipo) return String(oc.tipo).split(';').map(s => s.trim()).filter(Boolean);
+      return [];
+    }
+
+    function temTipoEmComum(tiposA, tiposB) {
+      const setB = new Set((tiposB || []).map(normalizarTexto));
+      return (tiposA || []).some(t => setB.has(normalizarTexto(t)));
     }
 
     // ============================================================
@@ -3239,9 +4024,17 @@
         document.getElementById('nivel-error').classList.add('show');
         valido = false;
       }
-      if (!tipoInput.value) { marcarErro(tipoInput, 'tipo-error'); valido = false; }
-      if (tipoInput.value === OUTRO_EXEMPLO && !outroExemploInput.value.trim()) {
+      const tiposSel = valoresCheckList(tiposLista);
+      if (!tiposSel.length) {
+        document.getElementById('tipo-error').classList.add('show');
+        valido = false;
+      }
+      if (tiposSel.includes(OUTRO_EXEMPLO) && !outroExemploInput.value.trim()) {
         marcarErro(outroExemploInput, 'outro-error');
+        valido = false;
+      }
+      if (!resolverProvidencias().length) {
+        document.getElementById('prov-error').classList.add('show');
         valido = false;
       }
       if (!descricaoInput.value.trim()) { marcarErro(descricaoInput, 'descricao-error'); valido = false; }
@@ -3286,21 +4079,25 @@
         normalizarTexto(oc.turma) === normalizarTexto(turma);
     }
 
-    function verdesAnterioresDoAluno(dados, turma) {
-      return ocorrencias.filter(oc => oc.nivel === 'verde' && ehMesmoAluno(oc, dados, turma));
+    function verdesAnterioresDoAlunoMesmoTipo(dados, turma, tiposAtuais) {
+      return ocorrencias.filter(oc =>
+        oc.nivel === 'verde' &&
+        ehMesmoAluno(oc, dados, turma) &&
+        temTipoEmComum(tiposDaOcorrencia(oc), tiposAtuais)
+      );
     }
 
-    function avaliarRecorrenciaVerde(nivel, dados, turma) {
+    function avaliarRecorrenciaVerde(nivel, dados, turma, tiposAtuais) {
       if (nivel !== 'verde') {
         return { nivel, reclassificado: false, verdesAnteriores: 0 };
       }
-      const anteriores = verdesAnterioresDoAluno(dados, turma);
+      const anteriores = verdesAnterioresDoAlunoMesmoTipo(dados, turma, tiposAtuais || []);
       if (anteriores.length >= 1) {
         return {
           nivel: 'amarelo',
           reclassificado: true,
           verdesAnteriores: anteriores.length,
-          motivo: `Reincidência: o aluno já possui ${anteriores.length} ocorrência(s) Verde. Reclassificada automaticamente para Amarelo.`
+          motivo: `Reincidência do mesmo tipo: o aluno já possui ${anteriores.length} ocorrência(s) Verde deste tipo. Reclassificada automaticamente para Amarelo.`
         };
       }
       return { nivel: 'verde', reclassificado: false, verdesAnteriores: 0 };
@@ -3416,7 +4213,7 @@
             <span class="item-nome">${escaparHtml(oc.aluno)}</span>
             <span class="badge ${info.badge}">${info.label}</span>
           </div>
-          <div class="item-sub">${escaparHtml(oc.tipo)} · ${escaparHtml(oc.turma)} · ${escaparHtml(oc.professor)}${oc.tutorNome ? ` · Tutor: ${escaparHtml(oc.tutorNome)}` : ''}</div>
+          <div class="item-sub">${escaparHtml(formatarListaTipos(oc))} · ${escaparHtml(oc.turma)} · ${escaparHtml(oc.professor)}${oc.tutorNome ? ` · Tutor: ${escaparHtml(oc.tutorNome)}` : ''}</div>
           <div class="item-data">${escaparHtml(oc.data)} · ${escaparHtml(oc.protocolo)}</div>
           <div class="item-footer">
             <button class="btn-reenviar" data-protocolo="${oc.protocolo}">${oc.celular ? 'Reenviar' : 'Ver detalhes'}</button>
@@ -3477,12 +4274,14 @@
       nivelSelecionado = '';
       nivelInput.value = '';
       [...nivelGrid.querySelectorAll('.nivel-card')].forEach(c => c.classList.remove('active'));
-      tipoInput.disabled = true;
-      tipoInput.innerHTML = '<option value="">Selecione o nível primeiro...</option>';
+      tiposLista.innerHTML = '<div class="prov-meta">Selecione o nível primeiro...</div>';
       outroGrupo.classList.add('hidden');
       outroExemploInput.value = '';
+      providenciasLista.innerHTML = '';
       providenciasBox.className = 'providencias-box';
       alertaFluxo.className = 'alerta-fluxo';
+      document.getElementById('tipo-error').classList.remove('show');
+      document.getElementById('prov-error').classList.remove('show');
       celularOpt.textContent = '(opcional)';
       celularInput.required = false;
       contatoHint.textContent = 'Para ocorrências verdes, o contato com a família é opcional.';
@@ -3518,7 +4317,7 @@
         `Turma: ${oc.turma}\n` +
         `Professor(a): ${oc.professor}\n` +
         `Tutor(a): ${oc.tutorNome || '—'}\n` +
-        `Tipo: ${oc.tipo}\n` +
+        `Tipo: ${formatarListaTipos(oc)}\n` +
         `Descrição: ${oc.descricao}\n\n` +
         `📎 *Anexo:* o documento da ocorrência foi baixado neste aparelho.\n` +
         `Por favor, anexe o arquivo *ocorrencia-${oc.protocolo}.html* nesta conversa (ou salve-o como PDF e anexe).\n\n` +
@@ -3563,13 +4362,13 @@
     <tr><td>Aluno</td><td>${escaparHtml(oc.aluno)}${oc.ra ? ` (RA ${escaparHtml(oc.ra)})` : ''}</td></tr>
     <tr><td>Turma</td><td>${escaparHtml(oc.turma)}</td></tr>
     <tr><td>Tutor</td><td>${escaparHtml(oc.tutorNome || '—')}</td></tr>
-    <tr><td>Tipo</td><td>${escaparHtml(oc.tipo)}</td></tr>
+    <tr><td>Tipo</td><td>${escaparHtml(formatarListaTipos(oc))}</td></tr>
     <tr><td>Descrição</td><td>${escaparHtml(oc.descricao)}</td></tr>
     <tr><td>WhatsApp</td><td>${escaparHtml(oc.celular || '—')}</td></tr>
     <tr><td>Email Responsável</td><td>${escaparHtml(oc.email || '—')}</td></tr>
   </table>
-  <p style="margin-top:20px;font-weight:600;">Providências</p>
-  <ul>${provRows}</ul>
+  <p style="margin-top:20px;font-weight:600;">Providências a serem tomadas</p>
+  <ul>${provRows || '<li>Nenhuma providência selecionada</li>'}</ul>
   <div class="assinaturas-titulo">Ciência e assinaturas</div>
   <div class="assinaturas">
     <div class="assinatura-box">
@@ -3670,7 +4469,7 @@
         : oc.nivel === 'vermelho'
           ? '<div class="email-note">Atendimento imediato — comunicação à família.</div>'
           : '';
-      const provList = (oc.providencias || info.providencias || [])
+      const provList = (oc.providencias || [])
         .map(p => `<li>${escaparHtml(p)}</li>`).join('');
       return `
         ${novo ? '<div style="font-weight:700;color:var(--primary-deep);margin-bottom:10px;">Ocorrência registrada com sucesso</div>' : ''}
@@ -3682,14 +4481,14 @@
           <dt>Aluno</dt><dd>${escaparHtml(oc.aluno)}${oc.ra ? ` · RA ${escaparHtml(oc.ra)}` : ''}${oc.alunoManual ? ' · (manual)' : ''}</dd>
           <dt>Turma</dt><dd>${escaparHtml(oc.turma)}</dd>
           <dt>Tutor</dt><dd>${escaparHtml(oc.tutorNome || '—')}</dd>
-          <dt>Tipo</dt><dd>${escaparHtml(oc.tipo)}</dd>
+          <dt>Tipo</dt><dd>${escaparHtml(formatarListaTipos(oc))}</dd>
           <dt>Descrição</dt><dd>${escaparHtml(oc.descricao)}</dd>
           <dt>WhatsApp</dt><dd>${escaparHtml(oc.celular || '—')}</dd>
         </dl>
         ${destino}
-        ${oc.reclassificado ? `<div class="email-note"><strong>Reclassificação automática:</strong> ${escaparHtml(oc.motivoReclassificacao || 'Verde → Amarelo por reincidência.')}</div>` : ''}
+        ${oc.reclassificado ? `<div class="email-note"><strong>Reclassificação automática:</strong> ${escaparHtml(oc.motivoReclassificacao || 'Verde → Amarelo por reincidência do mesmo tipo.')}</div>` : ''}
         ${fluxoExtra}
-        ${provList ? `<div class="email-note" style="font-style:normal;margin-top:12px;"><strong>Providências</strong><ul style="margin:6px 0 0;padding-left:18px;">${provList}</ul></div>` : ''}
+        ${provList ? `<div class="email-note" style="font-style:normal;margin-top:12px;"><strong>Providências a serem tomadas</strong><ul style="margin:6px 0 0;padding-left:18px;">${provList}</ul></div>` : ''}
         ${emailMsg}
       `;
     }
@@ -3709,14 +4508,11 @@
 
       const dadosAluno = resolverDadosAluno();
       const turmaVal = turmaInput.value.trim();
-      const recorrencia = avaliarRecorrenciaVerde(nivelSelecionado, dadosAluno, turmaVal);
+      const tiposFinal = resolverTipos();
+      const providenciasFinal = resolverProvidencias();
+      const recorrencia = avaliarRecorrenciaVerde(nivelSelecionado, dadosAluno, turmaVal, tiposFinal);
       const nivelFinal = recorrencia.nivel;
       const info = NIVEIS[nivelFinal];
-
-      let tipoFinal = resolverTipo();
-      if (recorrencia.reclassificado && tipoFinal && !tipoFinal.toLowerCase().includes('reincid')) {
-        // mantém o tipo escolhido; marca reincidência no registro
-      }
 
       const ocorrencia = {
         protocolo: gerarProtocolo(nivelFinal),
@@ -3732,14 +4528,15 @@
         reclassificado: !!recorrencia.reclassificado,
         motivoReclassificacao: recorrencia.motivo || '',
         verdesAnteriores: recorrencia.verdesAnteriores || 0,
-        tipo: tipoFinal,
+        tipos: tiposFinal,
+        tipo: tiposFinal.join('; '),
         descricao: descricaoInput.value.trim(),
         email: emailInput.value.trim(),
         celular: celularInput.value.trim(),
         tutorId: dadosAluno.tutorId,
         tutorNome: dadosAluno.tutorNome,
         direcionadoGestao: nivelFinal !== 'verde',
-        providencias: [...info.providencias],
+        providencias: providenciasFinal,
         responsavel: info.responsavel
       };
 
@@ -3820,7 +4617,7 @@ Professor: ${oc.professor}
 Aluno: ${oc.aluno}${oc.ra ? ` (RA ${oc.ra})` : ''}
 Turma: ${oc.turma}
 Tutor: ${oc.tutorNome || '—'}
-Tipo: ${oc.tipo}
+Tipo: ${formatarListaTipos(oc)}
 Descrição: ${oc.descricao}
 WhatsApp: ${oc.celular || '—'}
 Email do Responsável: ${oc.email || '—'}
