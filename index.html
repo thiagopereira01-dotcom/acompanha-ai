@@ -8,6 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Manrope:wght@500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
 
 <style>
   :root{
@@ -765,6 +767,7 @@
   .btn-wa{ background:var(--ok-tint); color:var(--ok); }
   .btn-copy{ background:var(--neutral-tint); color:var(--neutral); }
   .btn-pdf{ background:var(--warn-tint); color:var(--warn); }
+  .btn-email{ background:#E8F0FE; color:#1A56A8; }
   .resultado-actions button:hover{ filter:brightness(0.96); }
 
   .protocolo-strip{
@@ -1207,6 +1210,36 @@
     border-radius:4px;
   }
 
+  .cloud-status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 14px;
+    border-radius:12px;
+    background:var(--bg);
+    border:1px solid var(--line);
+    font-size:.82rem;
+    margin-bottom:14px;
+  }
+  .cloud-dot{
+    width:9px;height:9px;border-radius:50%;
+    background:#9A9290;
+    flex:0 0 auto;
+  }
+  .cloud-status.on .cloud-dot{ background:#1A7A4C; box-shadow:0 0 0 3px rgba(26,122,76,.2); }
+  .cloud-status.syncing .cloud-dot{ background:#D4A017; animation:pulse-dot 1s ease infinite; }
+  .cloud-status.err .cloud-dot{ background:var(--danger); }
+  @keyframes pulse-dot{ 50%{ opacity:.35; } }
+  .cloud-steps{
+    font-size:.78rem;
+    color:var(--ink-soft);
+    line-height:1.55;
+    margin:0 0 14px;
+    padding-left:18px;
+  }
+  .cloud-steps li{ margin-bottom:6px; }
+  .cloud-steps a{ color:var(--primary); font-weight:600; }
+
   .lista-cadastro{
     display:flex;
     flex-direction:column;
@@ -1553,6 +1586,8 @@
           <button type="button" class="admin-tab active" data-panel="relatorio">Relatório</button>
           <button type="button" class="admin-tab" data-panel="usuarios">Usuários</button>
           <button type="button" class="admin-tab" data-panel="alunos">Alunos</button>
+          <button type="button" class="admin-tab" data-panel="nuvem">Nuvem</button>
+          <button type="button" class="admin-tab" data-panel="email">E-mail</button>
         </div>
 
         <!-- Relatório -->
@@ -1713,6 +1748,99 @@
 
           <div class="lista-cadastro" id="listaAlunos"></div>
         </div>
+
+        <!-- Nuvem / Backup -->
+        <div class="admin-panel" id="panelNuvem">
+          <div class="section-label" style="margin-bottom:14px;padding-bottom:10px;">
+            <h2 style="font-size:1.05rem;">Nuvem gratuita</h2>
+          </div>
+          <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
+            Configure a nuvem <strong>uma única vez</strong>. Depois de fixar o código no sistema e publicar no Render, professores e demais PCs sincronizam sozinhos — sem entrar como admin em cada máquina.
+          </p>
+
+          <div class="cloud-status" id="cloudStatus">
+            <span class="cloud-dot"></span>
+            <span id="cloudStatusText">Nuvem não configurada</span>
+          </div>
+
+          <div class="form-group">
+            <label for="cloudBlobId">Código da nuvem</label>
+            <input type="text" id="cloudBlobId" placeholder="Gerado ao criar a nuvem" autocomplete="off">
+          </div>
+
+          <ol class="cloud-steps">
+            <li>Clique em <strong>Criar nuvem</strong> e copie o código.</li>
+            <li>No arquivo <code>index.html</code>, cole o código em <code>CLOUD_BLOB_ID_FIXO</code> (perto do topo do JavaScript).</li>
+            <li>Publique de novo no Render. Pronto: todos os PCs usam a mesma base automaticamente.</li>
+          </ol>
+
+          <div class="manage-actions" style="margin-bottom:16px;">
+            <button type="button" class="btn-primary-sm" id="btnCloudCreate">Criar nuvem</button>
+            <button type="button" class="btn-ghost-sm" id="btnCloudCopy">Copiar código</button>
+            <button type="button" class="btn-ghost-sm" id="btnCloudPull">Baixar agora</button>
+            <button type="button" class="btn-ghost-sm" id="btnCloudPush">Enviar agora</button>
+          </div>
+
+          <div class="csv-box">
+            <strong style="font-size:.85rem;">Backup em arquivo</strong>
+            <p>Exporte ou importe um JSON com todos os dados — cópia de segurança local.</p>
+            <div class="manage-actions">
+              <button type="button" class="btn-ghost-sm" id="btnExportJson">Exportar JSON</button>
+              <label class="btn-primary-sm" style="cursor:pointer;display:inline-flex;align-items:center;">
+                Importar JSON
+                <input type="file" id="importJsonFile" accept=".json,application/json" hidden>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- E-mail / EmailJS -->
+        <div class="admin-panel" id="panelEmail">
+          <div class="section-label" style="margin-bottom:14px;padding-bottom:10px;">
+            <h2 style="font-size:1.05rem;">E-mail automático (EmailJS + Outlook)</h2>
+          </div>
+          <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
+            Ao registrar uma ocorrência com e-mail do responsável, o sistema envia automaticamente um aviso pela conta Outlook conectada no EmailJS.
+          </p>
+
+          <div class="cloud-status" id="emailStatus">
+            <span class="cloud-dot"></span>
+            <span id="emailStatusText">E-mail não configurado</span>
+          </div>
+
+          <ol class="cloud-steps">
+            <li>Crie conta em <a href="https://www.emailjs.com/" target="_blank" rel="noopener">emailjs.com</a>.</li>
+            <li>Email Services → Add Service → <strong>Outlook / Office 365</strong> e conecte a conta da escola.</li>
+            <li>Email Templates → Create Template com as variáveis abaixo.</li>
+            <li>Cole Public Key, Service ID e Template ID e salve.</li>
+          </ol>
+
+          <div class="manage-form" style="margin-bottom:12px;">
+            <div class="form-group span-2">
+              <label for="emailjsPublicKey">Public Key</label>
+              <input type="text" id="emailjsPublicKey" placeholder="Ex.: xxxxxxxxxxxxxxxx" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="emailjsServiceId">Service ID</label>
+              <input type="text" id="emailjsServiceId" placeholder="Ex.: service_xxxxx" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label for="emailjsTemplateId">Template ID</label>
+              <input type="text" id="emailjsTemplateId" placeholder="Ex.: template_xxxxx" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="csv-box" style="margin-top:0;">
+            <strong style="font-size:.85rem;">Variáveis do template</strong>
+            <p style="margin-bottom:8px;">Use no EmailJS (To Email = <code>{{to_email}}</code>):</p>
+            <p><code>to_email, to_name, subject, protocolo, nivel, data, professor, aluno, ra, turma, tutor, tipo, descricao, message</code></p>
+          </div>
+
+          <div class="manage-actions" style="margin-top:12px;">
+            <button type="button" class="btn-primary-sm" id="btnSalvarEmailjs">Salvar configuração</button>
+            <button type="button" class="btn-ghost-sm" id="btnTestarEmailjs">Enviar e-mail de teste</button>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -1723,7 +1851,8 @@
         <div class="stamp" id="stamp">REGISTRADO<br><span id="stampProto"></span></div>
         <div id="resultadoConteudo"></div>
         <div class="resultado-actions">
-          <button class="btn-wa" onclick="enviarWhatsApp()">WhatsApp</button>
+          <button class="btn-wa" onclick="enviarWhatsApp()">WhatsApp + anexo</button>
+          <button class="btn-email" onclick="reenviarEmail()">E-mail</button>
           <button class="btn-copy" onclick="copiarOcorrencia()">Copiar</button>
           <button class="btn-pdf" onclick="baixarPDF()">PDF</button>
         </div>
@@ -1786,9 +1915,473 @@
         return Array.isArray(padrao) ? [...padrao] : padrao;
       }
     }
-    function salvarUsuarios() { localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios)); }
-    function salvarAlunos() { localStorage.setItem(STORE_KEYS.alunos, JSON.stringify(alunos)); }
-    function salvarOcorrenciasStore() { localStorage.setItem(STORE_KEYS.ocorrencias, JSON.stringify(ocorrencias)); }
+    function salvarUsuarios() {
+      localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
+      agendarSyncNuvem();
+    }
+    function salvarAlunos() {
+      localStorage.setItem(STORE_KEYS.alunos, JSON.stringify(alunos));
+      agendarSyncNuvem();
+    }
+    function salvarOcorrenciasStore() {
+      localStorage.setItem(STORE_KEYS.ocorrencias, JSON.stringify(ocorrencias));
+      agendarSyncNuvem();
+    }
+
+    function montarSnapshot() {
+      return {
+        versao: 1,
+        atualizadoEm: new Date().toISOString(),
+        usuarios,
+        alunos,
+        ocorrencias
+      };
+    }
+
+    function aplicarSnapshot(data, origem, opts = {}) {
+      if (!data || typeof data !== 'object') throw new Error('Arquivo inválido');
+      if (Array.isArray(data.usuarios)) usuarios = data.usuarios;
+      if (Array.isArray(data.alunos)) alunos = data.alunos;
+      if (Array.isArray(data.ocorrencias)) ocorrencias = data.ocorrencias;
+      localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
+      localStorage.setItem(STORE_KEYS.alunos, JSON.stringify(alunos));
+      localStorage.setItem(STORE_KEYS.ocorrencias, JSON.stringify(ocorrencias));
+      if (sessaoAtual && sessaoAtual.role === 'admin') {
+        renderizarListaUsuarios();
+        renderizarListaAlunos();
+        preencherSelectTutores();
+        renderizarHistorico();
+      } else if (sessaoAtual) {
+        renderizarHistorico();
+        renderizarTutorInbox();
+      }
+      atualizarLoginHint();
+      if (!opts.silencioso) {
+        mostrarToast('Dados carregados' + (origem ? ' (' + origem + ')' : ''));
+      }
+    }
+
+    // ============================================================
+    //  NUVEM GRATUITA (JSONBlob — sem login / sem Azure)
+    // ============================================================
+    // 1) Admin cria a nuvem uma vez
+    // 2) Cola o código abaixo e publica no Render
+    // 3) Todos os PCs sincronizam sozinhos (professor incluso)
+    const CLOUD_BLOB_ID_FIXO = '019ff204-f766-7fce-b19f-0579f850f35d';
+
+    const CLOUD = {
+      blobKey: 'acompanhaai_cloud_blob_id',
+      api: 'https://jsonblob.com/api/jsonBlob',
+      syncTimer: null,
+      connected: false
+    };
+
+    function getBlobId() {
+      const fixo = (CLOUD_BLOB_ID_FIXO || '').trim();
+      if (fixo) return fixo;
+      const input = document.getElementById('cloudBlobId');
+      return (localStorage.getItem(CLOUD.blobKey) || (input && input.value) || '').trim();
+    }
+
+    function nuvemFixaAtiva() {
+      return !!(CLOUD_BLOB_ID_FIXO || '').trim();
+    }
+
+    function setBlobId(id) {
+      localStorage.setItem(CLOUD.blobKey, id);
+      const input = document.getElementById('cloudBlobId');
+      if (input) input.value = id;
+    }
+
+    function setCloudStatus(estado, texto) {
+      const box = document.getElementById('cloudStatus');
+      const txt = document.getElementById('cloudStatusText');
+      if (!box || !txt) return;
+      box.className = 'cloud-status' + (estado ? ' ' + estado : '');
+      txt.textContent = texto;
+    }
+
+    function extrairBlobId(locationHeader) {
+      if (!locationHeader) return '';
+      const m = String(locationHeader).match(/jsonBlob[/]([^/?#]+)/i);
+      if (m) return m[1];
+      const parts = String(locationHeader).split('/');
+      return parts[parts.length - 1].trim();
+    }
+
+    async function pushNuvem(opts = {}) {
+      const blobId = getBlobId();
+      if (!blobId) {
+        if (!opts.silencioso) setCloudStatus('err', 'Crie a nuvem e fixe o código no sistema');
+        return false;
+      }
+      if (!opts.silencioso) setCloudStatus('syncing', 'Enviando para a nuvem...');
+      try {
+        const res = await fetch(CLOUD.api + '/' + encodeURIComponent(blobId), {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(montarSnapshot())
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        CLOUD.connected = true;
+        setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Sincronizado · ') + blobId.slice(0, 8) + '…');
+        return true;
+      } catch (e) {
+        setCloudStatus('err', 'Falha ao enviar: ' + (e.message || e));
+        if (!opts.silencioso) mostrarToast('Falha ao sincronizar na nuvem', 'error');
+        return false;
+      }
+    }
+
+    async function pullNuvem(opts = {}) {
+      const blobId = getBlobId();
+      if (!blobId) {
+        if (!opts.silencioso) setCloudStatus('err', 'Nuvem ainda não configurada');
+        return false;
+      }
+      if (!opts.silencioso) setCloudStatus('syncing', 'Baixando da nuvem...');
+      try {
+        const res = await fetch(CLOUD.api + '/' + encodeURIComponent(blobId), {
+          headers: { 'Accept': 'application/json' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        aplicarSnapshot(data, 'nuvem', { silencioso: !!opts.silencioso });
+        if (!nuvemFixaAtiva()) setBlobId(blobId);
+        CLOUD.connected = true;
+        setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Conectado · ') + blobId.slice(0, 8) + '…');
+        return true;
+      } catch (e) {
+        setCloudStatus('err', 'Falha ao baixar: ' + (e.message || e));
+        if (!opts.silencioso) mostrarToast('Falha ao baixar da nuvem', 'error');
+        return false;
+      }
+    }
+
+    async function criarNuvem() {
+      if (nuvemFixaAtiva()) {
+        mostrarToast('Já existe nuvem fixa no sistema. Remova CLOUD_BLOB_ID_FIXO para criar outra.', 'error');
+        return false;
+      }
+      setCloudStatus('syncing', 'Criando nuvem gratuita...');
+      try {
+        const res = await fetch(CLOUD.api, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(montarSnapshot())
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        let id = extrairBlobId(res.headers.get('Location')) ||
+          extrairBlobId(res.headers.get('X-jsonblob')) ||
+          extrairBlobId(res.headers.get('x-jsonblob'));
+        if (!id) {
+          const loc = res.headers.get('Location') || '';
+          const m = loc.match(/([a-f0-9-]{20,})/i);
+          if (m) id = m[1];
+        }
+        if (!id) throw new Error('Não foi possível obter o código da nuvem');
+        setBlobId(id);
+        CLOUD.connected = true;
+        setCloudStatus('on', 'Código gerado · cole em CLOUD_BLOB_ID_FIXO e publique');
+        mostrarToast('Código gerado! Cole em CLOUD_BLOB_ID_FIXO no index.html e publique.');
+        return true;
+      } catch (e) {
+        setCloudStatus('err', 'Falha ao criar: ' + (e.message || e));
+        mostrarToast('Não foi possível criar a nuvem. Use Exportar JSON.', 'error');
+        return false;
+      }
+    }
+
+    function agendarSyncNuvem() {
+      if (!getBlobId()) return;
+      CLOUD.connected = true;
+      clearTimeout(CLOUD.syncTimer);
+      CLOUD.syncTimer = setTimeout(() => { pushNuvem({ silencioso: true }); }, 1000);
+    }
+
+    function atualizarStatusNuvemUI() {
+      const id = getBlobId();
+      const input = document.getElementById('cloudBlobId');
+      if (input) {
+        input.value = id;
+        input.readOnly = nuvemFixaAtiva();
+      }
+      const btnCreate = document.getElementById('btnCloudCreate');
+      if (btnCreate) btnCreate.disabled = nuvemFixaAtiva();
+      if (id) {
+        CLOUD.connected = true;
+        setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Pronto · ') + id.slice(0, 8) + '…');
+      } else {
+        CLOUD.connected = false;
+        setCloudStatus('', 'Nuvem não configurada — crie uma vez e fixe o código');
+      }
+    }
+
+    async function iniciarNuvemAutomatica() {
+      const id = getBlobId();
+      if (!id) {
+        atualizarStatusNuvemUI();
+        return;
+      }
+      CLOUD.connected = true;
+      atualizarStatusNuvemUI();
+      await pullNuvem({ silencioso: true });
+    }
+
+    document.getElementById('cloudBlobId').value = getBlobId();
+    atualizarStatusNuvemUI();
+
+    document.getElementById('btnCloudCreate').addEventListener('click', criarNuvem);
+    document.getElementById('btnCloudPull').addEventListener('click', () => pullNuvem());
+    document.getElementById('btnCloudPush').addEventListener('click', async () => {
+      if (!getBlobId()) { mostrarToast('Crie a nuvem e fixe o código antes', 'error'); return; }
+      const ok = await pushNuvem();
+      if (ok) mostrarToast('Dados enviados!');
+    });
+    document.getElementById('btnCloudCopy').addEventListener('click', async () => {
+      const id = getBlobId();
+      if (!id) { mostrarToast('Nenhum código para copiar', 'error'); return; }
+      try {
+        await navigator.clipboard.writeText(id);
+        mostrarToast('Código copiado!');
+      } catch {
+        document.getElementById('cloudBlobId').select();
+        mostrarToast('Selecione e copie o código manualmente');
+      }
+    });
+
+    document.getElementById('btnExportJson').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(montarSnapshot(), null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'acompanha-ai-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      mostrarToast('Backup JSON baixado');
+    });
+
+    document.getElementById('importJsonFile').addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        const data = JSON.parse(await file.text());
+        if (!confirm('Importar este JSON substitui os dados atuais. Continuar?')) {
+          e.target.value = '';
+          return;
+        }
+        aplicarSnapshot(data, 'JSON');
+        agendarSyncNuvem();
+      } catch {
+        mostrarToast('JSON inválido', 'error');
+      }
+      e.target.value = '';
+    });
+
+    try { localStorage.removeItem('acompanhaai_msal_client_id'); } catch (_) {}
+    setTimeout(() => { iniciarNuvemAutomatica(); }, 300);
+
+    // ============================================================
+    //  EMAILJS + OUTLOOK
+    // ============================================================
+    // Você também pode fixar aqui (opcional). Se preenchido, vale sobre o painel.
+    const EMAILJS_FIXO = {
+      publicKey: '',
+      serviceId: '',
+      templateId: ''
+    };
+
+    const EMAILJS_KEYS = {
+      publicKey: 'acompanhaai_emailjs_public',
+      serviceId: 'acompanhaai_emailjs_service',
+      templateId: 'acompanhaai_emailjs_template'
+    };
+
+    function getEmailjsConfig() {
+      return {
+        publicKey: (EMAILJS_FIXO.publicKey || localStorage.getItem(EMAILJS_KEYS.publicKey) || '').trim(),
+        serviceId: (EMAILJS_FIXO.serviceId || localStorage.getItem(EMAILJS_KEYS.serviceId) || '').trim(),
+        templateId: (EMAILJS_FIXO.templateId || localStorage.getItem(EMAILJS_KEYS.templateId) || '').trim()
+      };
+    }
+
+    function emailjsConfigurado() {
+      const c = getEmailjsConfig();
+      return !!(c.publicKey && c.serviceId && c.templateId);
+    }
+
+    function setEmailStatus(estado, texto) {
+      const box = document.getElementById('emailStatus');
+      const txt = document.getElementById('emailStatusText');
+      if (!box || !txt) return;
+      box.className = 'cloud-status' + (estado ? ' ' + estado : '');
+      txt.textContent = texto;
+    }
+
+    function atualizarStatusEmailUI() {
+      const c = getEmailjsConfig();
+      const pk = document.getElementById('emailjsPublicKey');
+      const sid = document.getElementById('emailjsServiceId');
+      const tid = document.getElementById('emailjsTemplateId');
+      if (pk) pk.value = c.publicKey;
+      if (sid) sid.value = c.serviceId;
+      if (tid) tid.value = c.templateId;
+      const fixo = !!(EMAILJS_FIXO.publicKey && EMAILJS_FIXO.serviceId && EMAILJS_FIXO.templateId);
+      if (pk) pk.readOnly = fixo;
+      if (sid) sid.readOnly = fixo;
+      if (tid) tid.readOnly = fixo;
+      if (emailjsConfigurado()) {
+        setEmailStatus('on', fixo ? 'E-mail fixo ativo (EmailJS + Outlook)' : 'E-mail configurado (EmailJS + Outlook)');
+      } else {
+        setEmailStatus('', 'E-mail não configurado');
+      }
+    }
+
+    function initEmailJS() {
+      const c = getEmailjsConfig();
+      if (!c.publicKey || typeof emailjs === 'undefined') return false;
+      emailjs.init({ publicKey: c.publicKey });
+      return true;
+    }
+
+    function montarParamsEmail(oc, toEmail) {
+      const nivel = labelNivel(oc);
+      const message =
+        `Prezado(a) responsável,\n\n` +
+        `Informamos o registro de uma ocorrência escolar referente ao(à) aluno(a) ${oc.aluno}.\n\n` +
+        `Protocolo: ${oc.protocolo}\n` +
+        `Classificação: ${nivel}\n` +
+        `Data: ${oc.data}\n` +
+        `Turma: ${oc.turma}\n` +
+        `Professor(a): ${oc.professor}\n` +
+        `Tutor(a): ${oc.tutorNome || '—'}\n` +
+        `Tipo: ${oc.tipo}\n` +
+        `Descrição: ${oc.descricao}\n\n` +
+        `Este é um aviso automático do sistema Acompanha-Aí.\n` +
+        `Em caso de dúvidas, entre em contato com a escola.\n\n` +
+        `Atenciosamente,\nEquipe Escolar`;
+
+      return {
+        to_email: toEmail,
+        to_name: 'Responsável',
+        subject: `Acompanha-Aí — Ocorrência ${oc.protocolo} (${nivel})`,
+        protocolo: oc.protocolo || '',
+        nivel: nivel,
+        data: oc.data || '',
+        professor: oc.professor || '',
+        aluno: oc.aluno || '',
+        ra: oc.ra || '',
+        turma: oc.turma || '',
+        tutor: oc.tutorNome || '—',
+        tipo: oc.tipo || '',
+        descricao: oc.descricao || '',
+        message
+      };
+    }
+
+    async function enviarEmailOcorrencia(oc, opts = {}) {
+      if (!oc) return { ok: false, motivo: 'sem_ocorrencia' };
+      const destino = (opts.toEmail || oc.email || '').trim();
+      if (!destino) return { ok: false, motivo: 'sem_email' };
+      if (!emailjsConfigurado()) return { ok: false, motivo: 'nao_configurado' };
+      if (typeof emailjs === 'undefined') return { ok: false, motivo: 'sdk' };
+
+      const cfg = getEmailjsConfig();
+      initEmailJS();
+      try {
+        await emailjs.send(cfg.serviceId, cfg.templateId, montarParamsEmail(oc, destino));
+        oc.emailEnviado = true;
+        oc.emailErro = '';
+        return { ok: true };
+      } catch (e) {
+        oc.emailEnviado = false;
+        oc.emailErro = (e && (e.text || e.message)) ? String(e.text || e.message) : 'falha';
+        return { ok: false, motivo: 'erro', erro: oc.emailErro };
+      }
+    }
+
+    async function reenviarEmail() {
+      if (!ultimaOcorrencia) {
+        mostrarToast('Nenhuma ocorrência para enviar', 'error');
+        return;
+      }
+      if (!ultimaOcorrencia.email) {
+        mostrarToast('Esta ocorrência não tem e-mail do responsável', 'error');
+        return;
+      }
+      if (!emailjsConfigurado()) {
+        mostrarToast('Configure o EmailJS na aba E-mail (admin)', 'error');
+        return;
+      }
+      mostrarToast('Enviando e-mail...');
+      const r = await enviarEmailOcorrencia(ultimaOcorrencia);
+      if (r.ok) {
+        salvarOcorrenciasStore();
+        resultadoConteudo.innerHTML = montarDL(ultimaOcorrencia, false);
+        mostrarToast('E-mail enviado ao responsável!');
+      } else {
+        mostrarToast('Falha ao enviar e-mail' + (r.erro ? ': ' + r.erro : ''), 'error');
+      }
+    }
+    window.reenviarEmail = reenviarEmail;
+
+    document.getElementById('btnSalvarEmailjs').addEventListener('click', () => {
+      if (EMAILJS_FIXO.publicKey && EMAILJS_FIXO.serviceId && EMAILJS_FIXO.templateId) {
+        mostrarToast('Configuração fixa no código. Altere EMAILJS_FIXO no index.html.', 'error');
+        return;
+      }
+      const publicKey = document.getElementById('emailjsPublicKey').value.trim();
+      const serviceId = document.getElementById('emailjsServiceId').value.trim();
+      const templateId = document.getElementById('emailjsTemplateId').value.trim();
+      if (!publicKey || !serviceId || !templateId) {
+        mostrarToast('Preencha Public Key, Service ID e Template ID', 'error');
+        return;
+      }
+      localStorage.setItem(EMAILJS_KEYS.publicKey, publicKey);
+      localStorage.setItem(EMAILJS_KEYS.serviceId, serviceId);
+      localStorage.setItem(EMAILJS_KEYS.templateId, templateId);
+      initEmailJS();
+      atualizarStatusEmailUI();
+      mostrarToast('Configuração de e-mail salva!');
+    });
+
+    document.getElementById('btnTestarEmailjs').addEventListener('click', async () => {
+      if (!emailjsConfigurado()) {
+        mostrarToast('Salve a configuração antes de testar', 'error');
+        return;
+      }
+      const destino = prompt('E-mail de destino para o teste:');
+      if (!destino || !validarEmail(destino.trim())) {
+        mostrarToast('Informe um e-mail válido', 'error');
+        return;
+      }
+      const fake = {
+        protocolo: 'TESTE-' + Date.now(),
+        data: formatarData(),
+        professor: 'Professor(a) Teste',
+        aluno: 'Aluno Teste',
+        ra: '0000',
+        turma: 'Turma Teste',
+        tutorNome: 'Tutor Teste',
+        tipo: 'Teste de envio',
+        descricao: 'Este é um e-mail de teste do Acompanha-Aí.',
+        nivel: 'verde',
+        email: destino.trim()
+      };
+      mostrarToast('Enviando teste...');
+      const r = await enviarEmailOcorrencia(fake, { toEmail: destino.trim() });
+      if (r.ok) mostrarToast('E-mail de teste enviado!');
+      else mostrarToast('Falha no teste' + (r.erro ? ': ' + r.erro : ''), 'error');
+    });
+
+    atualizarStatusEmailUI();
+    initEmailJS();
 
     function professoresTutores() {
       return usuarios.filter(u => u.role === 'professor' && u.tutor);
@@ -1899,7 +2492,7 @@
       }
     }
 
-    function entrarNoApp(sessao) {
+    async function entrarNoApp(sessao) {
       userNomeEl.textContent = sessao.nome;
       userRoleBadge.textContent = sessao.role === 'admin' ? 'Administrador' : (sessao.tutor ? 'Professor tutor' : 'Professor');
       userRoleBadge.className = 'role-pill ' + sessao.role;
@@ -1907,9 +2500,19 @@
       capaScreen.classList.add('hidden');
       loginScreen.classList.add('hidden');
       appWrap.classList.remove('hidden');
+      if (getBlobId()) {
+        await pullNuvem({ silencioso: true });
+      }
       preencherSelectTutores();
       limparSelecaoAluno();
       renderizarHistorico();
+      if (sessao.tutor) renderizarTutorInbox();
+      if (sessao.role === 'admin') {
+        renderizarListaUsuarios();
+        renderizarListaAlunos();
+        atualizarStatusNuvemUI();
+        atualizarStatusEmailUI();
+      }
     }
 
     // ============================================================
@@ -2901,27 +3504,118 @@
     });
 
     // ============================================================
-    //  WHATSAPP
+    //  WHATSAPP + ANEXO
     // ============================================================
-    function montarMsgWhatsApp(oc) {
+    function montarTextoWhatsApp(oc) {
       const nivel = labelNivel(oc);
-      const providencias = (oc.providencias || []).map((p, i) => `${i + 1}. ${p}`).join('\n');
-      return encodeURIComponent(
-        `*Acompanha-Aí — Ocorrência Escolar*\n\n` +
-        `Protocolo: ${oc.protocolo}\n` +
-        `Nível: ${nivel}\n` +
+      return (
+        `Olá! Segue o registro oficial de ocorrência escolar.\n\n` +
+        `*Acompanha-Aí — Comunicação Escolar*\n\n` +
+        `Protocolo: *${oc.protocolo}*\n` +
+        `Classificação: *${nivel}*\n` +
         `Data: ${oc.data}\n` +
-        `Professor: ${oc.professor}\n` +
-        `Aluno: ${oc.aluno}${oc.ra ? ` (RA ${oc.ra})` : ''}\n` +
+        `Aluno(a): ${oc.aluno}${oc.ra ? ` (RA ${oc.ra})` : ''}\n` +
         `Turma: ${oc.turma}\n` +
-        `Tutor: ${oc.tutorNome || '—'}\n` +
+        `Professor(a): ${oc.professor}\n` +
+        `Tutor(a): ${oc.tutorNome || '—'}\n` +
         `Tipo: ${oc.tipo}\n` +
-        `Descrição: ${oc.descricao}` +
-        (providencias ? `\n\n*Providências:*\n${providencias}` : '')
+        `Descrição: ${oc.descricao}\n\n` +
+        `📎 *Anexo:* o documento da ocorrência foi baixado neste aparelho.\n` +
+        `Por favor, anexe o arquivo *ocorrencia-${oc.protocolo}.html* nesta conversa (ou salve-o como PDF e anexe).\n\n` +
+        `Atenciosamente,\n` +
+        `${oc.professor}\n` +
+        `Acompanha-Aí`
       );
     }
 
-    function enviarWhatsApp() {
+    function montarHtmlOcorrencia(oc) {
+      const info = NIVEIS[oc.nivel] || {};
+      const provRows = (oc.providencias || []).map(p => `<li>${escaparHtml(p)}</li>`).join('');
+      return `<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><title>Ocorrência ${escaparHtml(oc.protocolo)}</title><style>
+  @page { margin: 16mm; }
+  body{ font-family:system-ui, sans-serif; padding:28px; color:#152024; }
+  h1{ font-size:1.4rem; margin-bottom:4px; letter-spacing:-.02em; }
+  .sub{ font-size:.85rem; color:#5A6B72; margin-bottom:20px; }
+  .nivel{ display:inline-block; padding:4px 12px; border-radius:999px; font-size:.8rem; font-weight:700; margin-bottom:16px; }
+  .verde{ background:#D8F3E6; color:#146C3E; }
+  .amarelo{ background:#F7ECD8; color:#8A611F; }
+  .vermelho{ background:#F8E4E4; color:#A82E2E; }
+  table{ width:100%; border-collapse:collapse; }
+  td{ padding:10px 12px; border-bottom:1px solid #D0DBDF; font-size:.92rem; }
+  td:first-child{ font-weight:600; width:150px; color:#C62828; }
+  .footer{ margin-top:24px; font-size:.8rem; color:#8A979C; }
+  ul{ margin:8px 0 0; padding-left:18px; font-size:.9rem; }
+  .assinaturas{ margin-top:36px; display:grid; grid-template-columns:1fr 1fr; gap:28px 32px; page-break-inside:avoid; }
+  .assinatura-box{ border-top:1px solid #9AA4A8; padding-top:10px; min-height:88px; }
+  .assinatura-box .cargo{ font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:#5A6B72; margin-bottom:28px; }
+  .assinatura-box .linha-nome{ font-size:.82rem; color:#152024; margin-top:8px; }
+  .assinatura-box .linha-data{ font-size:.75rem; color:#8A979C; margin-top:6px; }
+  .assinaturas-titulo{ margin-top:32px; font-size:.95rem; font-weight:700; color:#152024; border-bottom:1px solid #D0DBDF; padding-bottom:8px; }
+</style></head><body>
+  <h1>Acompanha-Aí</h1>
+  <div class="sub">Registro de Ocorrência Escolar</div>
+  <div class="nivel ${oc.nivel || ''}">${labelNivel(oc)} — ${escaparHtml(info.titulo || '')}</div>
+  <table>
+    <tr><td>Protocolo</td><td>${escaparHtml(oc.protocolo)}</td></tr>
+    <tr><td>Data</td><td>${escaparHtml(oc.data)}</td></tr>
+    <tr><td>Professor</td><td>${escaparHtml(oc.professor)}</td></tr>
+    <tr><td>Aluno</td><td>${escaparHtml(oc.aluno)}${oc.ra ? ` (RA ${escaparHtml(oc.ra)})` : ''}</td></tr>
+    <tr><td>Turma</td><td>${escaparHtml(oc.turma)}</td></tr>
+    <tr><td>Tutor</td><td>${escaparHtml(oc.tutorNome || '—')}</td></tr>
+    <tr><td>Tipo</td><td>${escaparHtml(oc.tipo)}</td></tr>
+    <tr><td>Descrição</td><td>${escaparHtml(oc.descricao)}</td></tr>
+    <tr><td>WhatsApp</td><td>${escaparHtml(oc.celular || '—')}</td></tr>
+    <tr><td>Email Responsável</td><td>${escaparHtml(oc.email || '—')}</td></tr>
+  </table>
+  <p style="margin-top:20px;font-weight:600;">Providências</p>
+  <ul>${provRows}</ul>
+  <div class="assinaturas-titulo">Ciência e assinaturas</div>
+  <div class="assinaturas">
+    <div class="assinatura-box">
+      <div class="cargo">Professor(a)</div>
+      <div class="linha-nome">Nome: ${escaparHtml(oc.professor || '________________________________')}</div>
+      <div class="linha-data">Data: ____/____/________</div>
+    </div>
+    <div class="assinatura-box">
+      <div class="cargo">Professor(a) tutor(a)</div>
+      <div class="linha-nome">Nome: ${escaparHtml(oc.tutorNome || '________________________________')}</div>
+      <div class="linha-data">Data: ____/____/________</div>
+    </div>
+    <div class="assinatura-box">
+      <div class="cargo">Direção / Gestão</div>
+      <div class="linha-nome">Nome: ________________________________</div>
+      <div class="linha-data">Data: ____/____/________</div>
+    </div>
+    <div class="assinatura-box">
+      <div class="cargo">Responsável</div>
+      <div class="linha-nome">Nome: ________________________________</div>
+      <div class="linha-data">Data: ____/____/________</div>
+    </div>
+  </div>
+  <div class="footer">Gerado pelo Acompanha-Aí em ${formatarData()}</div>
+</body></html>`;
+    }
+
+    function criarArquivoOcorrencia(oc) {
+      const html = montarHtmlOcorrencia(oc);
+      return new File([html], `ocorrencia-${oc.protocolo}.html`, { type: 'text/html' });
+    }
+
+    function baixarArquivoOcorrencia(oc) {
+      const file = criarArquivoOcorrencia(oc);
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      return file;
+    }
+
+    async function enviarWhatsApp() {
       if (!ultimaOcorrencia) {
         mostrarToast('Nenhuma ocorrência para enviar', 'error');
         return;
@@ -2930,10 +3624,28 @@
         mostrarToast('Sem WhatsApp cadastrado nesta ocorrência', 'error');
         return;
       }
-      const cel = limparCelular(ultimaOcorrencia.celular);
-      const msg = montarMsgWhatsApp(ultimaOcorrencia);
-      window.open(`https://wa.me/55${cel}?text=${msg}`, '_blank');
-      mostrarToast('WhatsApp aberto!', 'success');
+
+      const oc = ultimaOcorrencia;
+      const texto = montarTextoWhatsApp(oc);
+      const arquivo = baixarArquivoOcorrencia(oc);
+      const cel = limparCelular(oc.celular);
+
+      try {
+        if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+          await navigator.share({
+            files: [arquivo],
+            title: `Ocorrência ${oc.protocolo}`,
+            text: texto
+          });
+          mostrarToast('Compartilhe no WhatsApp com o anexo');
+          return;
+        }
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+      }
+
+      window.open(`https://wa.me/55${cel}?text=${encodeURIComponent(texto)}`, '_blank');
+      mostrarToast('Documento baixado — anexe no WhatsApp');
     }
 
     // ============================================================
@@ -2941,7 +3653,13 @@
     // ============================================================
     function montarDL(oc, novo) {
       const info = NIVEIS[oc.nivel] || {};
-      const emailMsg = oc.email ? `<div class="email-note">Notificação enviada para ${escaparHtml(oc.email)}</div>` : '';
+      const emailMsg = oc.email
+        ? (oc.emailEnviado
+          ? `<div class="email-note">E-mail enviado para ${escaparHtml(oc.email)}</div>`
+          : oc.emailErro
+            ? `<div class="email-note">Falha ao enviar e-mail para ${escaparHtml(oc.email)}: ${escaparHtml(oc.emailErro)}</div>`
+            : `<div class="email-note">E-mail do responsável: ${escaparHtml(oc.email)}</div>`)
+        : '';
       const destino = oc.tutorNome
         ? `<div class="email-note">Direcionada ao tutor <strong>${escaparHtml(oc.tutorNome)}</strong> e à gestão.</div>`
         : (oc.nivel === 'amarelo' || oc.nivel === 'vermelho'
@@ -2969,6 +3687,7 @@
           <dt>WhatsApp</dt><dd>${escaparHtml(oc.celular || '—')}</dd>
         </dl>
         ${destino}
+        ${oc.reclassificado ? `<div class="email-note"><strong>Reclassificação automática:</strong> ${escaparHtml(oc.motivoReclassificacao || 'Verde → Amarelo por reincidência.')}</div>` : ''}
         ${fluxoExtra}
         ${provList ? `<div class="email-note" style="font-style:normal;margin-top:12px;"><strong>Providências</strong><ul style="margin:6px 0 0;padding-left:18px;">${provList}</ul></div>` : ''}
         ${emailMsg}
@@ -3026,6 +3745,21 @@
 
       ultimaOcorrencia = ocorrencia;
       salvarOcorrencia(ocorrencia);
+
+      if (ocorrencia.email) {
+        if (emailjsConfigurado()) {
+          const envio = await enviarEmailOcorrencia(ocorrencia);
+          if (envio.ok) {
+            salvarOcorrenciasStore();
+          } else if (envio.motivo === 'erro') {
+            salvarOcorrenciasStore();
+            mostrarToast('Ocorrência salva, mas o e-mail falhou', 'error');
+          }
+        } else {
+          ocorrencia.emailEnviado = false;
+          ocorrencia.emailErro = 'EmailJS não configurado';
+        }
+      }
 
       resultadoDiv.className = 'resultado show nivel-' + ocorrencia.nivel;
       stampProto.textContent = ocorrencia.protocolo;
@@ -3113,43 +3847,7 @@ ${prov}
     function baixarPDF() {
       if (!ultimaOcorrencia) { mostrarToast('Nenhuma ocorrência para exportar', 'error'); return; }
       const oc = ultimaOcorrencia;
-      const info = NIVEIS[oc.nivel] || {};
-      const provRows = (oc.providencias || []).map(p => `<li>${p}</li>`).join('');
-      const html = `
-        <html><head><meta charset="UTF-8"><style>
-          body{ font-family:system-ui, sans-serif; padding:40px; color:#152024; }
-          h1{ font-size:1.4rem; margin-bottom:4px; letter-spacing:-.02em; }
-          .sub{ font-size:.85rem; color:#5A6B72; margin-bottom:28px; }
-          .nivel{ display:inline-block; padding:4px 12px; border-radius:999px; font-size:.8rem; font-weight:700; margin-bottom:16px; }
-          .verde{ background:#D8F3E6; color:#146C3E; }
-          .amarelo{ background:#F7ECD8; color:#8A611F; }
-          .vermelho{ background:#F8E4E4; color:#A82E2E; }
-          table{ width:100%; border-collapse:collapse; }
-          td{ padding:10px 12px; border-bottom:1px solid #D0DBDF; font-size:.92rem; }
-          td:first-child{ font-weight:600; width:150px; color:#C62828; }
-          .footer{ margin-top:32px; font-size:.8rem; color:#8A979C; }
-          ul{ margin:8px 0 0; padding-left:18px; font-size:.9rem; }
-        </style></head><body>
-          <h1>Acompanha-Aí</h1>
-          <div class="sub">Registro de Ocorrência Escolar</div>
-          <div class="nivel ${oc.nivel || ''}">${labelNivel(oc)} — ${info.titulo || ''}</div>
-          <table>
-            <tr><td>Protocolo</td><td>${oc.protocolo}</td></tr>
-            <tr><td>Data</td><td>${oc.data}</td></tr>
-            <tr><td>Professor</td><td>${oc.professor}</td></tr>
-            <tr><td>Aluno</td><td>${oc.aluno}${oc.ra ? ` (RA ${oc.ra})` : ''}</td></tr>
-            <tr><td>Turma</td><td>${oc.turma}</td></tr>
-            <tr><td>Tutor</td><td>${oc.tutorNome || '—'}</td></tr>
-            <tr><td>Tipo</td><td>${oc.tipo}</td></tr>
-            <tr><td>Descrição</td><td>${oc.descricao}</td></tr>
-            <tr><td>WhatsApp</td><td>${oc.celular || '—'}</td></tr>
-            <tr><td>Email Responsável</td><td>${oc.email || '—'}</td></tr>
-          </table>
-          <p style="margin-top:20px;font-weight:600;">Providências</p>
-          <ul>${provRows}</ul>
-          <div class="footer">Gerado pelo Acompanha-Aí em ${formatarData()}</div>
-        </body></html>
-      `;
+      const html = montarHtmlOcorrencia(oc);
       const w = window.open('', '_blank');
       if (w) {
         w.document.write(html);
@@ -3158,13 +3856,7 @@ ${prov}
         w.print();
         mostrarToast('PDF gerado!', 'success');
       } else {
-        const blob = new Blob([html], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `ocorrencia-${oc.protocolo}.html`;
-        a.click();
-        URL.revokeObjectURL(url);
+        baixarArquivoOcorrencia(oc);
         mostrarToast('Arquivo baixado (salve como PDF no navegador)', 'success');
       }
     }
