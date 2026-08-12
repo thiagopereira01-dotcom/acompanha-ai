@@ -1917,17 +1917,17 @@
           </div>
 
           <ol class="cloud-steps">
-            <li>Clique em <strong>Criar nuvem</strong> e copie o código.</li>
-            <li>No arquivo <code>index.html</code>, cole o código em <code>CLOUD_BLOB_ID_FIXO</code> (perto do topo do JavaScript).</li>
-            <li>Publique de novo no Render. Pronto: todos os PCs usam a mesma base automaticamente.</li>
-            <li>A abertura do sistema <strong>só baixa</strong> dados; nunca envia a base vazia. Faça backup JSON com frequência.</li>
+            <li><strong>Os dados ficam salvos neste navegador</strong> (não somem ao fechar a aba).</li>
+            <li>Para copiar para outro PC: use <strong>Exportar JSON</strong> aqui e <strong>Importar JSON</strong> no outro.</li>
+            <li>A nuvem é <strong>opcional e só manual</strong> — o sistema não envia nada sozinho (isso evitava apagar cadastros).</li>
+            <li>Se for usar nuvem: clique em <strong>Baixar</strong> ou <strong>Enviar</strong> conscientemente e confirme os totais.</li>
           </ol>
 
           <div class="manage-actions" style="margin-bottom:16px;">
             <button type="button" class="btn-primary-sm" id="btnCloudCreate">Criar nuvem</button>
             <button type="button" class="btn-ghost-sm" id="btnCloudCopy">Copiar código</button>
-            <button type="button" class="btn-ghost-sm" id="btnCloudPull">Baixar agora</button>
-            <button type="button" class="btn-ghost-sm" id="btnCloudPush">Enviar agora</button>
+            <button type="button" class="btn-ghost-sm" id="btnCloudPull">Baixar da nuvem</button>
+            <button type="button" class="btn-ghost-sm" id="btnCloudPush">Publicar na nuvem</button>
           </div>
 
           <div class="csv-box">
@@ -2137,14 +2137,17 @@
       {
         id: 'u_admin',
         usuario: 'admin',
-        senha: 'Admin@Temp1',
+        senha: 'Admin@123',
         role: 'admin',
         nome: 'Administrador(a)',
         tutor: false,
         email: '',
-        mustChangePassword: true
+        mustChangePassword: false
       }
     ];
+    const ADMIN_LOGIN_PADRAO = 'admin';
+    const ADMIN_SENHA_PADRAO = 'Admin@123';
+    const ADMIN_CRED_VERSION = '4';
 
     let usuarios = carregarJSON(STORE_KEYS.usuarios, USUARIOS_PADRAO);
     if (!usuarios.length) usuarios = [...USUARIOS_PADRAO];
@@ -2303,15 +2306,15 @@
     }
     function salvarUsuarios() {
       localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
-      agendarSyncNuvem();
+      marcarPendenciaLocal();
     }
     function salvarAlunos() {
       localStorage.setItem(STORE_KEYS.alunos, JSON.stringify(alunos));
-      agendarSyncNuvem();
+      marcarPendenciaLocal();
     }
     function salvarOcorrenciasStore() {
       localStorage.setItem(STORE_KEYS.ocorrencias, JSON.stringify(ocorrencias));
-      agendarSyncNuvem();
+      marcarPendenciaLocal();
     }
 
     const WATERMARK_KEY = 'acompanhaai_cloud_watermark';
@@ -2567,12 +2570,13 @@
     }
 
     // ============================================================
-    //  NUVEM GRATUITA (JSONBlob — sem login / sem Azure)
+    //  NUVEM GRATUITA (JSONBlob) — SOMENTE MANUAL
     // ============================================================
-    // 1) Admin cria a nuvem uma vez
-    // 2) Cola o código abaixo e publica no Render
-    // 3) Todos os PCs sincronizam sozinhos (professor incluso)
+    // Sync automático foi desativado: gravava base vazia e apagava cadastros.
+    // Fonte da verdade = localStorage deste navegador.
+    // Nuvem só sob clique explícito em Baixar / Publicar.
     const CLOUD_BLOB_ID_FIXO = '019ff204-f766-7fce-b19f-0579f850f35d';
+    const CLOUD_AUTO = false; // nunca sincronizar sozinho
 
     const CLOUD = {
       blobKey: 'acompanhaai_cloud_blob_id',
@@ -2583,8 +2587,18 @@
       initPromise: null,
       syncLock: null,
       syncNeeded: false,
-      ultimoRemoto: null
+      ultimoRemoto: null,
+      pendenteLocal: false
     };
+
+    function marcarPendenciaLocal() {
+      if (!CLOUD) return;
+      CLOUD.pendenteLocal = true;
+      if (!CLOUD.inicializada) return;
+      const id = getBlobId();
+      if (!id) return;
+      setCloudStatus('syncing', 'Alterações só neste navegador · use Publicar na nuvem se quiser compartilhar');
+    }
 
     function getBlobId() {
       const fixo = (CLOUD_BLOB_ID_FIXO || '').trim();
@@ -2879,14 +2893,8 @@
     }
 
     function agendarSyncNuvem() {
-      if (!getBlobId() || !CLOUD.inicializada) return;
-      CLOUD.connected = true;
-      if (CLOUD.syncLock) {
-        CLOUD.syncNeeded = true;
-        return;
-      }
-      clearTimeout(CLOUD.syncTimer);
-      CLOUD.syncTimer = setTimeout(() => { syncNuvem({ silencioso: true }); }, 1000);
+      // Intencionalmente vazio: sync automático apagava dados entre PCs.
+      marcarPendenciaLocal();
     }
 
     function atualizarStatusNuvemUI() {
@@ -2900,41 +2908,58 @@
       if (btnCreate) btnCreate.disabled = nuvemFixaAtiva();
       if (id) {
         CLOUD.connected = true;
-        setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Pronto · ') + id.slice(0, 8) + '…');
+        if (CLOUD.pendenteLocal) {
+          setCloudStatus('syncing', 'Dados neste navegador · publique manualmente se quiser compartilhar');
+        } else {
+          setCloudStatus('on', 'Nuvem manual · ' + id.slice(0, 8) + '… · use Baixar/Publicar');
+        }
       } else {
         CLOUD.connected = false;
-        setCloudStatus('', 'Nuvem não configurada — crie uma vez e fixe o código');
+        setCloudStatus('', 'Sem nuvem · dados ficam só neste navegador (Exportar JSON recomendado)');
+      }
+    }
+
+    async function garantirAdminAcesso() {
+      let admin = usuarios.find(u => String(u.usuario || '').toLowerCase() === ADMIN_LOGIN_PADRAO);
+      if (!admin) {
+        admin = {
+          id: 'u_admin',
+          usuario: ADMIN_LOGIN_PADRAO,
+          role: 'admin',
+          nome: 'Administrador(a)',
+          tutor: false,
+          email: '',
+          mustChangePassword: false,
+          senhasAnteriores: []
+        };
+        usuarios.unshift(admin);
+      }
+      admin.usuario = ADMIN_LOGIN_PADRAO;
+      admin.role = 'admin';
+      if (!admin.nome) admin.nome = 'Administrador(a)';
+
+      const credFlag = localStorage.getItem('acompanhaai_admin_cred_v');
+      if (credFlag !== ADMIN_CRED_VERSION) {
+        await definirSenhaUsuario(admin, ADMIN_SENHA_PADRAO);
+        admin.mustChangePassword = false;
+        localStorage.setItem('acompanhaai_admin_cred_v', ADMIN_CRED_VERSION);
+        localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
       }
     }
 
     async function iniciarNuvemAutomatica() {
-      const id = getBlobId();
       atualizarMarcaDagua({ usuarios, alunos, ocorrencias });
-      if (!id) {
-        atualizarStatusNuvemUI();
-        await migrarUsuarios();
-        CLOUD.inicializada = true;
-        return;
-      }
-      CLOUD.connected = true;
       atualizarStatusNuvemUI();
-
-      // Primeiro acesso: só baixa e mescla. Nunca envia a base vazia para a nuvem.
-      const totaisLocaisAntes = contarTotais(montarSnapshot());
-      await syncNuvem({ silencioso: true, somentePull: true });
       await migrarUsuarios();
-
-      const totaisRemoto = contarTotais(CLOUD.ultimoRemoto || {});
-      const localTinhaMais =
-        totaisLocaisAntes.usuarios > totaisRemoto.usuarios ||
-        totaisLocaisAntes.alunos > totaisRemoto.alunos ||
-        totaisLocaisAntes.ocorrencias > totaisRemoto.ocorrencias;
-
+      await garantirAdminAcesso();
       CLOUD.inicializada = true;
-
-      // Só reenvia se este PC já tinha mais dados que a nuvem (recuperação), nunca no 1º acesso vazio.
-      if (localTinhaMais && !ehSnapshotSemente(montarSnapshot())) {
-        await syncNuvem({ silencioso: true });
+      // Não baixa nem envia automaticamente — evita sobrescrever cadastros.
+      if (!CLOUD_AUTO) {
+        const id = getBlobId();
+        if (id) {
+          setCloudStatus('on', 'Nuvem manual · ' + id.slice(0, 8) + '… · dados salvos neste navegador');
+        }
+        return;
       }
     }
 
@@ -2942,11 +2967,38 @@
     atualizarStatusNuvemUI();
 
     document.getElementById('btnCloudCreate').addEventListener('click', criarNuvem);
-    document.getElementById('btnCloudPull').addEventListener('click', () => pullNuvem());
+    document.getElementById('btnCloudPull').addEventListener('click', async () => {
+      if (!getBlobId()) { mostrarToast('Configure a nuvem antes', 'error'); return; }
+      const t = contarTotais(montarSnapshot());
+      if (!confirm(
+        'Baixar da nuvem e MESCLAR com os dados deste navegador?\n\n' +
+        'Agora neste PC: ' + t.usuarios + ' usuários, ' + t.alunos + ' alunos, ' + t.ocorrencias + ' ocorrências.\n' +
+        'Nada será apagado localmente — só une o que faltar.'
+      )) return;
+      const ok = await pullNuvem();
+      if (ok) mostrarToast('Dados da nuvem mesclados neste navegador');
+    });
     document.getElementById('btnCloudPush').addEventListener('click', async () => {
-      if (!getBlobId()) { mostrarToast('Crie a nuvem e fixe o código antes', 'error'); return; }
+      if (!getBlobId()) { mostrarToast('Configure a nuvem antes', 'error'); return; }
+      const t = contarTotais(montarSnapshot());
+      if (ehSnapshotSemente(montarSnapshot())) {
+        mostrarToast('Não é possível publicar a base vazia/padrão na nuvem', 'error');
+        return;
+      }
+      if (!confirm(
+        'PUBLICAR os dados DESTE navegador na nuvem?\n\n' +
+        'Será enviado (após mesclar com o que já estiver na nuvem):\n' +
+        '• ' + t.usuarios + ' usuário(s)\n' +
+        '• ' + t.alunos + ' aluno(s)\n' +
+        '• ' + t.ocorrencias + ' ocorrência(s)\n\n' +
+        'Use isso só quando este PC tiver a base correta.'
+      )) return;
       const ok = await syncNuvem();
-      if (ok) mostrarToast('Dados sincronizados!');
+      if (ok) {
+        CLOUD.pendenteLocal = false;
+        mostrarToast('Dados publicados na nuvem');
+        atualizarStatusNuvemUI();
+      }
     });
     document.getElementById('btnCloudCopy').addEventListener('click', async () => {
       const id = getBlobId();
@@ -2981,7 +3033,8 @@
           return;
         }
         aplicarSnapshot(data, 'JSON', { mesclar: true });
-        agendarSyncNuvem();
+        marcarPendenciaLocal();
+        mostrarToast('JSON importado e mesclado');
       } catch {
         mostrarToast('JSON inválido', 'error');
       }
@@ -3458,7 +3511,7 @@
       }
 
       if (CLOUD.initPromise) {
-        loginError.textContent = 'Sincronizando dados da nuvem...';
+        loginError.textContent = 'Preparando acesso...';
         loginError.classList.add('show');
         try { await CLOUD.initPromise; } catch (_) {}
         loginError.classList.remove('show');
