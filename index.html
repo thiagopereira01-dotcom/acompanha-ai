@@ -2582,7 +2582,8 @@
       inicializada: false,
       initPromise: null,
       syncLock: null,
-      syncNeeded: false
+      syncNeeded: false,
+      ultimoRemoto: null
     };
 
     function getBlobId() {
@@ -2658,7 +2659,23 @@
         setCloudStatus('err', 'Envio bloqueado: protege histórico local');
         return false;
       }
+      // Primeiro acesso / navegador novo: nunca grava a base padrão por cima da nuvem.
+      if (remoto && ehSnapshotSemente(snapshotFinal) && !ehSnapshotSemente(remoto)) {
+        setCloudStatus('err', 'Envio bloqueado: primeiro acesso não sobrescreve a nuvem');
+        return false;
+      }
       return true;
+    }
+
+    function ehSnapshotSemente(snap) {
+      const t = contarTotais(snap);
+      if (t.alunos > 0 || t.ocorrencias > 0) return false;
+      if (t.usuarios > 1) return false;
+      const lista = Array.isArray(snap && snap.usuarios) ? snap.usuarios : [];
+      if (!lista.length) return true;
+      const u = lista[0];
+      const login = String(u && u.usuario || '').toLowerCase();
+      return login === 'admin' || (u && u.id === 'u_admin');
     }
 
     async function syncNuvem(opts = {}) {
@@ -2672,11 +2689,15 @@
         return CLOUD.syncLock;
       }
 
+      const somentePull = opts.somentePull === true;
+
       CLOUD.syncLock = (async () => {
         let sucesso = false;
         do {
           CLOUD.syncNeeded = false;
-          if (!opts.silencioso) setCloudStatus('syncing', 'Sincronizando com a nuvem...');
+          if (!opts.silencioso) {
+            setCloudStatus('syncing', somentePull ? 'Baixando da nuvem...' : 'Sincronizando com a nuvem...');
+          }
 
           let enviou = false;
           for (let tentativa = 1; tentativa <= 5; tentativa++) {
@@ -2692,6 +2713,8 @@
               }
             }
 
+            CLOUD.ultimoRemoto = remoto;
+
             if (remoto) {
               atualizarMarcaDagua(remoto);
               const mesclado = mesclarSnapshots(localAntes, remoto);
@@ -2700,8 +2723,27 @@
               if (!nuvemFixaAtiva()) setBlobId(blobId);
             }
 
+            // Abertura do sistema / "Baixar agora": só mescla localmente, nunca grava na nuvem.
+            if (somentePull) {
+              CLOUD.connected = true;
+              setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Dados carregados · ') + blobId.slice(0, 8) + '…');
+              enviou = true;
+              sucesso = true;
+              break;
+            }
+
             let snapshotFinal = montarSnapshot();
             atualizarMarcaDagua(snapshotFinal);
+
+            // Base padrão contra base padrão: não precisa enviar.
+            if (ehSnapshotSemente(snapshotFinal) && (!remoto || ehSnapshotSemente(remoto))) {
+              CLOUD.connected = true;
+              setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Pronto · ') + blobId.slice(0, 8) + '…');
+              enviou = true;
+              sucesso = true;
+              break;
+            }
+
             if (!podeEnviarSnapshot(localAntes, remoto, snapshotFinal)) {
               if (!opts.silencioso) {
                 mostrarToast('Envio bloqueado para não apagar informações.', 'error');
@@ -2721,11 +2763,11 @@
             }
 
             if (remotoFresh && snapshotAssinatura(remotoFresh) !== snapshotAssinatura(remoto)) {
-              // Outro cliente gravou no meio do caminho: mescla de novo e tenta outra vez.
               continue;
             }
 
             if (remotoFresh) {
+              CLOUD.ultimoRemoto = remotoFresh;
               const remescla = mesclarSnapshots(snapshotFinal, remotoFresh);
               if (snapshotPerdeuDados(remotoFresh, remescla) || snapshotPerdeuDados(snapshotFinal, remescla)) {
                 continue;
@@ -2733,6 +2775,13 @@
               aplicarSnapshot(remescla, 'nuvem', { silencioso: true, substituir: true });
               garantirIntegridadeDados();
               snapshotFinal = montarSnapshot();
+              if (ehSnapshotSemente(snapshotFinal) && !ehSnapshotSemente(remotoFresh)) {
+                setCloudStatus('err', 'Envio bloqueado: primeiro acesso não sobrescreve a nuvem');
+                if (!opts.silencioso) {
+                  mostrarToast('Envio bloqueado para não apagar informações.', 'error');
+                }
+                return false;
+              }
               if (!podeEnviarSnapshot(localAntes, remotoFresh, snapshotFinal)) {
                 if (!opts.silencioso) {
                   mostrarToast('Envio bloqueado para não apagar informações.', 'error');
@@ -2761,7 +2810,7 @@
             if (!opts.silencioso) mostrarToast('Sincronização adiada para proteger os dados', 'error');
             return false;
           }
-        } while (CLOUD.syncNeeded);
+        } while (CLOUD.syncNeeded && !somentePull);
 
         return sucesso;
       })();
@@ -2772,14 +2821,14 @@
         CLOUD.syncLock = null;
         if (CLOUD.syncNeeded) {
           CLOUD.syncNeeded = false;
-          agendarSyncNuvem();
+          if (CLOUD.inicializada) agendarSyncNuvem();
         }
       }
     }
 
     async function pullNuvem(opts = {}) {
-      // Baixar sempre mescla; nunca substitui os dados locais.
-      return syncNuvem({ ...opts, silencioso: !!opts.silencioso });
+      // Baixar sempre mescla; nunca envia / sobrescreve a nuvem.
+      return syncNuvem({ ...opts, silencioso: !!opts.silencioso, somentePull: true });
     }
 
     async function pushNuvem(opts = {}) {
@@ -2869,9 +2918,24 @@
       }
       CLOUD.connected = true;
       atualizarStatusNuvemUI();
-      await syncNuvem({ silencioso: true });
+
+      // Primeiro acesso: só baixa e mescla. Nunca envia a base vazia para a nuvem.
+      const totaisLocaisAntes = contarTotais(montarSnapshot());
+      await syncNuvem({ silencioso: true, somentePull: true });
       await migrarUsuarios();
+
+      const totaisRemoto = contarTotais(CLOUD.ultimoRemoto || {});
+      const localTinhaMais =
+        totaisLocaisAntes.usuarios > totaisRemoto.usuarios ||
+        totaisLocaisAntes.alunos > totaisRemoto.alunos ||
+        totaisLocaisAntes.ocorrencias > totaisRemoto.ocorrencias;
+
       CLOUD.inicializada = true;
+
+      // Só reenvia se este PC já tinha mais dados que a nuvem (recuperação), nunca no 1º acesso vazio.
+      if (localTinhaMais && !ehSnapshotSemente(montarSnapshot())) {
+        await syncNuvem({ silencioso: true });
+      }
     }
 
     document.getElementById('cloudBlobId').value = getBlobId();
