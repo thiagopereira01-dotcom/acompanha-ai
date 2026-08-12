@@ -2321,11 +2321,66 @@
       };
     }
 
+    function marcaTempo(item) {
+      return String(item && (item.atualizadoEm || item.senhaAlteradaEm || item.dataISO || '') || '');
+    }
+
+    function chaveRegistro(item, tipo) {
+      if (!item || typeof item !== 'object') return '';
+      if (tipo === 'usuarios') return String(item.usuario || '').toLowerCase() || item.id || '';
+      if (tipo === 'alunos') return String(item.ra || '').trim() || item.id || '';
+      return item.protocolo || item.id || '';
+    }
+
+    function pontuarUsuario(u) {
+      if (!u) return 0;
+      let s = 0;
+      if (u.senhaHash) s += 2;
+      if (u.mustChangePassword === false) s += 4;
+      if (u.senhaAlteradaEm) s += 2;
+      if (u.email) s += 1;
+      if (Array.isArray(u.senhasAnteriores) && u.senhasAnteriores.length) s += 1;
+      return s;
+    }
+
+    function escolherRegistro(atual, novo, tipo) {
+      if (!atual) return novo;
+      if (!novo) return atual;
+      if (tipo === 'usuarios') {
+        const pa = pontuarUsuario(atual);
+        const pb = pontuarUsuario(novo);
+        if (pb !== pa) return pb > pa ? novo : atual;
+      }
+      const ta = marcaTempo(atual);
+      const tb = marcaTempo(novo);
+      if (tb && ta && tb !== ta) return tb > ta ? novo : atual;
+      return novo;
+    }
+
+    function mesclarListas(localArr, remotoArr, tipo) {
+      const map = new Map();
+      const incluir = (item) => {
+        const k = chaveRegistro(item, tipo);
+        if (!k) return;
+        map.set(k, escolherRegistro(map.get(k), item, tipo));
+      };
+      (Array.isArray(localArr) ? localArr : []).forEach(incluir);
+      (Array.isArray(remotoArr) ? remotoArr : []).forEach(incluir);
+      return [...map.values()];
+    }
+
     function aplicarSnapshot(data, origem, opts = {}) {
       if (!data || typeof data !== 'object') throw new Error('Arquivo inválido');
-      if (Array.isArray(data.usuarios)) usuarios = data.usuarios;
-      if (Array.isArray(data.alunos)) alunos = data.alunos;
-      if (Array.isArray(data.ocorrencias)) ocorrencias = data.ocorrencias;
+      const mesclar = !!opts.mesclar;
+      if (Array.isArray(data.usuarios)) {
+        usuarios = mesclar ? mesclarListas(usuarios, data.usuarios, 'usuarios') : data.usuarios;
+      }
+      if (Array.isArray(data.alunos)) {
+        alunos = mesclar ? mesclarListas(alunos, data.alunos, 'alunos') : data.alunos;
+      }
+      if (Array.isArray(data.ocorrencias)) {
+        ocorrencias = mesclar ? mesclarListas(ocorrencias, data.ocorrencias, 'ocorrencias') : data.ocorrencias;
+      }
       localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
       localStorage.setItem(STORE_KEYS.alunos, JSON.stringify(alunos));
       localStorage.setItem(STORE_KEYS.ocorrencias, JSON.stringify(ocorrencias));
@@ -2356,7 +2411,9 @@
       blobKey: 'acompanhaai_cloud_blob_id',
       api: 'https://jsonblob.com/api/jsonBlob',
       syncTimer: null,
-      connected: false
+      connected: false,
+      inicializada: false,
+      initPromise: null
     };
 
     function getBlobId() {
@@ -2432,11 +2489,23 @@
         });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
-        aplicarSnapshot(data, 'nuvem', { silencioso: !!opts.silencioso });
+        const remotoUsuarios = Array.isArray(data.usuarios) ? data.usuarios.length : 0;
+        const remotoAlunos = Array.isArray(data.alunos) ? data.alunos.length : 0;
+        const remotoOcorrencias = Array.isArray(data.ocorrencias) ? data.ocorrencias.length : 0;
+        aplicarSnapshot(data, 'nuvem', {
+          silencioso: !!opts.silencioso,
+          mesclar: opts.mesclar !== false
+        });
         if (!nuvemFixaAtiva()) setBlobId(blobId);
         CLOUD.connected = true;
         setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Conectado · ') + blobId.slice(0, 8) + '…');
-        return true;
+        const localMaior = usuarios.length > remotoUsuarios ||
+          alunos.length > remotoAlunos ||
+          ocorrencias.length > remotoOcorrencias;
+        if (localMaior && CLOUD.inicializada) {
+          await pushNuvem({ silencioso: true });
+        }
+        return localMaior ? 'merged' : true;
       } catch (e) {
         setCloudStatus('err', 'Falha ao baixar: ' + (e.message || e));
         if (!opts.silencioso) mostrarToast('Falha ao baixar da nuvem', 'error');
@@ -2482,7 +2551,7 @@
     }
 
     function agendarSyncNuvem() {
-      if (!getBlobId()) return;
+      if (!getBlobId() || !CLOUD.inicializada) return;
       CLOUD.connected = true;
       clearTimeout(CLOUD.syncTimer);
       CLOUD.syncTimer = setTimeout(() => { pushNuvem({ silencioso: true }); }, 1000);
@@ -2510,11 +2579,22 @@
       const id = getBlobId();
       if (!id) {
         atualizarStatusNuvemUI();
+        await migrarUsuarios();
+        CLOUD.inicializada = true;
         return;
       }
       CLOUD.connected = true;
       atualizarStatusNuvemUI();
-      await pullNuvem({ silencioso: true });
+      const qtdLocal = { u: usuarios.length, a: alunos.length, o: ocorrencias.length };
+      const resultado = await pullNuvem({ silencioso: true, mesclar: true });
+      await migrarUsuarios();
+      CLOUD.inicializada = true;
+      if (resultado === 'merged' ||
+          usuarios.length > qtdLocal.u ||
+          alunos.length > qtdLocal.a ||
+          ocorrencias.length > qtdLocal.o) {
+        await pushNuvem({ silencioso: true });
+      }
     }
 
     document.getElementById('cloudBlobId').value = getBlobId();
@@ -2568,7 +2648,7 @@
     });
 
     try { localStorage.removeItem('acompanhaai_msal_client_id'); } catch (_) {}
-    setTimeout(() => { iniciarNuvemAutomatica(); }, 300);
+    CLOUD.initPromise = iniciarNuvemAutomatica();
 
     // ============================================================
     //  EMAILJS + OUTLOOK
@@ -3036,16 +3116,25 @@
         return;
       }
 
+      if (CLOUD.initPromise) {
+        loginError.textContent = 'Sincronizando dados da nuvem...';
+        loginError.classList.add('show');
+        try { await CLOUD.initPromise; } catch (_) {}
+        loginError.classList.remove('show');
+      }
+
       const usuarioDigitado = loginUser.value.trim().toLowerCase();
       const senhaDigitada = loginPass.value;
-      const u = await encontrarUsuario(usuarioDigitado, senhaDigitada, perfilSelecionado);
+      const u = await encontrarUsuario(usuarioDigitado, senhaDigitada, null);
 
       if (u) {
         falhasLogin = 0;
+        perfilSelecionado = u.role;
+        [...roleTabs.children].forEach(b => b.classList.toggle('active', b.dataset.role === u.role));
         loginError.classList.remove('show');
         loginUser.classList.remove('is-invalid');
         loginPass.classList.remove('is-invalid');
-        loginError.textContent = 'Usuário ou senha inválidos para este perfil';
+        loginError.textContent = 'Usuário ou senha inválidos';
         sessaoAtual = { id: u.id, role: u.role, nome: u.nome, tutor: !!u.tutor, usuario: u.usuario };
         if (u.mustChangePassword) {
           loginScreen.classList.add('hidden');
@@ -3054,10 +3143,13 @@
         }
         await entrarNoApp(sessaoAtual);
       } else {
+        const existeLogin = usuarios.some(x => x.usuario === usuarioDigitado);
         const bloqueou = registrarFalhaLogin();
         loginError.textContent = bloqueou
           ? 'Muitas tentativas. Aguarde 30s e tente novamente.'
-          : 'Usuário ou senha inválidos para este perfil';
+          : (existeLogin
+            ? 'Senha incorreta para este usuário'
+            : 'Usuário não encontrado. Se acabou de cadastrar, use o computador em que o cadastro foi feito ou importe o backup JSON.');
         loginError.classList.add('show');
         loginUser.classList.add('is-invalid');
         loginPass.classList.add('is-invalid');
@@ -3112,7 +3204,7 @@
       loginScreen.classList.add('hidden');
       appWrap.classList.remove('hidden');
       if (getBlobId()) {
-        await pullNuvem({ silencioso: true });
+        await pullNuvem({ silencioso: true, mesclar: true });
       }
       preencherSelectTutores();
       limparSelecaoAluno();
@@ -3125,8 +3217,6 @@
         atualizarStatusEmailUI();
       }
     }
-
-    void migrarUsuarios();
 
     // ============================================================
     //  ADMIN TABS
