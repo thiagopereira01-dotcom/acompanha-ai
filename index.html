@@ -1920,6 +1920,7 @@
             <li>Clique em <strong>Criar nuvem</strong> e copie o código.</li>
             <li>No arquivo <code>index.html</code>, cole o código em <code>CLOUD_BLOB_ID_FIXO</code> (perto do topo do JavaScript).</li>
             <li>Publique de novo no Render. Pronto: todos os PCs usam a mesma base automaticamente.</li>
+            <li>A sincronização <strong>só une</strong> dados (nunca apaga cadastros). Faça backup JSON com frequência.</li>
           </ol>
 
           <div class="manage-actions" style="margin-bottom:16px;">
@@ -2146,6 +2147,7 @@
     ];
 
     let usuarios = carregarJSON(STORE_KEYS.usuarios, USUARIOS_PADRAO);
+    if (!usuarios.length) usuarios = [...USUARIOS_PADRAO];
     let alunos = carregarJSON(STORE_KEYS.alunos, []);
     let ocorrencias = carregarJSON(STORE_KEYS.ocorrencias, []);
     let sessaoAtual = null;
@@ -2245,6 +2247,7 @@
       u.senhasAnteriores = hist.slice(-3);
       u.mustChangePassword = false;
       u.senhaAlteradaEm = new Date().toISOString();
+      u.atualizadoEm = u.senhaAlteradaEm;
       delete u.senha;
     }
 
@@ -2311,6 +2314,100 @@
       agendarSyncNuvem();
     }
 
+    const WATERMARK_KEY = 'acompanhaai_cloud_watermark';
+
+    function contarTotais(snap) {
+      const s = snap || {};
+      return {
+        usuarios: Array.isArray(s.usuarios) ? s.usuarios.length : 0,
+        alunos: Array.isArray(s.alunos) ? s.alunos.length : 0,
+        ocorrencias: Array.isArray(s.ocorrencias) ? s.ocorrencias.length : 0
+      };
+    }
+
+    function totaisDiminuiram(antes, depois) {
+      return depois.usuarios < antes.usuarios ||
+        depois.alunos < antes.alunos ||
+        depois.ocorrencias < antes.ocorrencias;
+    }
+
+    function chavesPerdidas(baseArr, candidatoArr, tipo) {
+      const chaves = new Set(
+        (Array.isArray(candidatoArr) ? candidatoArr : [])
+          .map(item => chaveRegistro(item, tipo))
+          .filter(Boolean)
+      );
+      return (Array.isArray(baseArr) ? baseArr : []).some(item => {
+        const k = chaveRegistro(item, tipo);
+        return !!k && !chaves.has(k);
+      });
+    }
+
+    function snapshotPerdeuDados(base, candidato) {
+      if (!base) return false;
+      if (totaisDiminuiram(contarTotais(base), contarTotais(candidato))) return true;
+      return chavesPerdidas(base.usuarios, candidato.usuarios, 'usuarios') ||
+        chavesPerdidas(base.alunos, candidato.alunos, 'alunos') ||
+        chavesPerdidas(base.ocorrencias, candidato.ocorrencias, 'ocorrencias');
+    }
+
+    function lerMarcaDagua() {
+      try {
+        const w = JSON.parse(localStorage.getItem(WATERMARK_KEY) || 'null');
+        if (!w || typeof w !== 'object') return { usuarios: 0, alunos: 0, ocorrencias: 0 };
+        return {
+          usuarios: Number(w.usuarios) || 0,
+          alunos: Number(w.alunos) || 0,
+          ocorrencias: Number(w.ocorrencias) || 0
+        };
+      } catch {
+        return { usuarios: 0, alunos: 0, ocorrencias: 0 };
+      }
+    }
+
+    function atualizarMarcaDagua(snap) {
+      const t = contarTotais(snap);
+      const w = lerMarcaDagua();
+      const next = {
+        usuarios: Math.max(w.usuarios, t.usuarios),
+        alunos: Math.max(w.alunos, t.alunos),
+        ocorrencias: Math.max(w.ocorrencias, t.ocorrencias)
+      };
+      localStorage.setItem(WATERMARK_KEY, JSON.stringify(next));
+      return next;
+    }
+
+    function abaixoDaMarcaDagua(snap) {
+      const t = contarTotais(snap);
+      const w = lerMarcaDagua();
+      return t.usuarios < w.usuarios || t.alunos < w.alunos || t.ocorrencias < w.ocorrencias;
+    }
+
+    function snapshotAssinatura(snap) {
+      if (!snap || typeof snap !== 'object') return '';
+      const t = contarTotais(snap);
+      return [
+        snap.atualizadoEm || '',
+        t.usuarios,
+        t.alunos,
+        t.ocorrencias
+      ].join('|');
+    }
+
+    function garantirIntegridadeDados() {
+      if (!Array.isArray(usuarios) || !usuarios.length) {
+        usuarios = [...USUARIOS_PADRAO];
+      } else if (!usuarios.some(u => u.role === 'admin')) {
+        usuarios.unshift({ ...USUARIOS_PADRAO[0], id: uid('u') });
+      }
+      if (!Array.isArray(alunos)) alunos = [];
+      if (!Array.isArray(ocorrencias)) ocorrencias = [];
+      localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
+      localStorage.setItem(STORE_KEYS.alunos, JSON.stringify(alunos));
+      localStorage.setItem(STORE_KEYS.ocorrencias, JSON.stringify(ocorrencias));
+      atualizarMarcaDagua({ usuarios, alunos, ocorrencias });
+    }
+
     function montarSnapshot() {
       return {
         versao: 1,
@@ -2321,14 +2418,30 @@
       };
     }
 
+    function tocarRegistro(item) {
+      if (item && typeof item === 'object') {
+        item.atualizadoEm = new Date().toISOString();
+      }
+      return item;
+    }
+
     function marcaTempo(item) {
-      return String(item && (item.atualizadoEm || item.senhaAlteradaEm || item.dataISO || '') || '');
+      return String(item && (item.atualizadoEm || item.senhaAlteradaEm || item.dataISO || item.data || '') || '');
+    }
+
+    function valorPreenchido(v) {
+      return !(v === '' || v === null || v === undefined || (Array.isArray(v) && !v.length));
+    }
+
+    function contarCampos(item) {
+      if (!item || typeof item !== 'object') return 0;
+      return Object.values(item).filter(valorPreenchido).length;
     }
 
     function chaveRegistro(item, tipo) {
       if (!item || typeof item !== 'object') return '';
       if (tipo === 'usuarios') return String(item.usuario || '').toLowerCase() || item.id || '';
-      if (tipo === 'alunos') return String(item.ra || '').trim() || item.id || '';
+      if (tipo === 'alunos') return String(item.ra || '').trim().toLowerCase() || item.id || '';
       return item.protocolo || item.id || '';
     }
 
@@ -2343,18 +2456,44 @@
       return s;
     }
 
-    function escolherRegistro(atual, novo, tipo) {
-      if (!atual) return novo;
-      if (!novo) return atual;
-      if (tipo === 'usuarios') {
-        const pa = pontuarUsuario(atual);
-        const pb = pontuarUsuario(novo);
-        if (pb !== pa) return pb > pa ? novo : atual;
+    function unirCamposRegistro(a, b, prefer) {
+      const other = prefer === a ? b : a;
+      const out = { ...other, ...prefer };
+      for (const [k, v] of Object.entries(other)) {
+        if (!valorPreenchido(out[k]) && valorPreenchido(v)) out[k] = v;
       }
-      const ta = marcaTempo(atual);
-      const tb = marcaTempo(novo);
-      if (tb && ta && tb !== ta) return tb > ta ? novo : atual;
-      return novo;
+      if (tipoSenhasMelhor(other, prefer)) {
+        if (other.salt) out.salt = other.salt;
+        if (other.senhaHash) out.senhaHash = other.senhaHash;
+        if (other.senhasAnteriores) out.senhasAnteriores = other.senhasAnteriores;
+        if (typeof other.mustChangePassword === 'boolean') out.mustChangePassword = other.mustChangePassword;
+        if (other.senhaAlteradaEm) out.senhaAlteradaEm = other.senhaAlteradaEm;
+      }
+      return out;
+    }
+
+    function tipoSenhasMelhor(candidato, atual) {
+      return pontuarUsuario(candidato) > pontuarUsuario(atual);
+    }
+
+    function escolherRegistro(local, remoto, tipo) {
+      if (!local) return remoto;
+      if (!remoto) return local;
+      const tl = marcaTempo(local);
+      const tr = marcaTempo(remoto);
+      let prefer = local;
+      if (tl && tr && tl !== tr) {
+        prefer = tr > tl ? remoto : local;
+      } else if (tipo === 'usuarios') {
+        const pl = pontuarUsuario(local);
+        const pr = pontuarUsuario(remoto);
+        if (pr !== pl) prefer = pr > pl ? remoto : local;
+      } else {
+        const cl = contarCampos(local);
+        const cr = contarCampos(remoto);
+        if (cr !== cl) prefer = cr > cl ? remoto : local;
+      }
+      return unirCamposRegistro(local, remoto, prefer);
     }
 
     function mesclarListas(localArr, remotoArr, tipo) {
@@ -2362,28 +2501,56 @@
       const incluir = (item) => {
         const k = chaveRegistro(item, tipo);
         if (!k) return;
-        map.set(k, escolherRegistro(map.get(k), item, tipo));
+        const existente = map.get(k);
+        map.set(k, existente ? escolherRegistro(existente, item, tipo) : item);
       };
       (Array.isArray(localArr) ? localArr : []).forEach(incluir);
       (Array.isArray(remotoArr) ? remotoArr : []).forEach(incluir);
       return [...map.values()];
     }
 
+    function mesclarSnapshots(localSnap, remotoSnap) {
+      const local = localSnap || {};
+      const remoto = remotoSnap || {};
+      return {
+        versao: 1,
+        atualizadoEm: new Date().toISOString(),
+        usuarios: mesclarListas(local.usuarios || usuarios, remoto.usuarios, 'usuarios'),
+        alunos: mesclarListas(local.alunos || alunos, remoto.alunos, 'alunos'),
+        ocorrencias: mesclarListas(local.ocorrencias || ocorrencias, remoto.ocorrencias, 'ocorrencias')
+      };
+    }
+
     function aplicarSnapshot(data, origem, opts = {}) {
       if (!data || typeof data !== 'object') throw new Error('Arquivo inválido');
-      const mesclar = !!opts.mesclar;
+      // Por padrão sempre mescla — nunca substitui e apaga dados locais.
+      // Só permite substituição total com opts.substituir === true (uso interno após merge).
+      const substituir = opts.substituir === true;
+      const mesclar = !substituir && opts.mesclar !== false;
+      const antes = montarSnapshot();
+
       if (Array.isArray(data.usuarios)) {
-        usuarios = mesclar ? mesclarListas(usuarios, data.usuarios, 'usuarios') : data.usuarios;
+        usuarios = mesclar ? mesclarListas(usuarios, data.usuarios, 'usuarios')
+          : (substituir ? data.usuarios : usuarios);
       }
       if (Array.isArray(data.alunos)) {
-        alunos = mesclar ? mesclarListas(alunos, data.alunos, 'alunos') : data.alunos;
+        alunos = mesclar ? mesclarListas(alunos, data.alunos, 'alunos')
+          : (substituir ? data.alunos : alunos);
       }
       if (Array.isArray(data.ocorrencias)) {
-        ocorrencias = mesclar ? mesclarListas(ocorrencias, data.ocorrencias, 'ocorrencias') : data.ocorrencias;
+        ocorrencias = mesclar ? mesclarListas(ocorrencias, data.ocorrencias, 'ocorrencias')
+          : (substituir ? data.ocorrencias : ocorrencias);
       }
-      localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
-      localStorage.setItem(STORE_KEYS.alunos, JSON.stringify(alunos));
-      localStorage.setItem(STORE_KEYS.ocorrencias, JSON.stringify(ocorrencias));
+
+      // Se uma substituição faria perder registros, força mescla com o estado anterior.
+      if (substituir && snapshotPerdeuDados(antes, montarSnapshot())) {
+        const recuperado = mesclarSnapshots(antes, data);
+        usuarios = recuperado.usuarios;
+        alunos = recuperado.alunos;
+        ocorrencias = recuperado.ocorrencias;
+      }
+
+      garantirIntegridadeDados();
       if (sessaoAtual && sessaoAtual.role === 'admin') {
         renderizarListaUsuarios();
         renderizarListaAlunos();
@@ -2413,7 +2580,9 @@
       syncTimer: null,
       connected: false,
       inicializada: false,
-      initPromise: null
+      initPromise: null,
+      syncLock: null,
+      syncNeeded: false
     };
 
     function getBlobId() {
@@ -2449,68 +2618,177 @@
       return parts[parts.length - 1].trim();
     }
 
+    async function baixarSnapshotNuvem(blobId) {
+      const res = await fetch(CLOUD.api + '/' + encodeURIComponent(blobId), {
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }
+
+    async function enviarSnapshotNuvem(blobId, snapshot, opts = {}) {
+      if (!opts.silencioso) setCloudStatus('syncing', 'Enviando para a nuvem...');
+      const res = await fetch(CLOUD.api + '/' + encodeURIComponent(blobId), {
+        method: 'PUT',
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(snapshot)
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      CLOUD.connected = true;
+      setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Sincronizado · ') + blobId.slice(0, 8) + '…');
+      return true;
+    }
+
+    function podeEnviarSnapshot(localAntes, remoto, snapshotFinal) {
+      if (remoto && snapshotPerdeuDados(remoto, snapshotFinal)) {
+        setCloudStatus('err', 'Envio bloqueado: evita sobrescrever dados da nuvem');
+        return false;
+      }
+      if (snapshotPerdeuDados(localAntes, snapshotFinal)) {
+        setCloudStatus('err', 'Envio bloqueado: evita perder dados locais');
+        return false;
+      }
+      if (abaixoDaMarcaDagua(snapshotFinal)) {
+        setCloudStatus('err', 'Envio bloqueado: protege histórico local');
+        return false;
+      }
+      return true;
+    }
+
+    async function syncNuvem(opts = {}) {
+      const blobId = getBlobId();
+      if (!blobId) {
+        if (!opts.silencioso) setCloudStatus('err', 'Nuvem ainda não configurada');
+        return false;
+      }
+      if (CLOUD.syncLock) {
+        CLOUD.syncNeeded = true;
+        return CLOUD.syncLock;
+      }
+
+      CLOUD.syncLock = (async () => {
+        let sucesso = false;
+        do {
+          CLOUD.syncNeeded = false;
+          if (!opts.silencioso) setCloudStatus('syncing', 'Sincronizando com a nuvem...');
+
+          let enviou = false;
+          for (let tentativa = 1; tentativa <= 5; tentativa++) {
+            const localAntes = montarSnapshot();
+            let remoto = null;
+            try {
+              remoto = await baixarSnapshotNuvem(blobId);
+            } catch (e) {
+              if (!opts.silencioso) setCloudStatus('err', 'Falha ao baixar: ' + (e.message || e));
+              if (!opts.allowPushOnPullFail) {
+                if (!opts.silencioso) mostrarToast('Falha ao sincronizar na nuvem', 'error');
+                return false;
+              }
+            }
+
+            if (remoto) {
+              atualizarMarcaDagua(remoto);
+              const mesclado = mesclarSnapshots(localAntes, remoto);
+              aplicarSnapshot(mesclado, 'nuvem', { silencioso: true, substituir: true });
+              garantirIntegridadeDados();
+              if (!nuvemFixaAtiva()) setBlobId(blobId);
+            }
+
+            let snapshotFinal = montarSnapshot();
+            atualizarMarcaDagua(snapshotFinal);
+            if (!podeEnviarSnapshot(localAntes, remoto, snapshotFinal)) {
+              if (!opts.silencioso) {
+                mostrarToast('Envio bloqueado para não apagar informações.', 'error');
+              }
+              return false;
+            }
+
+            // Releia imediatamente antes do PUT — evita corrida entre dois PCs.
+            let remotoFresh = null;
+            try {
+              remotoFresh = await baixarSnapshotNuvem(blobId);
+            } catch (e) {
+              if (!opts.allowPushOnPullFail) {
+                if (!opts.silencioso) setCloudStatus('err', 'Falha ao confirmar nuvem: ' + (e.message || e));
+                return false;
+              }
+            }
+
+            if (remotoFresh && snapshotAssinatura(remotoFresh) !== snapshotAssinatura(remoto)) {
+              // Outro cliente gravou no meio do caminho: mescla de novo e tenta outra vez.
+              continue;
+            }
+
+            if (remotoFresh) {
+              const remescla = mesclarSnapshots(snapshotFinal, remotoFresh);
+              if (snapshotPerdeuDados(remotoFresh, remescla) || snapshotPerdeuDados(snapshotFinal, remescla)) {
+                continue;
+              }
+              aplicarSnapshot(remescla, 'nuvem', { silencioso: true, substituir: true });
+              garantirIntegridadeDados();
+              snapshotFinal = montarSnapshot();
+              if (!podeEnviarSnapshot(localAntes, remotoFresh, snapshotFinal)) {
+                if (!opts.silencioso) {
+                  mostrarToast('Envio bloqueado para não apagar informações.', 'error');
+                }
+                return false;
+              }
+            }
+
+            try {
+              await enviarSnapshotNuvem(blobId, snapshotFinal, opts);
+              atualizarMarcaDagua(snapshotFinal);
+              enviou = true;
+              sucesso = true;
+              break;
+            } catch (e) {
+              if (tentativa >= 5) {
+                setCloudStatus('err', 'Falha ao enviar: ' + (e.message || e));
+                if (!opts.silencioso) mostrarToast('Falha ao sincronizar na nuvem', 'error');
+                return false;
+              }
+            }
+          }
+
+          if (!enviou && !sucesso) {
+            setCloudStatus('err', 'Não foi possível sincronizar sem risco de perda');
+            if (!opts.silencioso) mostrarToast('Sincronização adiada para proteger os dados', 'error');
+            return false;
+          }
+        } while (CLOUD.syncNeeded);
+
+        return sucesso;
+      })();
+
+      try {
+        return await CLOUD.syncLock;
+      } finally {
+        CLOUD.syncLock = null;
+        if (CLOUD.syncNeeded) {
+          CLOUD.syncNeeded = false;
+          agendarSyncNuvem();
+        }
+      }
+    }
+
+    async function pullNuvem(opts = {}) {
+      // Baixar sempre mescla; nunca substitui os dados locais.
+      return syncNuvem({ ...opts, silencioso: !!opts.silencioso });
+    }
+
     async function pushNuvem(opts = {}) {
       const blobId = getBlobId();
       if (!blobId) {
         if (!opts.silencioso) setCloudStatus('err', 'Crie a nuvem e fixe o código no sistema');
         return false;
       }
-      if (!opts.silencioso) setCloudStatus('syncing', 'Enviando para a nuvem...');
-      try {
-        const res = await fetch(CLOUD.api + '/' + encodeURIComponent(blobId), {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(montarSnapshot())
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        CLOUD.connected = true;
-        setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Sincronizado · ') + blobId.slice(0, 8) + '…');
-        return true;
-      } catch (e) {
-        setCloudStatus('err', 'Falha ao enviar: ' + (e.message || e));
-        if (!opts.silencioso) mostrarToast('Falha ao sincronizar na nuvem', 'error');
-        return false;
-      }
-    }
-
-    async function pullNuvem(opts = {}) {
-      const blobId = getBlobId();
-      if (!blobId) {
-        if (!opts.silencioso) setCloudStatus('err', 'Nuvem ainda não configurada');
-        return false;
-      }
-      if (!opts.silencioso) setCloudStatus('syncing', 'Baixando da nuvem...');
-      try {
-        const res = await fetch(CLOUD.api + '/' + encodeURIComponent(blobId), {
-          headers: { 'Accept': 'application/json' }
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const remotoUsuarios = Array.isArray(data.usuarios) ? data.usuarios.length : 0;
-        const remotoAlunos = Array.isArray(data.alunos) ? data.alunos.length : 0;
-        const remotoOcorrencias = Array.isArray(data.ocorrencias) ? data.ocorrencias.length : 0;
-        aplicarSnapshot(data, 'nuvem', {
-          silencioso: !!opts.silencioso,
-          mesclar: opts.mesclar !== false
-        });
-        if (!nuvemFixaAtiva()) setBlobId(blobId);
-        CLOUD.connected = true;
-        setCloudStatus('on', (nuvemFixaAtiva() ? 'Nuvem fixa ativa · ' : 'Conectado · ') + blobId.slice(0, 8) + '…');
-        const localMaior = usuarios.length > remotoUsuarios ||
-          alunos.length > remotoAlunos ||
-          ocorrencias.length > remotoOcorrencias;
-        if (localMaior && CLOUD.inicializada) {
-          await pushNuvem({ silencioso: true });
-        }
-        return localMaior ? 'merged' : true;
-      } catch (e) {
-        setCloudStatus('err', 'Falha ao baixar: ' + (e.message || e));
-        if (!opts.silencioso) mostrarToast('Falha ao baixar da nuvem', 'error');
-        return false;
-      }
+      return syncNuvem(opts);
     }
 
     async function criarNuvem() {
@@ -2540,6 +2818,7 @@
         if (!id) throw new Error('Não foi possível obter o código da nuvem');
         setBlobId(id);
         CLOUD.connected = true;
+        atualizarMarcaDagua(montarSnapshot());
         setCloudStatus('on', 'Código gerado · cole em CLOUD_BLOB_ID_FIXO e publique');
         mostrarToast('Código gerado! Cole em CLOUD_BLOB_ID_FIXO no index.html e publique.');
         return true;
@@ -2553,8 +2832,12 @@
     function agendarSyncNuvem() {
       if (!getBlobId() || !CLOUD.inicializada) return;
       CLOUD.connected = true;
+      if (CLOUD.syncLock) {
+        CLOUD.syncNeeded = true;
+        return;
+      }
       clearTimeout(CLOUD.syncTimer);
-      CLOUD.syncTimer = setTimeout(() => { pushNuvem({ silencioso: true }); }, 1000);
+      CLOUD.syncTimer = setTimeout(() => { syncNuvem({ silencioso: true }); }, 1000);
     }
 
     function atualizarStatusNuvemUI() {
@@ -2577,6 +2860,7 @@
 
     async function iniciarNuvemAutomatica() {
       const id = getBlobId();
+      atualizarMarcaDagua({ usuarios, alunos, ocorrencias });
       if (!id) {
         atualizarStatusNuvemUI();
         await migrarUsuarios();
@@ -2585,16 +2869,9 @@
       }
       CLOUD.connected = true;
       atualizarStatusNuvemUI();
-      const qtdLocal = { u: usuarios.length, a: alunos.length, o: ocorrencias.length };
-      const resultado = await pullNuvem({ silencioso: true, mesclar: true });
+      await syncNuvem({ silencioso: true });
       await migrarUsuarios();
       CLOUD.inicializada = true;
-      if (resultado === 'merged' ||
-          usuarios.length > qtdLocal.u ||
-          alunos.length > qtdLocal.a ||
-          ocorrencias.length > qtdLocal.o) {
-        await pushNuvem({ silencioso: true });
-      }
     }
 
     document.getElementById('cloudBlobId').value = getBlobId();
@@ -2604,8 +2881,8 @@
     document.getElementById('btnCloudPull').addEventListener('click', () => pullNuvem());
     document.getElementById('btnCloudPush').addEventListener('click', async () => {
       if (!getBlobId()) { mostrarToast('Crie a nuvem e fixe o código antes', 'error'); return; }
-      const ok = await pushNuvem();
-      if (ok) mostrarToast('Dados enviados!');
+      const ok = await syncNuvem();
+      if (ok) mostrarToast('Dados sincronizados!');
     });
     document.getElementById('btnCloudCopy').addEventListener('click', async () => {
       const id = getBlobId();
@@ -2635,11 +2912,11 @@
       if (!file) return;
       try {
         const data = JSON.parse(await file.text());
-        if (!confirm('Importar este JSON substitui os dados atuais. Continuar?')) {
+        if (!confirm('Importar este JSON e mesclar com os dados atuais. Continuar?')) {
           e.target.value = '';
           return;
         }
-        aplicarSnapshot(data, 'JSON');
+        aplicarSnapshot(data, 'JSON', { mesclar: true });
         agendarSyncNuvem();
       } catch {
         mostrarToast('JSON inválido', 'error');
@@ -3204,7 +3481,7 @@
       loginScreen.classList.add('hidden');
       appWrap.classList.remove('hidden');
       if (getBlobId()) {
-        await pullNuvem({ silencioso: true, mesclar: true });
+        await syncNuvem({ silencioso: true });
       }
       preencherSelectTutores();
       limparSelecaoAluno();
@@ -3292,7 +3569,7 @@
       };
       await definirSenhaUsuario(novo, senha);
       novo.mustChangePassword = true;
-      usuarios.push(novo);
+      usuarios.push(tocarRegistro(novo));
       salvarUsuarios();
       formUsuario.reset();
       renderizarListaUsuarios();
@@ -3497,9 +3774,9 @@
         return;
       }
 
-      alunos.push({
+      alunos.push(tocarRegistro({
         id: uid('a'), nome, ra, turma, responsavel, celular, email, tutorId
-      });
+      }));
       salvarAlunos();
       formAluno.reset();
       renderizarListaAlunos();
@@ -3602,7 +3879,7 @@
           if (tutor) tutorId = tutor.id;
         }
 
-        alunos.push({
+        alunos.push(tocarRegistro({
           id: uid('a'),
           nome,
           ra,
@@ -3611,7 +3888,7 @@
           celular: iCel >= 0 ? (cols[iCel] || '').trim() : '',
           email: iEmail >= 0 ? (cols[iEmail] || '').trim() : '',
           tutorId
-        });
+        }));
         ok++;
       }
       if (ok) salvarAlunos();
@@ -4210,7 +4487,7 @@
       return ocorrencias;
     }
     function salvarOcorrencia(oc) {
-      ocorrencias.unshift(oc);
+      ocorrencias.unshift(tocarRegistro(oc));
       salvarOcorrenciasStore();
     }
 
