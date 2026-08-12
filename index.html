@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Manrope:wght@500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 
 <style>
@@ -1727,7 +1728,7 @@
           <button type="button" class="admin-tab active" data-panel="relatorio">Relatório</button>
           <button type="button" class="admin-tab" data-panel="usuarios">Usuários</button>
           <button type="button" class="admin-tab" data-panel="alunos">Alunos</button>
-          <button type="button" class="admin-tab" data-panel="nuvem">Nuvem</button>
+          <button type="button" class="admin-tab" data-panel="nuvem">Backup</button>
           <button type="button" class="admin-tab" data-panel="email">E-mail</button>
         </div>
 
@@ -1897,42 +1898,52 @@
           <div class="lista-cadastro" id="listaAlunos"></div>
         </div>
 
-        <!-- Nuvem / Backup -->
+        <!-- Backup / Google Drive -->
         <div class="admin-panel" id="panelNuvem">
           <div class="section-label" style="margin-bottom:14px;padding-bottom:10px;">
-            <h2 style="font-size:1.05rem;">Nuvem gratuita</h2>
+            <h2 style="font-size:1.05rem;">Google Drive</h2>
           </div>
           <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
-            Configure a nuvem <strong>uma única vez</strong>. Depois de fixar o código no sistema e publicar no Render, professores e demais PCs sincronizam sozinhos — sem entrar como admin em cada máquina.
+            Salve o banco do Acompanha-Aí na sua conta Google (Drive). O navegador continua sendo o uso diário;
+            o Drive serve de <strong>backup compartilhado</strong> — só quando você clicar em salvar ou carregar.
           </p>
 
-          <div class="cloud-status" id="cloudStatus">
+          <div class="cloud-status" id="gdriveStatus">
             <span class="cloud-dot"></span>
-            <span id="cloudStatusText">Nuvem não configurada</span>
-          </div>
-
-          <div class="form-group">
-            <label for="cloudBlobId">Código da nuvem</label>
-            <input type="text" id="cloudBlobId" placeholder="Gerado ao criar a nuvem" autocomplete="off">
+            <span id="gdriveStatusText">Google Drive não configurado</span>
           </div>
 
           <ol class="cloud-steps">
-            <li><strong>Os dados ficam salvos neste navegador</strong> (não somem ao fechar a aba).</li>
-            <li>Para copiar para outro PC: use <strong>Exportar JSON</strong> aqui e <strong>Importar JSON</strong> no outro.</li>
-            <li>A nuvem é <strong>opcional e só manual</strong> — o sistema não envia nada sozinho (isso evitava apagar cadastros).</li>
-            <li>Se for usar nuvem: clique em <strong>Baixar</strong> ou <strong>Enviar</strong> conscientemente e confirme os totais.</li>
+            <li>Acesse <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a> → crie um projeto.</li>
+            <li>Ative a API <strong>Google Drive API</strong>.</li>
+            <li>Credenciais → <strong>ID do cliente OAuth</strong> → tipo <strong>Aplicativo da Web</strong>.</li>
+            <li>Em origens JavaScript autorizadas, inclua a URL do site (ex.: <code>https://seu-app.onrender.com</code>) e <code>http://localhost</code> se testar local.</li>
+            <li>Cole o Client ID abaixo, conecte a conta da escola e use <strong>Salvar no Drive</strong> / <strong>Carregar do Drive</strong>.</li>
           </ol>
 
-          <div class="manage-actions" style="margin-bottom:16px;">
-            <button type="button" class="btn-primary-sm" id="btnCloudCreate">Criar nuvem</button>
-            <button type="button" class="btn-ghost-sm" id="btnCloudCopy">Copiar código</button>
-            <button type="button" class="btn-ghost-sm" id="btnCloudPull">Baixar da nuvem</button>
-            <button type="button" class="btn-ghost-sm" id="btnCloudPush">Publicar na nuvem</button>
+          <div class="manage-form" style="margin-bottom:12px;">
+            <div class="form-group span-2">
+              <label for="gdriveClientId">Google OAuth Client ID</label>
+              <input type="text" id="gdriveClientId" placeholder="xxxxx.apps.googleusercontent.com" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="manage-actions" style="margin-bottom:16px;flex-wrap:wrap;">
+            <button type="button" class="btn-primary-sm" id="btnGdriveSaveCfg">Salvar Client ID</button>
+            <button type="button" class="btn-ghost-sm" id="btnGdriveConnect">Conectar Google</button>
+            <button type="button" class="btn-ghost-sm" id="btnGdriveUpload">Salvar no Drive</button>
+            <button type="button" class="btn-ghost-sm" id="btnGdriveDownload">Carregar do Drive</button>
+            <button type="button" class="btn-ghost-sm" id="btnGdriveDisconnect">Desconectar</button>
+          </div>
+
+          <div class="csv-box" style="margin-bottom:16px;">
+            <strong style="font-size:.85rem;">Arquivo no Drive</strong>
+            <p id="gdriveFileInfo">Ainda sem arquivo. Ao salvar, cria <code>acompanha-ai-dados.json</code> no Drive da conta conectada.</p>
           </div>
 
           <div class="csv-box">
-            <strong style="font-size:.85rem;">Backup em arquivo</strong>
-            <p>Exporte ou importe um JSON com todos os dados — cópia de segurança local.</p>
+            <strong style="font-size:.85rem;">Backup em arquivo (sem Google)</strong>
+            <p>Exporte ou importe um JSON — funciona offline e em qualquer PC.</p>
             <div class="manage-actions">
               <button type="button" class="btn-ghost-sm" id="btnExportJson">Exportar JSON</button>
               <label class="btn-primary-sm" style="cursor:pointer;display:inline-flex;align-items:center;">
@@ -1941,6 +1952,26 @@
               </label>
             </div>
           </div>
+
+          <details style="margin-top:18px;">
+            <summary style="cursor:pointer;font-size:.85rem;font-weight:600;color:var(--ink-soft);">Opção antiga (JSONBlob — não recomendada)</summary>
+            <div style="margin-top:12px;">
+              <div class="cloud-status" id="cloudStatus">
+                <span class="cloud-dot"></span>
+                <span id="cloudStatusText">Nuvem JSONBlob desativada por padrão</span>
+              </div>
+              <div class="form-group" style="margin-top:10px;">
+                <label for="cloudBlobId">Código da nuvem</label>
+                <input type="text" id="cloudBlobId" placeholder="Somente se ainda usar JSONBlob" autocomplete="off">
+              </div>
+              <div class="manage-actions" style="margin-top:10px;">
+                <button type="button" class="btn-ghost-sm" id="btnCloudCreate">Criar nuvem</button>
+                <button type="button" class="btn-ghost-sm" id="btnCloudCopy">Copiar código</button>
+                <button type="button" class="btn-ghost-sm" id="btnCloudPull">Baixar</button>
+                <button type="button" class="btn-ghost-sm" id="btnCloudPush">Publicar</button>
+              </div>
+            </div>
+          </details>
         </div>
 
         <!-- E-mail / EmailJS -->
@@ -3043,6 +3074,340 @@
 
     try { localStorage.removeItem('acompanhaai_msal_client_id'); } catch (_) {}
     CLOUD.initPromise = iniciarNuvemAutomatica();
+
+    // ============================================================
+    //  GOOGLE DRIVE (backup manual)
+    // ============================================================
+    // Cole o Client ID abaixo (opcional) ou no painel Backup.
+    const GDRIVE_CLIENT_ID_FIXO = '';
+    const GDRIVE_FILE_ID_FIXO = '';
+    const GDRIVE_FILE_NAME = 'acompanha-ai-dados.json';
+
+    const GDRIVE = {
+      clientIdKey: 'acompanhaai_gdrive_client_id',
+      fileIdKey: 'acompanhaai_gdrive_file_id',
+      scope: 'https://www.googleapis.com/auth/drive.file',
+      token: null,
+      tokenClient: null,
+      email: ''
+    };
+
+    function getGdriveClientId() {
+      return (GDRIVE_CLIENT_ID_FIXO || localStorage.getItem(GDRIVE.clientIdKey) ||
+        (document.getElementById('gdriveClientId') && document.getElementById('gdriveClientId').value) ||
+        '').trim();
+    }
+
+    function getGdriveFileId() {
+      return (GDRIVE_FILE_ID_FIXO || localStorage.getItem(GDRIVE.fileIdKey) || '').trim();
+    }
+
+    function setGdriveFileId(id) {
+      if (id) localStorage.setItem(GDRIVE.fileIdKey, id);
+      else localStorage.removeItem(GDRIVE.fileIdKey);
+      atualizarGdriveUI();
+    }
+
+    function setGdriveStatus(estado, texto) {
+      const box = document.getElementById('gdriveStatus');
+      const txt = document.getElementById('gdriveStatusText');
+      if (!box || !txt) return;
+      box.className = 'cloud-status' + (estado ? ' ' + estado : '');
+      txt.textContent = texto;
+    }
+
+    function atualizarGdriveUI() {
+      const input = document.getElementById('gdriveClientId');
+      const cid = getGdriveClientId();
+      if (input) {
+        input.value = cid;
+        input.readOnly = !!(GDRIVE_CLIENT_ID_FIXO || '').trim();
+      }
+      const info = document.getElementById('gdriveFileInfo');
+      const fid = getGdriveFileId();
+      if (info) {
+        info.innerHTML = fid
+          ? 'Arquivo vinculado: <code>' + GDRIVE_FILE_NAME + '</code> · id <code>' + fid.slice(0, 12) + '…</code>'
+          : 'Ainda sem arquivo. Ao salvar, cria <code>' + GDRIVE_FILE_NAME + '</code> no Drive da conta conectada.';
+      }
+      if (GDRIVE.token) {
+        setGdriveStatus('on', 'Conectado' + (GDRIVE.email ? ' · ' + GDRIVE.email : '') + ' · use Salvar/Carregar');
+      } else if (cid) {
+        setGdriveStatus('', 'Client ID ok · clique em Conectar Google');
+      } else {
+        setGdriveStatus('', 'Google Drive não configurado');
+      }
+    }
+
+    function aguardarGis(timeoutMs) {
+      const limite = Date.now() + (timeoutMs || 8000);
+      return new Promise((resolve, reject) => {
+        (function tick() {
+          if (window.google && google.accounts && google.accounts.oauth2) return resolve();
+          if (Date.now() > limite) return reject(new Error('Google Identity não carregou'));
+          setTimeout(tick, 100);
+        })();
+      });
+    }
+
+    async function garantirGdriveToken(opts) {
+      const forcar = !!(opts && opts.forcar);
+      if (GDRIVE.token && !forcar) return GDRIVE.token;
+      const clientId = getGdriveClientId();
+      if (!clientId) throw new Error('Informe o Google OAuth Client ID');
+      await aguardarGis();
+
+      return new Promise((resolve, reject) => {
+        try {
+          GDRIVE.tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: GDRIVE.scope,
+            callback: (resp) => {
+              if (resp.error) {
+                reject(new Error(resp.error_description || resp.error));
+                return;
+              }
+              GDRIVE.token = resp.access_token;
+              atualizarGdriveUI();
+              void carregarEmailGoogle().then(atualizarGdriveUI);
+              resolve(GDRIVE.token);
+            },
+            error_callback: (err) => {
+              reject(new Error((err && (err.message || err.type)) || 'Falha na autenticação Google'));
+            }
+          });
+          GDRIVE.tokenClient.requestAccessToken({ prompt: forcar || !GDRIVE.token ? 'consent' : '' });
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }
+
+    async function carregarEmailGoogle() {
+      if (!GDRIVE.token) return;
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: 'Bearer ' + GDRIVE.token }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        GDRIVE.email = data.email || '';
+      } catch (_) {}
+    }
+
+    async function gdriveFetch(url, init) {
+      const token = await garantirGdriveToken();
+      const headers = Object.assign({}, (init && init.headers) || {}, {
+        Authorization: 'Bearer ' + token
+      });
+      const res = await fetch(url, Object.assign({}, init, { headers }));
+      if (res.status === 401) {
+        GDRIVE.token = null;
+        const token2 = await garantirGdriveToken({ forcar: true });
+        headers.Authorization = 'Bearer ' + token2;
+        return fetch(url, Object.assign({}, init, { headers }));
+      }
+      return res;
+    }
+
+    async function gdriveBuscarArquivo() {
+      let id = getGdriveFileId();
+      if (id) return id;
+      const q = encodeURIComponent("name = '" + GDRIVE_FILE_NAME + "' and trashed = false");
+      const res = await gdriveFetch(
+        'https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id,name,modifiedTime)&pageSize=5'
+      );
+      if (!res.ok) throw new Error('Falha ao buscar arquivo no Drive (HTTP ' + res.status + ')');
+      const data = await res.json();
+      const files = data.files || [];
+      if (!files.length) return '';
+      id = files[0].id;
+      setGdriveFileId(id);
+      return id;
+    }
+
+    async function gdriveBaixarSnapshot() {
+      const id = await gdriveBuscarArquivo();
+      if (!id) return null;
+      const res = await gdriveFetch(
+        'https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(id) + '?alt=media'
+      );
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error('Falha ao baixar do Drive (HTTP ' + res.status + ')');
+      return res.json();
+    }
+
+    async function gdriveCriarArquivo(snapshot) {
+      const meta = {
+        name: GDRIVE_FILE_NAME,
+        mimeType: 'application/json'
+      };
+      const boundary = 'acompanhaai_' + Date.now().toString(36);
+      const body =
+        '--' + boundary + '\r\n' +
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+        JSON.stringify(meta) + '\r\n' +
+        '--' + boundary + '\r\n' +
+        'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(snapshot) + '\r\n' +
+        '--' + boundary + '--';
+
+      const res = await gdriveFetch(
+        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'multipart/related; boundary=' + boundary },
+          body
+        }
+      );
+      if (!res.ok) throw new Error('Falha ao criar arquivo no Drive (HTTP ' + res.status + ')');
+      const data = await res.json();
+      setGdriveFileId(data.id);
+      return data.id;
+    }
+
+    async function gdriveAtualizarArquivo(fileId, snapshot) {
+      const res = await gdriveFetch(
+        'https://www.googleapis.com/upload/drive/v3/files/' + encodeURIComponent(fileId) + '?uploadType=media',
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(snapshot)
+        }
+      );
+      if (!res.ok) throw new Error('Falha ao atualizar arquivo no Drive (HTTP ' + res.status + ')');
+      return true;
+    }
+
+    async function gdriveSalvar() {
+      setGdriveStatus('syncing', 'Salvando no Google Drive...');
+      const localAntes = montarSnapshot();
+      if (ehSnapshotSemente(localAntes)) {
+        setGdriveStatus('err', 'Não salva base vazia/padrão no Drive');
+        mostrarToast('Cadastre dados antes de salvar no Drive', 'error');
+        return false;
+      }
+
+      let remoto = null;
+      try {
+        remoto = await gdriveBaixarSnapshot();
+      } catch (_) {
+        remoto = null;
+      }
+
+      let snapshotFinal = localAntes;
+      if (remoto) {
+        const mesclado = mesclarSnapshots(localAntes, remoto);
+        if (snapshotPerdeuDados(remoto, mesclado) || snapshotPerdeuDados(localAntes, mesclado)) {
+          setGdriveStatus('err', 'Envio bloqueado: evita perder dados');
+          mostrarToast('Não foi possível unir com o arquivo do Drive sem perda', 'error');
+          return false;
+        }
+        aplicarSnapshot(mesclado, 'Google Drive', { silencioso: true, substituir: true });
+        snapshotFinal = montarSnapshot();
+      }
+
+      if (remoto && snapshotPerdeuDados(remoto, snapshotFinal)) {
+        setGdriveStatus('err', 'Envio bloqueado: protege o arquivo do Drive');
+        mostrarToast('Envio bloqueado para não apagar o Drive', 'error');
+        return false;
+      }
+
+      let fileId = getGdriveFileId() || (remoto ? await gdriveBuscarArquivo() : '');
+      if (fileId) await gdriveAtualizarArquivo(fileId, snapshotFinal);
+      else await gdriveCriarArquivo(snapshotFinal);
+
+      CLOUD.pendenteLocal = false;
+      setGdriveStatus('on', 'Salvo no Google Drive · ' + new Date().toLocaleString('pt-BR'));
+      mostrarToast('Dados salvos no Google Drive');
+      atualizarGdriveUI();
+      return true;
+    }
+
+    async function gdriveCarregar() {
+      setGdriveStatus('syncing', 'Carregando do Google Drive...');
+      const remoto = await gdriveBaixarSnapshot();
+      if (!remoto) {
+        setGdriveStatus('err', 'Nenhum arquivo encontrado no Drive');
+        mostrarToast('Nenhum backup no Drive ainda. Use Salvar no Drive primeiro.', 'error');
+        return false;
+      }
+      const t = contarTotais(remoto);
+      if (!confirm(
+        'Carregar do Google Drive e MESCLAR com este navegador?\n\n' +
+        'No Drive: ' + t.usuarios + ' usuários, ' + t.alunos + ' alunos, ' + t.ocorrencias + ' ocorrências.\n' +
+        'Nada local será apagado — só une o que faltar.'
+      )) {
+        atualizarGdriveUI();
+        return false;
+      }
+      aplicarSnapshot(remoto, 'Google Drive', { mesclar: true });
+      setGdriveStatus('on', 'Carregado do Drive · ' + new Date().toLocaleString('pt-BR'));
+      mostrarToast('Dados do Drive mesclados neste navegador');
+      atualizarGdriveUI();
+      return true;
+    }
+
+    document.getElementById('btnGdriveSaveCfg').addEventListener('click', () => {
+      const cid = (document.getElementById('gdriveClientId').value || '').trim();
+      if (!cid) {
+        mostrarToast('Cole o Client ID do Google', 'error');
+        return;
+      }
+      localStorage.setItem(GDRIVE.clientIdKey, cid);
+      atualizarGdriveUI();
+      mostrarToast('Client ID salvo neste navegador');
+    });
+
+    document.getElementById('btnGdriveConnect').addEventListener('click', async () => {
+      try {
+        setGdriveStatus('syncing', 'Abrindo login Google...');
+        await garantirGdriveToken({ forcar: true });
+        mostrarToast('Google conectado');
+        atualizarGdriveUI();
+      } catch (e) {
+        setGdriveStatus('err', e.message || 'Falha ao conectar');
+        mostrarToast(e.message || 'Falha ao conectar Google', 'error');
+      }
+    });
+
+    document.getElementById('btnGdriveUpload').addEventListener('click', async () => {
+      try {
+        const t = contarTotais(montarSnapshot());
+        if (!confirm(
+          'Salvar neste Google Drive?\n\n' +
+          '• ' + t.usuarios + ' usuário(s)\n' +
+          '• ' + t.alunos + ' aluno(s)\n' +
+          '• ' + t.ocorrencias + ' ocorrência(s)\n\n' +
+          'Se já existir arquivo, os dados serão unidos antes de gravar.'
+        )) return;
+        await gdriveSalvar();
+      } catch (e) {
+        setGdriveStatus('err', e.message || 'Falha ao salvar');
+        mostrarToast(e.message || 'Falha ao salvar no Drive', 'error');
+      }
+    });
+
+    document.getElementById('btnGdriveDownload').addEventListener('click', async () => {
+      try {
+        await gdriveCarregar();
+      } catch (e) {
+        setGdriveStatus('err', e.message || 'Falha ao carregar');
+        mostrarToast(e.message || 'Falha ao carregar do Drive', 'error');
+      }
+    });
+
+    document.getElementById('btnGdriveDisconnect').addEventListener('click', () => {
+      if (GDRIVE.token && window.google && google.accounts && google.accounts.oauth2) {
+        try { google.accounts.oauth2.revoke(GDRIVE.token); } catch (_) {}
+      }
+      GDRIVE.token = null;
+      GDRIVE.email = '';
+      atualizarGdriveUI();
+      mostrarToast('Google desconectado');
+    });
+
+    atualizarGdriveUI();
 
     // ============================================================
     //  EMAILJS + OUTLOOK
