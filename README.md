@@ -2,56 +2,49 @@
 
 Sistema de ocorrências escolares (Verde / Amarelo / Vermelho).
 
-## Primeiro acesso (admin)
+## Papéis
 
-Em instalação nova (sem dados salvos), use:
+| Perfil | O que faz |
+|--------|-----------|
+| **Admin full** (`superadmin`) | Cadastra escolas e libera/suspende licenças |
+| **Administrador da escola** | Gestão da escola; pode também ser professor |
+| **Professor** | Registra ocorrências |
 
-- Usuário: `admin`
-- Senha provisória: `Admin@Temp1`
+Um usuário pode ser **administrador e professor** ao mesmo tempo (marque “Também atua como professor”). No topo, alterne entre **Gestão** e **Ocorrência**.
 
-No primeiro login a troca de senha é **obrigatória**. Depois, cadastre professores na aba **Usuários**.
+O sistema identifica a **escola** no topo da tela. Sem licença ativa, usuários daquela escola não entram.
 
-### Regras de senha
+## Hospedagem na HostGator (recomendado)
 
-- Mínimo 8 caracteres
-- Maiúscula, minúscula, número e caractere especial
-- Diferente do usuário e das senhas recentes
+1. Crie um banco MySQL no cPanel.
+2. Envie `index.html` e a pasta `api/` para `public_html`.
+3. Abra `https://seudominio.com.br/api/ativar.php` e preencha os dados do banco.
+4. Apague `api/ativar.php` depois que o status ficar verde.
 
-### Recuperação
+Passo a passo: [INSTALAR-HOSTGATOR.md](INSTALAR-HOSTGATOR.md).
 
-- **Esqueci a senha** na tela de login (exige e-mail cadastrado; envia via EmailJS se configurado)
-- **Trocar senha** no topo do app (usuário logado)
-- Admin pode **Redefinir senha** na lista de usuários (gera provisória + troca obrigatória no próximo acesso)
+## Primeiro acesso (Admin full)
 
-## Persistência (Render estático)
+- Usuário: `superadmin`
+- Senha: `Admin@123`
 
-### Configurar a nuvem uma vez
+Fluxo:
 
-1. Entre como **admin** → aba **Nuvem** → **Criar nuvem**.
-2. Copie o código gerado.
-3. No `index.html`, cole o código aqui:
+1. Aba **Escolas / Licenças** → cadastre a escola e deixe a licença **ativa**.
+2. Aba **Usuários** → crie o administrador da escola (vincule à escola; opcionalmente “também professor”).
+3. O admin da escola cadastra professores e alunos.
 
-```js
-const CLOUD_BLOB_ID_FIXO = 'COLE-O-CODIGO-AQUI';
-```
+Administradores antigos com login `admin` continuam válidos (escola migrada automaticamente).
 
-4. Publique de novo no Render.
+## Persistência
 
-Depois disso, **professores e todos os PCs sincronizam sozinhos** — não é preciso configurar máquina por máquina.
+Com a API na HostGator, o MySQL é a fonte da verdade. O navegador só guarda um cache.
 
-### Backup em arquivo
-
-Na aba **Nuvem**: Exportar / Importar JSON.
+Backups extras (aba **Servidor**): Google Drive, exportar/importar JSON.
 
 ## E-mail automático (EmailJS + Outlook)
 
 1. Crie conta em [emailjs.com](https://www.emailjs.com/).
-2. **Email Services** → Add Service → **Outlook / Office 365** e conecte o e-mail da escola.
-3. **Email Templates** → Create Template:
-   - **To Email:** `{{to_email}}`
-   - **Subject:** `{{subject}}`
-   - **Content:** use `{{message}}` (ou as variáveis individuais).
-4. Variáveis disponíveis: `to_email`, `to_name`, `subject`, `protocolo`, `nivel`, `data`, `professor`, `aluno`, `ra`, `turma`, `tutor`, `tipo`, `descricao`, `message`.
-5. No sistema: admin → aba **E-mail** → cole Public Key, Service ID e Template ID → **Salvar**.
-
-Ao registrar ocorrência com e-mail do responsável, o aviso é enviado automaticamente. Também há o botão **E-mail** no detalhe para reenviar.
+2. **Email Services** → Add Service → **Outlook / Office 365**.
+3. **Email Templates** → To Email `{{to_email}}`, Subject `{{subject}}`, Content `{{message}}`.
+4. No sistema: admin → aba **E-mail** → Public Key, Service ID e Template ID → **Salvar**.

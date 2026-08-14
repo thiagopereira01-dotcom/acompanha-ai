@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-teste
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -334,32 +333,7 @@ teste
     margin-bottom:24px;
   }
 
-  .role-tabs{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:6px;
-    background:rgba(0,0,0,.28);
-    border-radius:12px;
-    padding:4px;
-    margin-bottom:22px;
-  }
-  .role-tab{
-    border:none;
-    background:transparent;
-    color:rgba(244,251,250,.7);
-    font-family:inherit;
-    font-weight:600;
-    font-size:.84rem;
-    padding:10px 6px;
-    border-radius:9px;
-    cursor:pointer;
-    transition:background .18s, color .18s, box-shadow .18s;
-  }
-  .role-tab.active{
-    background:#fff;
-    color:var(--ink);
-    box-shadow:0 2px 8px rgba(0,0,0,.15);
-  }
+  .role-tabs{ display:none !important; }
 
   .login-card .form-group{ margin-bottom:14px; }
   .login-card label{
@@ -613,6 +587,34 @@ teste
   }
   .role-pill.professor{ background:var(--primary-tint); color:var(--primary-deep); }
   .role-pill.admin{ background:var(--neutral-tint); color:var(--neutral); }
+  .role-pill.superadmin{ background:#1A237E; color:#E8EAF6; }
+  .role-pill.admin.professor{ background:var(--accent-tint); color:var(--accent-deep); }
+
+  .escola-chip{
+    font-size:.72rem;font-weight:700;
+    padding:5px 9px;border-radius:999px;
+    background:var(--primary-tint);color:var(--primary-deep);
+    border:1px solid rgba(198,40,40,.18);
+    max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .escola-chip.off{ background:var(--danger-tint); color:var(--danger); }
+
+  .modo-switch{
+    display:none;align-items:center;gap:4px;
+    background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px;
+  }
+  .modo-switch.show{ display:inline-flex; }
+  .modo-switch button{
+    border:0;background:transparent;font:inherit;font-size:.72rem;font-weight:700;
+    padding:5px 10px;border-radius:999px;color:var(--ink-soft);
+  }
+  .modo-switch button.active{
+    background:var(--surface);color:var(--primary-deep);
+    box-shadow:var(--shadow-1);
+  }
+
+  .layout.dual-col{ grid-template-columns:1.2fr 1fr; max-width:1100px; }
+  .layout.super-col{ grid-template-columns:1fr; max-width:920px; }
 
   .btn-sair,
   .btn-conta{
@@ -1368,6 +1370,22 @@ teste
   .cloud-steps li{ margin-bottom:6px; }
   .cloud-steps a{ color:var(--primary); font-weight:600; }
 
+  .server-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:.72rem;font-weight:700;letter-spacing:.01em;
+    padding:5px 9px;border-radius:999px;
+    background:var(--ok-tint);color:var(--ok);
+    border:1px solid rgba(26,122,76,.18);
+  }
+  .server-chip.off{ background:var(--warn-tint); color:var(--warn); border-color:rgba(184,120,32,.22); }
+  .server-chip.err{ background:var(--danger-tint); color:var(--danger); }
+  .server-chip .cloud-dot{ width:7px;height:7px; }
+  .login-server-status{
+    margin-top:12px;font-size:.78rem;color:var(--ink-soft);text-align:center;min-height:1.2em;
+  }
+  .login-server-status.on{ color:var(--ok); font-weight:600; }
+  .login-server-status.err{ color:var(--danger); }
+
   .lista-cadastro{
     display:flex;
     flex-direction:column;
@@ -1412,6 +1430,32 @@ teste
     color:var(--primary-deep);
     background:var(--primary-tint);
   }
+  .btn-item-edit{
+    color:var(--ok);
+    background:var(--ok-tint);
+    flex:0 0 auto;
+    font-size:.72rem;
+    font-weight:700;
+    border:none;
+    padding:5px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .log-item{
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:var(--bg);
+    font-size:.78rem;
+    line-height:1.45;
+  }
+  .log-item .log-when{
+    font-family:var(--font-mono);
+    font-size:.68rem;
+    color:var(--ink-soft);
+    margin-bottom:2px;
+  }
+  .log-item strong{ color:var(--ink); }
 
   .aluno-busca-wrap{ position:relative; }
   .sugestoes{
@@ -1530,29 +1574,25 @@ teste
     <div class="login-card">
       <div class="login-mark">A</div>
       <h1>Acompanha-Aí</h1>
-      <p class="login-sub">Sistema de ocorrência escolar</p>
-
-      <div class="role-tabs" id="roleTabs">
-        <button type="button" class="role-tab active" data-role="professor">Professor</button>
-        <button type="button" class="role-tab" data-role="admin">Administrador</button>
-      </div>
+      <p class="login-sub">Entre com seu usuário e senha — o sistema identifica o perfil automaticamente</p>
 
       <form id="loginForm" novalidate>
         <div class="form-group">
           <label for="loginUser">Usuário</label>
-          <input type="text" id="loginUser" placeholder="Digite seu usuário" required autocomplete="username">
+          <input type="text" id="loginUser" placeholder="Seu usuário" required autocomplete="username">
         </div>
         <div class="form-group">
           <label for="loginPass">Senha</label>
-          <input type="password" id="loginPass" placeholder="Digite sua senha" required autocomplete="current-password">
+          <input type="password" id="loginPass" placeholder="Sua senha" required autocomplete="current-password">
         </div>
-        <span class="error-msg" id="login-error">Usuário ou senha inválidos para este perfil</span>
+        <span class="error-msg" id="login-error">Usuário ou senha inválidos</span>
         <button type="submit" class="login-btn">Entrar</button>
       </form>
 
       <div class="login-links">
         <button type="button" id="btnEsqueciSenha">Esqueci a senha</button>
       </div>
+      <p class="login-server-status" id="serverLoginStatus"></p>
     </div>
   </div>
 
@@ -1567,6 +1607,12 @@ teste
       </div>
       <div class="topbar-meta">
         <div class="meta-date" id="dataAtual"></div>
+        <span class="escola-chip hidden" id="escolaChip" title="Escola deste sistema">—</span>
+        <span class="server-chip hidden" id="serverChip"><span class="cloud-dot"></span><span id="serverChipText">Servidor</span></span>
+        <div class="modo-switch" id="modoSwitch" aria-label="Alternar modo">
+          <button type="button" data-modo="gestao" class="active">Gestão</button>
+          <button type="button" data-modo="professor">Ocorrência</button>
+        </div>
         <div class="user-chip">
           <strong id="userNome"></strong>
           <span class="role-pill" id="userRoleBadge"></span>
@@ -1729,8 +1775,10 @@ teste
           <button type="button" class="admin-tab active" data-panel="relatorio">Relatório</button>
           <button type="button" class="admin-tab" data-panel="usuarios">Usuários</button>
           <button type="button" class="admin-tab" data-panel="alunos">Alunos</button>
-          <button type="button" class="admin-tab" data-panel="nuvem">Backup</button>
+          <button type="button" class="admin-tab" data-panel="escolas" id="tabEscolas">Escolas / Licenças</button>
+          <button type="button" class="admin-tab" data-panel="nuvem">Servidor</button>
           <button type="button" class="admin-tab" data-panel="email">E-mail</button>
+          <button type="button" class="admin-tab" data-panel="auditoria" id="tabAuditoria">Log</button>
         </div>
 
         <!-- Relatório -->
@@ -1801,9 +1849,10 @@ teste
         <!-- Usuários -->
         <div class="admin-panel" id="panelUsuarios">
           <div class="section-label" style="margin-bottom:14px;padding-bottom:10px;">
-            <h2 style="font-size:1.05rem;">Cadastrar usuário</h2>
+            <h2 style="font-size:1.05rem;" id="tituloFormUsuario">Cadastrar usuário</h2>
           </div>
           <form id="formUsuario" class="manage-form" novalidate>
+            <input type="hidden" id="editUserId" value="">
             <div class="form-group">
               <label for="novoUserNome">Nome</label>
               <input type="text" id="novoUserNome" placeholder="Nome completo" required>
@@ -1817,17 +1866,29 @@ teste
               <input type="email" id="novoUserEmail" placeholder="usuario@escola.com" autocomplete="off">
               <p class="pwd-hint">Usado para recuperação de senha (recomendado).</p>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="wrapUserSenha">
               <label for="novoUserSenha">Senha provisória</label>
-              <input type="text" id="novoUserSenha" placeholder="Gerar ou digitar" required autocomplete="off">
-              <p class="pwd-hint">O usuário será obrigado a trocar no primeiro acesso.</p>
+              <input type="text" id="novoUserSenha" placeholder="Gerar ou digitar" autocomplete="off">
+              <p class="pwd-hint" id="hintUserSenha">No cadastro, o usuário troca a senha no primeiro acesso. Na edição, deixe em branco para manter a senha.</p>
             </div>
             <div class="form-group">
               <label for="novoUserRole">Perfil</label>
               <select id="novoUserRole">
                 <option value="professor">Professor</option>
-                <option value="admin">Administrador</option>
+                <option value="admin">Administrador da escola</option>
               </select>
+            </div>
+            <div class="form-group" id="wrapUserEscola">
+              <label for="novoUserEscola">Escola</label>
+              <select id="novoUserEscola">
+                <option value="">Selecione a escola</option>
+              </select>
+            </div>
+            <div class="form-group span-2">
+              <label class="check-row">
+                <input type="checkbox" id="novoUserTambemProfessor">
+                Também atua como professor (pode registrar ocorrências)
+              </label>
             </div>
             <div class="form-group span-2">
               <label class="check-row">
@@ -1837,7 +1898,8 @@ teste
             </div>
             <div class="manage-actions span-2">
               <button type="button" class="btn-ghost-sm" id="btnGerarSenhaUser">Gerar senha provisória</button>
-              <button type="submit" class="btn-primary-sm">Salvar usuário</button>
+              <button type="button" class="btn-ghost-sm hidden" id="btnCancelarEdicaoUser">Cancelar edição</button>
+              <button type="submit" class="btn-primary-sm" id="btnSalvarUsuario">Salvar usuário</button>
             </div>
           </form>
           <div class="lista-cadastro" id="listaUsuarios"></div>
@@ -1899,14 +1961,83 @@ teste
           <div class="lista-cadastro" id="listaAlunos"></div>
         </div>
 
-        <!-- Backup / Google Drive -->
+        <!-- Escolas / Licenças (superadmin) -->
+        <div class="admin-panel" id="panelEscolas">
+          <div class="section-label" style="margin-bottom:14px;padding-bottom:10px;">
+            <h2 style="font-size:1.05rem;">Escolas e licenças</h2>
+          </div>
+          <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
+            O <strong>administrador full</strong> cadastra a escola e libera a licença de uso.
+            Sem licença ativa, professores e administradores daquela escola não entram.
+          </p>
+          <form id="formEscola" class="manage-form" novalidate>
+            <div class="form-group span-2">
+              <label for="novaEscolaNome">Nome da escola</label>
+              <input type="text" id="novaEscolaNome" placeholder="Ex.: EMEF Professor João Silva" required>
+            </div>
+            <div class="form-group">
+              <label for="novaEscolaCodigo">Código curto</label>
+              <input type="text" id="novaEscolaCodigo" placeholder="Ex.: EMEFJS" maxlength="20">
+            </div>
+            <div class="form-group">
+              <label for="novaEscolaCidade">Cidade</label>
+              <input type="text" id="novaEscolaCidade" placeholder="Cidade / UF">
+            </div>
+            <div class="form-group">
+              <label for="novaEscolaValidade">Licença válida até</label>
+              <input type="date" id="novaEscolaValidade">
+            </div>
+            <div class="form-group">
+              <label class="check-row" style="margin-top:28px;">
+                <input type="checkbox" id="novaEscolaAtiva" checked>
+                Licença ativa
+              </label>
+            </div>
+            <div class="manage-actions span-2">
+              <button type="button" class="btn-ghost-sm" id="btnGerarLicenca">Gerar chave de licença</button>
+              <button type="submit" class="btn-primary-sm">Salvar escola / liberar</button>
+            </div>
+            <div class="form-group span-2">
+              <label for="novaEscolaChave">Chave de licença</label>
+              <input type="text" id="novaEscolaChave" placeholder="Gerada automaticamente" readonly>
+            </div>
+          </form>
+          <div class="lista-cadastro" id="listaEscolas"></div>
+        </div>
+
+        <!-- Servidor HostGator + backups -->
         <div class="admin-panel" id="panelNuvem">
+          <div class="section-label" style="margin-bottom:14px;padding-bottom:10px;">
+            <h2 style="font-size:1.05rem;">Servidor da escola</h2>
+          </div>
+          <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
+            <strong>Tudo é automático.</strong> Ao cadastrar aluno, usuário ou ocorrência, o sistema grava sozinho no MySQL da HostGator.
+            Os outros computadores atualizam sozinhos em poucos segundos — sem clicar em backup.
+          </p>
+          <div class="cloud-status" id="serverStatus">
+            <span class="cloud-dot"></span>
+            <span id="serverStatusText">Procurando servidor da escola…</span>
+          </div>
+          <p style="font-size:.78rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
+            Status verde = sincronização automática ativa. Se ainda não instalou: pasta <code>api/</code> + <code>api/ativar.php</code>.
+          </p>
+          <details style="margin-bottom:18px;">
+            <summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--ink-soft);">Ferramentas de emergência (opcional)</summary>
+            <p style="font-size:.78rem;color:var(--ink-soft);margin:10px 0;line-height:1.5;">
+              No dia a dia <strong>não precisa</strong> usar isto. Só se um PC ficou desatualizado ou a base precisa ser republicada.
+            </p>
+            <div class="manage-actions" style="flex-wrap:wrap;">
+              <button type="button" class="btn-primary-sm" id="btnServerPull">Forçar atualização agora</button>
+              <button type="button" class="btn-ghost-sm" id="btnServerPush">Republicar este PC</button>
+            </div>
+          </details>
+
           <div class="section-label" style="margin-bottom:14px;padding-bottom:10px;">
             <h2 style="font-size:1.05rem;">Google Drive</h2>
           </div>
           <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
-            Salve o banco do Acompanha-Aí na sua conta Google (Drive). O navegador continua sendo o uso diário;
-            o Drive serve de <strong>backup compartilhado</strong> — só quando você clicar em salvar ou carregar.
+            Backup extra (opcional). No dia a dia o MySQL da HostGator já replica entre os PCs.
+            Use o Drive só se quiser uma cópia na conta Google da escola.
           </p>
 
           <div class="cloud-status" id="gdriveStatus">
@@ -2021,6 +2152,17 @@ teste
             <button type="button" class="btn-primary-sm" id="btnSalvarEmailjs">Salvar configuração</button>
             <button type="button" class="btn-ghost-sm" id="btnTestarEmailjs">Enviar e-mail de teste</button>
           </div>
+        </div>
+
+        <!-- Log / auditoria -->
+        <div class="admin-panel" id="panelAuditoria">
+          <div class="section-label" style="margin-bottom:14px;padding-bottom:10px;">
+            <h2 style="font-size:1.05rem;">Log de segurança</h2>
+          </div>
+          <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
+            Registro automático das ações no sistema (login, cadastros, edições e exclusões). Senhas nunca são gravadas.
+          </p>
+          <div class="lista-cadastro" id="listaAuditoria"></div>
         </div>
       </div>
 
@@ -2140,6 +2282,7 @@ teste
     <span id="toastMsg"></span>
   </div>
 
+  <script src="api/public-token.js"></script>
   <script>
     // ============================================================
     //  CAPA / SPLASH
@@ -2158,7 +2301,10 @@ teste
     const STORE_KEYS = {
       usuarios: 'acompanhaai_usuarios',
       alunos: 'acompanhaai_alunos',
-      ocorrencias: 'acompanhaai_ocorrencias'
+      ocorrencias: 'acompanhaai_ocorrencias',
+      removidos: 'acompanhaai_removidos',
+      escolas: 'acompanhaai_escolas',
+      logs: 'acompanhaai_logs'
     };
 
     function uid(prefix) {
@@ -2167,25 +2313,44 @@ teste
 
     const USUARIOS_PADRAO = [
       {
-        id: 'u_admin',
-        usuario: 'admin',
+        id: 'u_super',
+        usuario: 'superadmin',
         senha: 'Admin@123',
-        role: 'admin',
-        nome: 'Administrador(a)',
+        role: 'superadmin',
+        nome: 'Administrador Full',
         tutor: false,
+        professor: false,
+        escolaId: '',
         email: '',
         mustChangePassword: false
       }
     ];
-    const ADMIN_LOGIN_PADRAO = 'admin';
+    const ADMIN_LOGIN_PADRAO = 'superadmin';
     const ADMIN_SENHA_PADRAO = 'Admin@123';
-    const ADMIN_CRED_VERSION = '4';
+    const ADMIN_CRED_VERSION = '6';
 
-    let usuarios = carregarJSON(STORE_KEYS.usuarios, USUARIOS_PADRAO);
-    if (!usuarios.length) usuarios = [...USUARIOS_PADRAO];
+    function removidosPadrao() {
+      return { usuarios: [], alunos: [], ocorrencias: [], escolas: [] };
+    }
+
+    let usuarios = carregarJSON(STORE_KEYS.usuarios, null);
+    if (!Array.isArray(usuarios) || !usuarios.length) {
+      usuarios = USUARIOS_PADRAO.map(u => ({ ...u }));
+    }
     let alunos = carregarJSON(STORE_KEYS.alunos, []);
     let ocorrencias = carregarJSON(STORE_KEYS.ocorrencias, []);
+    let escolas = carregarJSON(STORE_KEYS.escolas, []);
+    if (!Array.isArray(escolas)) escolas = [];
+    let logs = carregarJSON(STORE_KEYS.logs, []);
+    if (!Array.isArray(logs)) logs = [];
+    let removidos = carregarJSON(STORE_KEYS.removidos, removidosPadrao());
+    if (!removidos || typeof removidos !== 'object' || Array.isArray(removidos)) removidos = removidosPadrao();
+    if (!Array.isArray(removidos.usuarios)) removidos.usuarios = [];
+    if (!Array.isArray(removidos.alunos)) removidos.alunos = [];
+    if (!Array.isArray(removidos.ocorrencias)) removidos.ocorrencias = [];
+    if (!Array.isArray(removidos.escolas)) removidos.escolas = [];
     let sessaoAtual = null;
+    let modoTrabalho = 'gestao'; // gestao | professor (para admin dual)
     let ultimaOcorrencia = null;
     let nivelSelecionado = '';
     let alunoModoManual = false;
@@ -2288,6 +2453,33 @@ teste
 
     async function migrarUsuarios() {
       let mudou = false;
+
+      // Garante escola padrão se já houver dados sem escola (migração).
+      if (!escolas.length && (alunos.length || ocorrencias.length || usuarios.some(u => u.role === 'admin' || u.role === 'professor'))) {
+        const esc = tocarRegistro({
+          id: uid('esc'),
+          nome: 'Escola principal',
+          codigo: 'PRINCIPAL',
+          cidade: '',
+          licencaChave: gerarChaveLicenca(),
+          licencaAtiva: true,
+          licencaAte: '',
+          criadaEm: new Date().toISOString()
+        });
+        escolas.push(esc);
+        mudou = true;
+        alunos.forEach(a => { if (!a.escolaId) { a.escolaId = esc.id; } });
+        ocorrencias.forEach(o => { if (!o.escolaId) { o.escolaId = esc.id; } });
+        usuarios.forEach(u => {
+          if (u.role !== 'superadmin' && !u.escolaId) u.escolaId = esc.id;
+        });
+        salvarEscolas();
+        salvarAlunos();
+        salvarOcorrenciasStore();
+      }
+
+      const escolaPadraoId = escolas[0] ? escolas[0].id : '';
+
       for (const u of usuarios) {
         if (typeof u.email !== 'string') {
           u.email = '';
@@ -2299,6 +2491,14 @@ teste
         }
         if (!Array.isArray(u.senhasAnteriores)) {
           u.senhasAnteriores = [];
+          mudou = true;
+        }
+        if (typeof u.professor !== 'boolean') {
+          u.professor = u.role === 'professor';
+          mudou = true;
+        }
+        if (typeof u.escolaId !== 'string') {
+          u.escolaId = u.role === 'superadmin' ? '' : escolaPadraoId;
           mudou = true;
         }
         if (u.senha && !u.senhaHash) {
@@ -2315,6 +2515,36 @@ teste
           }
         }
       }
+
+      // Admin antigo "admin" continua; superadmin é criado à parte.
+      if (!usuarios.some(u => u.role === 'superadmin')) {
+        const novoSuper = {
+          id: 'u_super',
+          usuario: 'superadmin',
+          role: 'superadmin',
+          nome: 'Administrador Full',
+          tutor: false,
+          professor: false,
+          escolaId: '',
+          email: '',
+          mustChangePassword: false,
+          senhasAnteriores: []
+        };
+        await definirSenhaUsuario(novoSuper, ADMIN_SENHA_PADRAO);
+        novoSuper.mustChangePassword = false;
+        usuarios.unshift(novoSuper);
+        mudou = true;
+      }
+
+      // Garante que todo superadmin tenha senha utilizável
+      for (const u of usuarios) {
+        if (u.role === 'superadmin' && !u.senhaHash && !u.senha) {
+          await definirSenhaUsuario(u, ADMIN_SENHA_PADRAO);
+          u.mustChangePassword = false;
+          mudou = true;
+        }
+      }
+
       if (mudou) salvarUsuarios();
     }
 
@@ -2331,22 +2561,192 @@ teste
         const raw = localStorage.getItem(chave);
         if (!raw) return Array.isArray(padrao) ? [...padrao] : padrao;
         const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : (Array.isArray(padrao) ? [...padrao] : padrao);
+        if (Array.isArray(padrao)) return Array.isArray(parsed) ? parsed : [...padrao];
+        return parsed && typeof parsed === 'object' ? parsed : padrao;
       } catch {
         return Array.isArray(padrao) ? [...padrao] : padrao;
       }
     }
+    function salvarRemovidos() {
+      localStorage.setItem(STORE_KEYS.removidos, JSON.stringify(removidos));
+    }
+    function salvarEscolas() {
+      localStorage.setItem(STORE_KEYS.escolas, JSON.stringify(escolas));
+      marcarPendenciaLocal();
+      agendarPushServidor();
+    }
     function salvarUsuarios() {
       localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
       marcarPendenciaLocal();
+      agendarPushServidor();
     }
     function salvarAlunos() {
       localStorage.setItem(STORE_KEYS.alunos, JSON.stringify(alunos));
       marcarPendenciaLocal();
+      agendarPushServidor();
     }
     function salvarOcorrenciasStore() {
       localStorage.setItem(STORE_KEYS.ocorrencias, JSON.stringify(ocorrencias));
       marcarPendenciaLocal();
+      agendarPushServidor();
+    }
+    const LOGS_MAX = 2000;
+    function limitarLogs(arr) {
+      const lista = Array.isArray(arr) ? arr.slice() : [];
+      lista.sort((a, b) => String(b.em || '').localeCompare(String(a.em || '')));
+      return lista.slice(0, LOGS_MAX);
+    }
+    function mesclarLogs(a, b) {
+      const map = new Map();
+      [].concat(a || [], b || []).forEach(item => {
+        if (item && item.id) map.set(item.id, item);
+      });
+      return limitarLogs([...map.values()]);
+    }
+    function salvarLogs() {
+      logs = limitarLogs(logs);
+      localStorage.setItem(STORE_KEYS.logs, JSON.stringify(logs));
+      marcarPendenciaLocal();
+      agendarPushServidor();
+    }
+    function registrarLog(acao, detalhe, alvo) {
+      const s = sessaoAtual || {};
+      const itemAlvo = alvo && typeof alvo === 'object' ? alvo : null;
+      logs.unshift({
+        id: uid('log'),
+        em: new Date().toISOString(),
+        acao: String(acao || ''),
+        detalhe: String(detalhe || ''),
+        usuario: s.usuario || '',
+        nome: s.nome || '',
+        role: s.role || '',
+        escolaId: itemAlvo && itemAlvo.escolaId ? itemAlvo.escolaId : (s.escolaId || ''),
+        alvo: itemAlvo ? String(itemAlvo.usuario || itemAlvo.nome || itemAlvo.protocolo || itemAlvo.id || '') : ''
+      });
+      salvarLogs();
+    }
+
+    function marcarRemovido(tipo, item) {
+      const k = chaveRegistro(item, tipo);
+      if (!k) return;
+      if (!Array.isArray(removidos[tipo])) removidos[tipo] = [];
+      if (removidos[tipo].indexOf(k) === -1) removidos[tipo].push(k);
+      salvarRemovidos();
+    }
+    function desmarcarRemovido(tipo, item) {
+      const k = chaveRegistro(item, tipo);
+      if (!k || !Array.isArray(removidos[tipo])) return;
+      const antes = removidos[tipo].length;
+      removidos[tipo] = removidos[tipo].filter(x => x !== k);
+      if (removidos[tipo].length !== antes) salvarRemovidos();
+    }
+    function filtrarRemovidos(arr, tipo, listaRem) {
+      const origem = listaRem || removidos;
+      const set = new Set(origem[tipo] || []);
+      if (!set.size) return Array.isArray(arr) ? arr : [];
+      return (Array.isArray(arr) ? arr : []).filter(item => !set.has(chaveRegistro(item, tipo)));
+    }
+    function unirRemovidos(a, b) {
+      const out = removidosPadrao();
+      ['usuarios', 'alunos', 'ocorrencias', 'escolas'].forEach(tipo => {
+        out[tipo] = [...new Set([].concat((a && a[tipo]) || [], (b && b[tipo]) || []))];
+      });
+      return out;
+    }
+    function aplicarRemovidosNasListas() {
+      usuarios = filtrarRemovidos(usuarios, 'usuarios');
+      alunos = filtrarRemovidos(alunos, 'alunos');
+      ocorrencias = filtrarRemovidos(ocorrencias, 'ocorrencias');
+      escolas = filtrarRemovidos(escolas, 'escolas');
+    }
+
+    // ---- Escola / papéis / licença ----
+    function ehSuperAdmin(u) {
+      return !!(u && u.role === 'superadmin');
+    }
+    function ehAdminEscola(u) {
+      return !!(u && (u.role === 'admin' || u.role === 'superadmin'));
+    }
+    function podeSerProfessor(u) {
+      if (!u) return false;
+      if (u.role === 'professor') return true;
+      return !!u.professor;
+    }
+    function escolaPorId(id) {
+      return escolas.find(e => e.id === id) || null;
+    }
+    function escolaDaSessao() {
+      if (!sessaoAtual || ehSuperAdmin(sessaoAtual)) return null;
+      return escolaPorId(sessaoAtual.escolaId);
+    }
+    function licencaEscolaOk(escola) {
+      if (!escola) return false;
+      if (!escola.licencaAtiva) return false;
+      if (escola.licencaAte) {
+        const fim = String(escola.licencaAte).slice(0, 10);
+        const hoje = new Date().toISOString().slice(0, 10);
+        if (fim && fim < hoje) return false;
+      }
+      return true;
+    }
+    function statusLicencaEscola(escola) {
+      if (!escola) return { ok: false, texto: 'Sem escola' };
+      if (!escola.licencaAtiva) return { ok: false, texto: 'Licença inativa' };
+      if (escola.licencaAte) {
+        const fim = String(escola.licencaAte).slice(0, 10);
+        const hoje = new Date().toISOString().slice(0, 10);
+        if (fim && fim < hoje) return { ok: false, texto: 'Licença vencida em ' + fim };
+      }
+      return {
+        ok: true,
+        texto: escola.licencaAte ? ('Licença até ' + String(escola.licencaAte).slice(0, 10)) : 'Licença ativa'
+      };
+    }
+    function gerarChaveLicenca() {
+      const bloco = () => Math.random().toString(36).slice(2, 6).toUpperCase();
+      return 'AA-' + bloco() + '-' + bloco() + '-' + bloco();
+    }
+    function usuariosDaEscola(escolaId) {
+      if (!escolaId) return usuarios.filter(u => u.role !== 'superadmin');
+      return usuarios.filter(u => u.role === 'superadmin' || u.escolaId === escolaId);
+    }
+    function alunosDaEscola(escolaId) {
+      if (!escolaId) return alunos.slice();
+      return alunos.filter(a => !a.escolaId || a.escolaId === escolaId);
+    }
+    function ocorrenciasDaEscola(escolaId) {
+      if (!escolaId) return ocorrencias.slice();
+      return ocorrencias.filter(o => !o.escolaId || o.escolaId === escolaId);
+    }
+    function escopoEscolaId() {
+      if (!sessaoAtual) return '';
+      if (ehSuperAdmin(sessaoAtual)) return '';
+      return sessaoAtual.escolaId || '';
+    }
+    function atualizarChipEscola() {
+      const chip = document.getElementById('escolaChip');
+      if (!chip) return;
+      if (!sessaoAtual) {
+        chip.classList.add('hidden');
+        return;
+      }
+      if (ehSuperAdmin(sessaoAtual)) {
+        chip.classList.remove('hidden', 'off');
+        chip.textContent = 'Admin full · todas as escolas';
+        return;
+      }
+      const esc = escolaPorId(sessaoAtual.escolaId);
+      if (!esc) {
+        chip.classList.remove('hidden');
+        chip.classList.add('off');
+        chip.textContent = 'Escola não vinculada';
+        return;
+      }
+      const st = statusLicencaEscola(esc);
+      chip.classList.remove('hidden');
+      chip.classList.toggle('off', !st.ok);
+      chip.textContent = esc.nome + (st.ok ? '' : ' · ' + st.texto);
+      chip.title = esc.nome + ' · ' + st.texto + (esc.licencaChave ? ' · ' + esc.licencaChave : '');
     }
 
     const WATERMARK_KEY = 'acompanhaai_cloud_watermark';
@@ -2356,7 +2756,8 @@ teste
       return {
         usuarios: Array.isArray(s.usuarios) ? s.usuarios.length : 0,
         alunos: Array.isArray(s.alunos) ? s.alunos.length : 0,
-        ocorrencias: Array.isArray(s.ocorrencias) ? s.ocorrencias.length : 0
+        ocorrencias: Array.isArray(s.ocorrencias) ? s.ocorrencias.length : 0,
+        escolas: Array.isArray(s.escolas) ? s.escolas.length : 0
       };
     }
 
@@ -2430,26 +2831,35 @@ teste
     }
 
     function garantirIntegridadeDados() {
+      if (!Array.isArray(escolas)) escolas = [];
       if (!Array.isArray(usuarios) || !usuarios.length) {
-        usuarios = [...USUARIOS_PADRAO];
-      } else if (!usuarios.some(u => u.role === 'admin')) {
+        usuarios = USUARIOS_PADRAO.map(u => ({ ...u }));
+      } else if (!usuarios.some(u => u.role === 'superadmin') && !usuarios.some(u => u.role === 'admin')) {
         usuarios.unshift({ ...USUARIOS_PADRAO[0], id: uid('u') });
       }
       if (!Array.isArray(alunos)) alunos = [];
       if (!Array.isArray(ocorrencias)) ocorrencias = [];
+      aplicarRemovidosNasListas();
       localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
       localStorage.setItem(STORE_KEYS.alunos, JSON.stringify(alunos));
       localStorage.setItem(STORE_KEYS.ocorrencias, JSON.stringify(ocorrencias));
-      atualizarMarcaDagua({ usuarios, alunos, ocorrencias });
+      localStorage.setItem(STORE_KEYS.escolas, JSON.stringify(escolas));
+      salvarRemovidos();
+      if (!Array.isArray(logs)) logs = [];
+      localStorage.setItem(STORE_KEYS.logs, JSON.stringify(limitarLogs(logs)));
+      atualizarMarcaDagua({ usuarios, alunos, ocorrencias, escolas });
     }
 
     function montarSnapshot() {
       return {
-        versao: 1,
+        versao: 2,
         atualizadoEm: new Date().toISOString(),
         usuarios,
         alunos,
-        ocorrencias
+        ocorrencias,
+        escolas,
+        logs: limitarLogs(logs),
+        removidos
       };
     }
 
@@ -2477,6 +2887,8 @@ teste
       if (!item || typeof item !== 'object') return '';
       if (tipo === 'usuarios') return String(item.usuario || '').toLowerCase() || item.id || '';
       if (tipo === 'alunos') return String(item.ra || '').trim().toLowerCase() || item.id || '';
+      if (tipo === 'escolas') return String(item.id || item.codigo || item.nome || '').toLowerCase();
+      if (tipo === 'logs') return item.id || '';
       return item.protocolo || item.id || '';
     }
 
@@ -2547,19 +2959,21 @@ teste
     function mesclarSnapshots(localSnap, remotoSnap) {
       const local = localSnap || {};
       const remoto = remotoSnap || {};
+      const rem = unirRemovidos(local.removidos, remoto.removidos);
       return {
-        versao: 1,
+        versao: 2,
         atualizadoEm: new Date().toISOString(),
-        usuarios: mesclarListas(local.usuarios || usuarios, remoto.usuarios, 'usuarios'),
-        alunos: mesclarListas(local.alunos || alunos, remoto.alunos, 'alunos'),
-        ocorrencias: mesclarListas(local.ocorrencias || ocorrencias, remoto.ocorrencias, 'ocorrencias')
+        usuarios: filtrarRemovidos(mesclarListas(local.usuarios || usuarios, remoto.usuarios, 'usuarios'), 'usuarios', rem),
+        alunos: filtrarRemovidos(mesclarListas(local.alunos || alunos, remoto.alunos, 'alunos'), 'alunos', rem),
+        ocorrencias: filtrarRemovidos(mesclarListas(local.ocorrencias || ocorrencias, remoto.ocorrencias, 'ocorrencias'), 'ocorrencias', rem),
+        escolas: filtrarRemovidos(mesclarListas(local.escolas || escolas, remoto.escolas, 'escolas'), 'escolas', rem),
+        logs: mesclarLogs(local.logs || logs, remoto.logs),
+        removidos: rem
       };
     }
 
     function aplicarSnapshot(data, origem, opts = {}) {
       if (!data || typeof data !== 'object') throw new Error('Arquivo inválido');
-      // Por padrão sempre mescla — nunca substitui e apaga dados locais.
-      // Só permite substituição total com opts.substituir === true (uso interno após merge).
       const substituir = opts.substituir === true;
       const mesclar = !substituir && opts.mesclar !== false;
       const antes = montarSnapshot();
@@ -2576,19 +2990,34 @@ teste
         ocorrencias = mesclar ? mesclarListas(ocorrencias, data.ocorrencias, 'ocorrencias')
           : (substituir ? data.ocorrencias : ocorrencias);
       }
+      if (Array.isArray(data.escolas)) {
+        escolas = mesclar ? mesclarListas(escolas, data.escolas, 'escolas')
+          : (substituir ? data.escolas : escolas);
+      }
+      if (Array.isArray(data.logs)) {
+        logs = mesclar || substituir ? mesclarLogs(logs, data.logs) : logs;
+      }
+      if (data.removidos && typeof data.removidos === 'object') {
+        removidos = mesclar || substituir ? unirRemovidos(removidos, data.removidos) : removidos;
+      }
+      aplicarRemovidosNasListas();
 
-      // Se uma substituição faria perder registros, força mescla com o estado anterior.
       if (substituir && snapshotPerdeuDados(antes, montarSnapshot())) {
         const recuperado = mesclarSnapshots(antes, data);
         usuarios = recuperado.usuarios;
         alunos = recuperado.alunos;
         ocorrencias = recuperado.ocorrencias;
+        escolas = recuperado.escolas || escolas;
+        if (recuperado.logs) logs = recuperado.logs;
+        if (recuperado.removidos) removidos = recuperado.removidos;
       }
 
       garantirIntegridadeDados();
-      if (sessaoAtual && sessaoAtual.role === 'admin') {
+      if (sessaoAtual && (sessaoAtual.role === 'admin' || sessaoAtual.role === 'superadmin')) {
         renderizarListaUsuarios();
         renderizarListaAlunos();
+        if (typeof renderizarListaEscolas === 'function') renderizarListaEscolas();
+        if (typeof renderizarListaAuditoria === 'function') renderizarListaAuditoria();
         preencherSelectTutores();
         renderizarHistorico();
       } else if (sessaoAtual) {
@@ -2596,10 +3025,383 @@ teste
         renderizarTutorInbox();
       }
       void migrarUsuarios();
+      if (origem && origem !== 'servidor') agendarPushServidor();
       if (!opts.silencioso) {
         mostrarToast('Dados carregados' + (origem ? ' (' + origem + ')' : ''));
       }
     }
+
+    // ============================================================
+    //  SERVIDOR DA ESCOLA (HostGator PHP + MySQL)
+    // ============================================================
+    // Fonte da verdade = MySQL. PC novo só BAIXA. Nunca envia base vazia.
+    const SERVER = {
+      url: 'api/index.php',
+      ativo: false,
+      version: 0,
+      pollTimer: null,
+      pushTimer: null,
+      lock: null,
+      pendente: false,
+      inicializado: false,
+      ultimoErro: ''
+    };
+
+    function serverToken() {
+      return String(window.ACOMPANHA_API_TOKEN || '').trim();
+    }
+
+    function setServerStatus(estado, texto) {
+      SERVER.ultimoErro = estado === 'err' ? (texto || '') : '';
+      const box = document.getElementById('serverStatus');
+      const txt = document.getElementById('serverStatusText');
+      if (box) box.className = 'cloud-status' + (estado ? ' ' + estado : '');
+      if (txt) txt.textContent = texto || '';
+      const chip = document.getElementById('serverChip');
+      const chipTxt = document.getElementById('serverChipText');
+      if (chip) {
+        chip.classList.remove('hidden');
+        chip.classList.toggle('off', estado === 'syncing' || !estado);
+        chip.classList.toggle('err', estado === 'err');
+        if (chipTxt) {
+          chipTxt.textContent = estado === 'on' ? 'Sincronizado'
+            : (estado === 'syncing' ? 'Sincronizando…'
+              : (estado === 'err' ? 'Servidor offline' : 'Só neste PC'));
+        }
+      }
+      const loginSt = document.getElementById('serverLoginStatus');
+      if (loginSt) {
+        loginSt.className = 'login-server-status' + (estado === 'on' ? ' on' : (estado === 'err' ? ' err' : ''));
+        loginSt.textContent = estado === 'on'
+          ? 'Sincronização automática ativa — todos os PCs compartilham a mesma base'
+          : (estado === 'err'
+            ? 'Servidor indisponível — os dados ficam só neste navegador até reconectar'
+            : (estado === 'syncing' ? 'Conectando ao servidor da escola…' : ''));
+      }
+    }
+
+    async function serverFetch(action, opts) {
+      const o = opts || {};
+      const headers = { 'Accept': 'application/json' };
+      const token = serverToken();
+      if (token) headers['X-Api-Token'] = token;
+      if (o.body) headers['Content-Type'] = 'application/json';
+      const res = await fetch(SERVER.url + '?action=' + encodeURIComponent(action), {
+        method: o.method || 'GET',
+        headers,
+        body: o.body ? JSON.stringify(o.body) : undefined,
+        cache: 'no-store'
+      });
+      let json = null;
+      try { json = await res.json(); } catch (_) { json = null; }
+      return { res, json };
+    }
+
+    function snapshotDoServidorVazio(data) {
+      if (!data || typeof data !== 'object') return true;
+      return ehSnapshotSemente(data);
+    }
+
+    function scoreSnapshot(snap) {
+      const t = contarTotais(snap);
+      return (t.usuarios * 2) + (t.alunos * 5) + (t.ocorrencias * 3);
+    }
+
+    function aplicarDoServidor(data, opts) {
+      const o = opts || {};
+      aplicarSnapshot(data || {}, 'servidor', {
+        silencioso: true,
+        substituir: o.substituir === true,
+        mesclar: o.mesclar !== false && o.substituir !== true
+      });
+    }
+
+    async function puxarServidor() {
+      const { res, json } = await serverFetch('get');
+      if (!res.ok || !json || !json.ok) {
+        if (res.status === 401) throw new Error('token');
+        throw new Error((json && json.erro) || 'get');
+      }
+      SERVER.version = Number(json.version) || 0;
+      const data = json.data;
+      if (SERVER.version > 0 && (!data || typeof data !== 'object')) {
+        throw new Error('payload_invalido');
+      }
+      return data || null;
+    }
+
+    function podeEnviarAoServidor(snapshot, remoto) {
+      if (!snapshot) return false;
+      // Nunca publicar só a semente se o servidor já tem versão/dados.
+      if (ehSnapshotSemente(snapshot)) {
+        if (SERVER.version > 0) return false;
+        if (remoto && !snapshotDoServidorVazio(remoto)) return false;
+      }
+      if (remoto && !snapshotDoServidorVazio(remoto)) {
+        // Não enviar se o payload local for claramente menor (PC novo / cache vazio).
+        if (scoreSnapshot(snapshot) < scoreSnapshot(remoto)) {
+          const tl = contarTotais(snapshot);
+          const tr = contarTotais(remoto);
+          const perdaBrusca = (
+            (tr.alunos > 0 && tl.alunos === 0) ||
+            (tr.ocorrencias > 0 && tl.ocorrencias === 0 && tr.ocorrencias > tl.ocorrencias) ||
+            (tr.usuarios > 1 && tl.usuarios <= 1)
+          );
+          if (perdaBrusca) return false;
+        }
+      }
+      return true;
+    }
+
+    async function enviarServidor(snapshot, version) {
+      const { res, json } = await serverFetch('save', {
+        method: 'POST',
+        body: { version: version, data: snapshot }
+      });
+      if (res.status === 409 && json) {
+        const err = new Error(json.erro || 'conflito');
+        err.conflito = true;
+        err.recusado = json.erro === 'recusado_semente' || json.erro === 'recusado_perda';
+        err.version = Number(json.version) || 0;
+        err.data = json.data || null;
+        throw err;
+      }
+      if (!res.ok || !json || !json.ok) {
+        if (res.status === 401) throw new Error('token');
+        throw new Error((json && json.erro) || 'save');
+      }
+      SERVER.version = Number(json.version) || SERVER.version;
+      SERVER.pendente = false;
+      return json;
+    }
+
+    async function syncServidor(opts) {
+      const o = opts || {};
+      if (!SERVER.ativo) return false;
+      if (SERVER.lock) {
+        // Empurra só se o pedido atual também queria gravar.
+        if (!o.somentePull) SERVER.pendente = true;
+        return SERVER.lock;
+      }
+
+      const somentePull = o.somentePull === true;
+
+      SERVER.lock = (async () => {
+        try {
+          setServerStatus('syncing', somentePull ? 'Atualizando do servidor…' : 'Gravando no servidor…');
+          let remoto = null;
+          try {
+            remoto = await puxarServidor();
+          } catch (e) {
+            if (e.message === 'token') {
+              SERVER.ativo = false;
+              setServerStatus('err', 'Token inválido. Rode api/ativar.php de novo.');
+              return false;
+            }
+            throw e;
+          }
+
+          const local = montarSnapshot();
+          const remotoVazio = snapshotDoServidorVazio(remoto);
+          const localSemente = ehSnapshotSemente(local);
+
+          // 1) PC novo / base local vazia: só carrega o servidor. NUNCA envia.
+          if (localSemente && !remotoVazio) {
+            aplicarDoServidor(remoto, { substituir: true });
+            setServerStatus('on', 'Servidor da escola · dados carregados · v' + SERVER.version);
+            return true;
+          }
+
+          if (somentePull) {
+            if (!remotoVazio) {
+              // Mescla o que veio do servidor; não grava de volta neste passo.
+              aplicarDoServidor(remoto, { mesclar: true });
+            }
+            setServerStatus('on', 'Servidor da escola · sincronizado · v' + SERVER.version);
+            return true;
+          }
+
+          // 2) Servidor vazio: só o primeiro PC com dados reais publica.
+          if (remotoVazio) {
+            if (localSemente) {
+              // Ambos vazios: cria registro inicial (só admin) uma vez.
+              if (SERVER.version === 0) {
+                try {
+                  await enviarServidor(local, 0);
+                } catch (e) {
+                  if (e.conflito && e.data) {
+                    aplicarDoServidor(e.data, { substituir: true });
+                    SERVER.version = e.version;
+                  } else if (!e.recusado) {
+                    throw e;
+                  }
+                }
+              }
+              setServerStatus('on', 'Servidor da escola · sincronizado · v' + SERVER.version);
+              return true;
+            }
+            if (!podeEnviarAoServidor(local, remoto)) {
+              setServerStatus('on', 'Servidor da escola · sincronizado · v' + SERVER.version);
+              return true;
+            }
+            try {
+              await enviarServidor(local, SERVER.version);
+            } catch (e) {
+              if (e.conflito && e.data) {
+                aplicarDoServidor(mesclarSnapshots(local, e.data), { substituir: true });
+                SERVER.version = e.version;
+                if (podeEnviarAoServidor(montarSnapshot(), e.data)) {
+                  await enviarServidor(montarSnapshot(), SERVER.version);
+                }
+              } else if (e.recusado && e.data) {
+                aplicarDoServidor(e.data, { substituir: true });
+                SERVER.version = e.version;
+              } else {
+                throw e;
+              }
+            }
+            setServerStatus('on', 'Servidor da escola · sincronizado · v' + SERVER.version);
+            return true;
+          }
+
+          // 3) Ambos têm dados: mescla e envia só se não for perda.
+          let merged = mesclarSnapshots(local, remoto);
+          aplicarDoServidor(merged, { substituir: true });
+          merged = montarSnapshot();
+
+          if (!podeEnviarAoServidor(merged, remoto)) {
+            // Mantém o resultado mesclado localmente; servidor já é a base.
+            setServerStatus('on', 'Servidor da escola · sincronizado · v' + SERVER.version);
+            return true;
+          }
+
+          try {
+            await enviarServidor(merged, SERVER.version);
+          } catch (e) {
+            if (e.recusado && e.data) {
+              aplicarDoServidor(e.data, { substituir: true });
+              SERVER.version = e.version;
+            } else if (e.conflito) {
+              SERVER.version = e.version;
+              const outra = mesclarSnapshots(montarSnapshot(), e.data || {});
+              aplicarDoServidor(outra, { substituir: true });
+              const finalSnap = montarSnapshot();
+              if (podeEnviarAoServidor(finalSnap, e.data)) {
+                await enviarServidor(finalSnap, SERVER.version);
+              }
+            } else {
+              throw e;
+            }
+          }
+          setServerStatus('on', 'Servidor da escola · sincronizado · v' + SERVER.version);
+          return true;
+        } catch (e) {
+          setServerStatus('err', 'Falha ao sincronizar (' + (e.message || 'rede') + '). Tentando de novo…');
+          return false;
+        } finally {
+          SERVER.lock = null;
+          if (SERVER.pendente) {
+            SERVER.pendente = false;
+            // Reenvio só depois da carga inicial — e nunca como “pull disfarçado”.
+            if (SERVER.inicializado && !ehSnapshotSemente(montarSnapshot())) {
+              agendarPushServidor(400);
+            }
+          }
+        }
+      })();
+
+      return SERVER.lock;
+    }
+
+    function agendarPushServidor(ms) {
+      if (!SERVER.ativo) return;
+      // Antes da 1ª carga do servidor, não agenda gravação (evita PC novo apagar a base).
+      if (!SERVER.inicializado) return;
+      if (ehSnapshotSemente(montarSnapshot())) return;
+      SERVER.pendente = true;
+      clearTimeout(SERVER.pushTimer);
+      SERVER.pushTimer = setTimeout(() => {
+        void syncServidor().then((ok) => {
+          if (ok) setServerStatus('on', 'Gravado automaticamente no servidor · v' + SERVER.version);
+        });
+      }, typeof ms === 'number' ? ms : 500);
+    }
+
+    function iniciarPollServidor() {
+      clearInterval(SERVER.pollTimer);
+      if (!SERVER.ativo) return;
+      SERVER.pollTimer = setInterval(async () => {
+        if (!SERVER.ativo || SERVER.lock || document.hidden) return;
+        try {
+          const { res, json } = await serverFetch('version');
+          if (!res.ok || !json || !json.ok) return;
+          const v = Number(json.version) || 0;
+          if (v !== SERVER.version) {
+            const antes = snapshotAssinatura(montarSnapshot());
+            await syncServidor({ somentePull: true });
+            if (snapshotAssinatura(montarSnapshot()) !== antes) {
+              setServerStatus('on', 'Atualizado automaticamente · v' + SERVER.version);
+            }
+            if (sessaoAtual) {
+              renderizarHistorico();
+              if (sessaoAtual.role === 'admin') {
+                renderizarListaUsuarios();
+                renderizarListaAlunos();
+              } else if (sessaoAtual.tutor) {
+                renderizarTutorInbox();
+              }
+            }
+          }
+        } catch (_) {}
+      }, 4000);
+    }
+
+    async function iniciarServidor() {
+      setServerStatus('syncing', 'Conectando ao servidor da escola…');
+      try {
+        const { res, json } = await serverFetch('ping');
+        if (!res.ok || !json || !json.ok) {
+          SERVER.ativo = false;
+          if (res.status === 503) {
+            setServerStatus('err', 'API ainda não instalada. Abra api/ativar.php na HostGator.');
+          } else {
+            setServerStatus('', 'Sem servidor · dados só neste navegador');
+          }
+          const chip = document.getElementById('serverChip');
+          if (chip) chip.classList.add('hidden');
+          return false;
+        }
+        if (json.precisaToken && !serverToken()) {
+          SERVER.ativo = false;
+          setServerStatus('err', 'Falta o token (api/public-token.js). Rode api/ativar.php.');
+          return false;
+        }
+        SERVER.ativo = true;
+        SERVER.inicializado = false;
+        SERVER.version = Number(json.version) || 0;
+        // Sempre baixa primeiro. Nunca começa publicando.
+        await syncServidor({ somentePull: true });
+        SERVER.inicializado = true;
+        iniciarPollServidor();
+        return true;
+      } catch (_) {
+        SERVER.ativo = false;
+        SERVER.inicializado = false;
+        setServerStatus('', 'Sem servidor · dados só neste navegador');
+        const chip = document.getElementById('serverChip');
+        if (chip) chip.classList.add('hidden');
+        return false;
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && SERVER.ativo) {
+        void syncServidor({ somentePull: true });
+      }
+    });
+    window.addEventListener('online', () => {
+      if (SERVER.ativo) void syncServidor({ somentePull: true });
+    });
 
     // ============================================================
     //  NUVEM GRATUITA (JSONBlob) — SOMENTE MANUAL
@@ -2952,14 +3754,17 @@ teste
     }
 
     async function garantirAdminAcesso() {
-      let admin = usuarios.find(u => String(u.usuario || '').toLowerCase() === ADMIN_LOGIN_PADRAO);
+      let admin = usuarios.find(u => String(u.usuario || '').toLowerCase() === ADMIN_LOGIN_PADRAO)
+        || usuarios.find(u => u.role === 'superadmin');
       if (!admin) {
         admin = {
-          id: 'u_admin',
+          id: 'u_super',
           usuario: ADMIN_LOGIN_PADRAO,
-          role: 'admin',
-          nome: 'Administrador(a)',
+          role: 'superadmin',
+          nome: 'Administrador Full',
           tutor: false,
+          professor: false,
+          escolaId: '',
           email: '',
           mustChangePassword: false,
           senhasAnteriores: []
@@ -2967,28 +3772,35 @@ teste
         usuarios.unshift(admin);
       }
       admin.usuario = ADMIN_LOGIN_PADRAO;
-      admin.role = 'admin';
-      if (!admin.nome) admin.nome = 'Administrador(a)';
+      admin.role = 'superadmin';
+      admin.escolaId = '';
+      admin.professor = false;
+      if (!admin.nome) admin.nome = 'Administrador Full';
 
       const credFlag = localStorage.getItem('acompanhaai_admin_cred_v');
-      if (credFlag !== ADMIN_CRED_VERSION) {
+      const semSenha = !admin.senhaHash && !admin.senha;
+      // Sempre define senha se estiver faltando (bug anterior com servidor ativo).
+      // Também reaplica a senha padrão na troca de versão de credencial (só local).
+      if (semSenha || (!SERVER.ativo && credFlag !== ADMIN_CRED_VERSION)) {
         await definirSenhaUsuario(admin, ADMIN_SENHA_PADRAO);
         admin.mustChangePassword = false;
-        localStorage.setItem('acompanhaai_admin_cred_v', ADMIN_CRED_VERSION);
         localStorage.setItem(STORE_KEYS.usuarios, JSON.stringify(usuarios));
+        agendarPushServidor(300);
       }
+      localStorage.setItem('acompanhaai_admin_cred_v', ADMIN_CRED_VERSION);
     }
 
     async function iniciarNuvemAutomatica() {
       atualizarMarcaDagua({ usuarios, alunos, ocorrencias });
       atualizarStatusNuvemUI();
+      await iniciarServidor();
       await migrarUsuarios();
       await garantirAdminAcesso();
       CLOUD.inicializada = true;
-      // Não baixa nem envia automaticamente — evita sobrescrever cadastros.
+      // JSONBlob continua manual. A fonte compartilhada é o servidor HostGator.
       if (!CLOUD_AUTO) {
         const id = getBlobId();
-        if (id) {
+        if (id && !SERVER.ativo) {
           setCloudStatus('on', 'Nuvem manual · ' + id.slice(0, 8) + '… · dados salvos neste navegador');
         }
         return;
@@ -3074,6 +3886,53 @@ teste
     });
 
     try { localStorage.removeItem('acompanhaai_msal_client_id'); } catch (_) {}
+
+    const btnServerPull = document.getElementById('btnServerPull');
+    const btnServerPush = document.getElementById('btnServerPush');
+    if (btnServerPull) {
+      btnServerPull.addEventListener('click', async () => {
+        if (!SERVER.ativo) {
+          mostrarToast('Servidor não conectado. Verifique api/ativar.php', 'error');
+          return;
+        }
+        const ok = await syncServidor({ somentePull: true });
+        if (ok) {
+          renderizarHistorico();
+          if (sessaoAtual && sessaoAtual.role === 'admin') {
+            renderizarListaUsuarios();
+            renderizarListaAlunos();
+          }
+          mostrarToast('Dados atualizados a partir do servidor');
+        } else {
+          mostrarToast('Não foi possível atualizar do servidor', 'error');
+        }
+      });
+    }
+    if (btnServerPush) {
+      btnServerPush.addEventListener('click', async () => {
+        if (!SERVER.ativo) {
+          mostrarToast('Servidor não conectado. Verifique api/ativar.php', 'error');
+          return;
+        }
+        if (ehSnapshotSemente(montarSnapshot())) {
+          mostrarToast('Este PC está vazio. Aguarde a sincronização automática ou force a atualização.', 'error');
+          return;
+        }
+        const t = contarTotais(montarSnapshot());
+        if (!confirm(
+          'Republicar os dados DESTE computador no servidor?\n\n' +
+          '• ' + t.usuarios + ' usuário(s)\n' +
+          '• ' + t.alunos + ' aluno(s)\n' +
+          '• ' + t.ocorrencias + ' ocorrência(s)\n\n' +
+          'Só use em emergência, no PC que tem a base correta.'
+        )) return;
+        SERVER.inicializado = true;
+        const ok = await syncServidor();
+        if (ok) mostrarToast('Base publicada no servidor');
+        else mostrarToast('Publicação recusada ou falhou', 'error');
+      });
+    }
+
     CLOUD.initPromise = iniciarNuvemAutomatica();
 
     // ============================================================
@@ -3607,13 +4466,24 @@ teste
     initEmailJS();
 
     function professoresTutores() {
-      return usuarios.filter(u => u.role === 'professor' && u.tutor);
+      const escopo = escopoEscolaId();
+      return usuarios.filter(u => {
+        if (!u.tutor) return false;
+        if (!(u.role === 'professor' || u.professor)) return false;
+        if (escopo && u.escolaId && u.escolaId !== escopo) return false;
+        return true;
+      });
     }
     async function encontrarUsuario(usuario, senha, role) {
       const login = String(usuario || '').trim().toLowerCase();
-      const candidatos = usuarios.filter(u =>
-        u.usuario === login && (!role || u.role === role)
-      );
+      const candidatos = usuarios.filter(u => {
+        if (u.usuario !== login) return false;
+        if (!role) return true;
+        if (role === 'superadmin') return u.role === 'superadmin';
+        if (role === 'admin') return u.role === 'admin' || u.role === 'superadmin';
+        if (role === 'professor') return u.role === 'professor' || !!u.professor;
+        return u.role === role;
+      });
       for (const u of candidatos) {
         if (await senhaCorresponde(u, senha)) return u;
       }
@@ -3629,7 +4499,6 @@ teste
     // ============================================================
     const loginScreen = document.getElementById('loginScreen');
     const appWrap = document.getElementById('appWrap');
-    const roleTabs = document.getElementById('roleTabs');
     const loginForm = document.getElementById('loginForm');
     const loginUser = document.getElementById('loginUser');
     const loginPass = document.getElementById('loginPass');
@@ -3650,8 +4519,6 @@ teste
     const formEsqueciSenha = document.getElementById('formEsqueciSenha');
     const trocaError = document.getElementById('troca-error');
     const forgotError = document.getElementById('forgot-error');
-
-    let perfilSelecionado = 'professor';
 
     function loginBloqueado() {
       return Date.now() < bloqueioLoginAte;
@@ -3789,13 +4656,14 @@ teste
 
       await definirSenhaUsuario(u, nova);
       salvarUsuarios();
+      registrarLog('senha_propria', 'Usuário alterou a própria senha', u);
       modoTrocaSenha = 'voluntario';
       authOverlay.classList.add('hidden');
       authOverlay.setAttribute('aria-hidden', 'true');
       formTrocaSenha.reset();
 
       if (appWrap.classList.contains('hidden')) {
-        sessaoAtual = { id: u.id, role: u.role, nome: u.nome, tutor: !!u.tutor, usuario: u.usuario };
+        sessaoAtual = { id: u.id, role: u.role, nome: u.nome, tutor: !!u.tutor, usuario: u.usuario, professor: podeSerProfessor(u), escolaId: u.escolaId || '' };
         await entrarNoApp(sessaoAtual);
       }
       usuarioPendenteTroca = null;
@@ -3819,6 +4687,7 @@ teste
       await definirSenhaUsuario(u, provisoria);
       u.mustChangePassword = true;
       salvarUsuarios();
+      registrarLog('senha_recuperacao', 'Senha provisória gerada para @' + u.usuario, u);
 
       let enviado = false;
       if (typeof emailjsConfigurado === 'function' && emailjsConfigurado()) {
@@ -3857,16 +4726,6 @@ teste
       }
     });
 
-    roleTabs.addEventListener('click', (e) => {
-      const btn = e.target.closest('.role-tab');
-      if (!btn) return;
-      perfilSelecionado = btn.dataset.role;
-      [...roleTabs.children].forEach(b => b.classList.toggle('active', b === btn));
-      loginError.classList.remove('show');
-      loginUser.classList.remove('is-invalid');
-      loginPass.classList.remove('is-invalid');
-    });
-
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (loginBloqueado()) {
@@ -3883,19 +4742,49 @@ teste
         loginError.classList.remove('show');
       }
 
+      // Garante superadmin com senha antes de autenticar
+      try { await garantirAdminAcesso(); } catch (_) {}
+
       const usuarioDigitado = loginUser.value.trim().toLowerCase();
       const senhaDigitada = loginPass.value;
-      const u = await encontrarUsuario(usuarioDigitado, senhaDigitada, null);
+      let u = await encontrarUsuario(usuarioDigitado, senhaDigitada, null);
+
+      // Recuperação: superadmin sem senha cadastrada → define Admin@123
+      if (!u && usuarioDigitado === ADMIN_LOGIN_PADRAO && senhaDigitada === ADMIN_SENHA_PADRAO) {
+        let admin = usuarios.find(x => String(x.usuario || '').toLowerCase() === ADMIN_LOGIN_PADRAO)
+          || usuarios.find(x => x.role === 'superadmin');
+        if (!admin) {
+          admin = {
+            id: 'u_super',
+            usuario: ADMIN_LOGIN_PADRAO,
+            role: 'superadmin',
+            nome: 'Administrador Full',
+            tutor: false,
+            professor: false,
+            escolaId: '',
+            email: '',
+            mustChangePassword: false,
+            senhasAnteriores: []
+          };
+          usuarios.unshift(admin);
+        }
+        if (!admin.senhaHash && !admin.senha) {
+          admin.usuario = ADMIN_LOGIN_PADRAO;
+          admin.role = 'superadmin';
+          await definirSenhaUsuario(admin, ADMIN_SENHA_PADRAO);
+          admin.mustChangePassword = false;
+          salvarUsuarios();
+          u = admin;
+        }
+      }
 
       if (u) {
         falhasLogin = 0;
-        perfilSelecionado = u.role;
-        [...roleTabs.children].forEach(b => b.classList.toggle('active', b.dataset.role === u.role));
         loginError.classList.remove('show');
         loginUser.classList.remove('is-invalid');
         loginPass.classList.remove('is-invalid');
         loginError.textContent = 'Usuário ou senha inválidos';
-        sessaoAtual = { id: u.id, role: u.role, nome: u.nome, tutor: !!u.tutor, usuario: u.usuario };
+        sessaoAtual = { id: u.id, role: u.role, nome: u.nome, tutor: !!u.tutor, usuario: u.usuario, professor: podeSerProfessor(u), escolaId: u.escolaId || '' };
         if (u.mustChangePassword) {
           loginScreen.classList.add('hidden');
           abrirModalTrocaSenha('obrigatorio', u);
@@ -3905,11 +4794,15 @@ teste
       } else {
         const existeLogin = usuarios.some(x => x.usuario === usuarioDigitado);
         const bloqueou = registrarFalhaLogin();
+        const tentado = usuarios.find(x => x.usuario === usuarioDigitado);
+        registrarLog('login_falha', existeLogin
+          ? 'Senha incorreta para @' + usuarioDigitado
+          : 'Usuário não encontrado: @' + usuarioDigitado, tentado);
         loginError.textContent = bloqueou
           ? 'Muitas tentativas. Aguarde 30s e tente novamente.'
           : (existeLogin
             ? 'Senha incorreta para este usuário'
-            : 'Usuário não encontrado. Se acabou de cadastrar, use o computador em que o cadastro foi feito ou importe o backup JSON.');
+            : 'Usuário não encontrado. Confira o login ou peça ao administrador para cadastrar neste sistema.');
         loginError.classList.add('show');
         loginUser.classList.add('is-invalid');
         loginPass.classList.add('is-invalid');
@@ -3917,6 +4810,7 @@ teste
     });
 
     btnSair.addEventListener('click', () => {
+      registrarLog('logout', 'Saiu do sistema');
       sessaoAtual = null;
       usuarioPendenteTroca = null;
       appWrap.classList.add('hidden');
@@ -3924,15 +4818,32 @@ teste
       loginScreen.classList.remove('hidden');
       loginForm.reset();
       loginError.classList.remove('show');
-      loginError.textContent = 'Usuário ou senha inválidos para este perfil';
+      loginError.textContent = 'Usuário ou senha inválidos';
     });
 
     function aplicarPermissoes(sessao) {
       const role = sessao.role;
+      const dual = role === 'admin' && !!sessao.professor;
+      const modoSwitch = document.getElementById('modoSwitch');
       tutorInboxCard.classList.add('hidden');
-      layoutEl.classList.remove('single-col', 'admin-col', 'professor-tutor');
+      layoutEl.classList.remove('single-col', 'admin-col', 'professor-tutor', 'dual-col', 'super-col');
+      if (modoSwitch) modoSwitch.classList.remove('show');
 
-      if (role === 'professor') {
+      const tabEscolas = document.getElementById('tabEscolas');
+      if (tabEscolas) tabEscolas.classList.toggle('hidden', role !== 'superadmin');
+      const tabAuditoria = document.getElementById('tabAuditoria');
+      if (tabAuditoria) tabAuditoria.classList.toggle('hidden', role !== 'admin' && role !== 'superadmin');
+
+      const tabRel = adminTabs && adminTabs.querySelector('[data-panel="relatorio"]');
+      const tabAlu = adminTabs && adminTabs.querySelector('[data-panel="alunos"]');
+      const tabEmail = adminTabs && adminTabs.querySelector('[data-panel="email"]');
+      // Superadmin: Escolas + Usuários (para criar admin da escola) + Servidor
+      [tabRel, tabAlu, tabEmail].forEach(t => {
+        if (!t) return;
+        t.classList.toggle('hidden', role === 'superadmin');
+      });
+
+      if (role === 'professor' || (dual && modoTrabalho === 'professor')) {
         formCard.classList.remove('hidden');
         sidebarCard.classList.add('hidden');
         professorInput.value = sessao.nome;
@@ -3944,38 +4855,101 @@ teste
         } else {
           layoutEl.classList.add('single-col');
         }
+        if (dual && modoSwitch) {
+          modoSwitch.classList.add('show');
+          [...modoSwitch.querySelectorAll('button')].forEach(b => {
+            b.classList.toggle('active', b.dataset.modo === modoTrabalho);
+          });
+        }
+      } else if (role === 'superadmin') {
+        formCard.classList.add('hidden');
+        sidebarCard.classList.remove('hidden');
+        layoutEl.classList.add('super-col');
+        professorInput.readOnly = false;
+        if (tabEscolas) {
+          [...adminTabs.children].forEach(t => t.classList.toggle('active', t === tabEscolas));
+          document.querySelectorAll('.admin-panel').forEach(p => {
+            p.classList.toggle('active', p.id === 'panelEscolas');
+          });
+        }
+        renderizarListaEscolas();
+        preencherSelectEscolasUsuario();
       } else {
         formCard.classList.add('hidden');
         sidebarCard.classList.remove('hidden');
-        layoutEl.classList.add('admin-col');
+        layoutEl.classList.add(dual ? 'dual-col' : 'admin-col');
         professorInput.readOnly = false;
+        if (dual && modoSwitch) {
+          modoSwitch.classList.add('show');
+          [...modoSwitch.querySelectorAll('button')].forEach(b => {
+            b.classList.toggle('active', b.dataset.modo === modoTrabalho);
+          });
+        }
         renderizarListaUsuarios();
         renderizarListaAlunos();
         preencherSelectTutores();
+        preencherSelectEscolasUsuario();
       }
+      atualizarChipEscola();
     }
 
     async function entrarNoApp(sessao) {
+      if (!ehSuperAdmin(sessao)) {
+        const esc = escolaPorId(sessao.escolaId);
+        const st = statusLicencaEscola(esc);
+        if (!st.ok) {
+          mostrarToast(
+            !esc
+              ? 'Usuário sem escola vinculada. Peça ao Admin Full para liberar.'
+              : ('Acesso bloqueado: ' + st.texto + '. Contate o Admin Full.'),
+            'error'
+          );
+          sessaoAtual = null;
+          return;
+        }
+      }
+
+      modoTrabalho = (sessao.role === 'admin' && sessao.professor) ? 'gestao' : (sessao.role === 'professor' ? 'professor' : 'gestao');
       userNomeEl.textContent = sessao.nome;
-      userRoleBadge.textContent = sessao.role === 'admin' ? 'Administrador' : (sessao.tutor ? 'Professor tutor' : 'Professor');
-      userRoleBadge.className = 'role-pill ' + sessao.role;
+      let badge = 'Professor';
+      let badgeClass = 'professor';
+      if (sessao.role === 'superadmin') {
+        badge = 'Admin full';
+        badgeClass = 'superadmin';
+      } else if (sessao.role === 'admin' && sessao.professor) {
+        badge = 'Admin + Professor';
+        badgeClass = 'admin professor';
+      } else if (sessao.role === 'admin') {
+        badge = 'Administrador';
+        badgeClass = 'admin';
+      } else if (sessao.tutor) {
+        badge = 'Professor tutor';
+      }
+      userRoleBadge.textContent = badge;
+      userRoleBadge.className = 'role-pill ' + badgeClass;
       aplicarPermissoes(sessao);
       capaScreen.classList.add('hidden');
       loginScreen.classList.add('hidden');
       appWrap.classList.remove('hidden');
-      if (getBlobId()) {
+      if (SERVER.ativo) {
+        await syncServidor({ somentePull: true });
+      } else if (getBlobId()) {
         await syncNuvem({ silencioso: true });
       }
       preencherSelectTutores();
       limparSelecaoAluno();
       renderizarHistorico();
       if (sessao.tutor) renderizarTutorInbox();
-      if (sessao.role === 'admin') {
+      if (sessao.role === 'admin' || sessao.role === 'superadmin') {
         renderizarListaUsuarios();
         renderizarListaAlunos();
+        if (sessao.role === 'superadmin') renderizarListaEscolas();
         atualizarStatusNuvemUI();
         atualizarStatusEmailUI();
+        renderizarListaAuditoria();
       }
+      atualizarChipEscola();
+      registrarLog('login', 'Acesso como ' + (sessao.role === 'superadmin' ? 'admin full' : (sessao.role === 'admin' ? 'administrador' : 'professor')));
     }
 
     // ============================================================
@@ -3990,7 +4964,68 @@ teste
       document.querySelectorAll('.admin-panel').forEach(p => {
         p.classList.toggle('active', p.id === 'panel' + panel.charAt(0).toUpperCase() + panel.slice(1));
       });
+      if (panel === 'auditoria') renderizarListaAuditoria();
     });
+
+    const modoSwitchEl = document.getElementById('modoSwitch');
+    if (modoSwitchEl) {
+      modoSwitchEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-modo]');
+        if (!btn || !sessaoAtual) return;
+        modoTrabalho = btn.dataset.modo;
+        aplicarPermissoes(sessaoAtual);
+      });
+    }
+
+    function rotuloAcaoLog(acao) {
+      const mapa = {
+        login: 'Login',
+        login_falha: 'Falha de login',
+        logout: 'Saída',
+        usuario_criar: 'Cadastro de usuário',
+        usuario_editar: 'Edição de usuário',
+        usuario_excluir: 'Exclusão de usuário',
+        usuario_senha: 'Redefinição de senha',
+        senha_propria: 'Troca de senha',
+        senha_recuperacao: 'Recuperação de senha',
+        aluno_criar: 'Cadastro de aluno',
+        aluno_excluir: 'Exclusão de aluno',
+        aluno_csv: 'Importação de alunos',
+        ocorrencia: 'Ocorrência',
+        escola_criar: 'Cadastro de escola',
+        escola_excluir: 'Exclusão de escola',
+        licenca: 'Licença',
+        historico_limpar: 'Limpeza de histórico'
+      };
+      return mapa[acao] || acao;
+    }
+    function formatarQuandoLog(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      const p = n => String(n).padStart(2, '0');
+      return p(d.getDate()) + '/' + p(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+    }
+    function renderizarListaAuditoria() {
+      const box = document.getElementById('listaAuditoria');
+      if (!box) return;
+      const escopo = escopoEscolaId();
+      const lista = limitarLogs(logs).filter(l => {
+        if (!escopo) return true;
+        return !l.escolaId || l.escolaId === escopo;
+      });
+      if (!lista.length) {
+        box.innerHTML = '<div class="historico-vazio">Nenhuma ação registrada ainda.</div>';
+        return;
+      }
+      box.innerHTML = lista.slice(0, 300).map(l => `
+        <div class="log-item">
+          <div class="log-when">${escaparHtml(formatarQuandoLog(l.em))}</div>
+          <strong>${escaparHtml(rotuloAcaoLog(l.acao))}</strong>
+          <div class="meta">${escaparHtml((l.nome || l.usuario || 'Sistema') + (l.usuario ? ' (@' + l.usuario + ')' : ''))}${l.detalhe ? ' · ' + escaparHtml(l.detalhe) : ''}</div>
+        </div>
+      `).join('');
+    }
 
     // ============================================================
     //  USUÁRIOS (admin)
@@ -3998,26 +5033,118 @@ teste
     const formUsuario = document.getElementById('formUsuario');
     const listaUsuarios = document.getElementById('listaUsuarios');
 
+    function preencherSelectEscolasUsuario() {
+      const sel = document.getElementById('novoUserEscola');
+      if (!sel) return;
+      const cur = sel.value;
+      const lista = ehSuperAdmin(sessaoAtual) ? escolas : escolas.filter(e => e.id === (sessaoAtual && sessaoAtual.escolaId));
+      sel.innerHTML = '<option value="">Selecione a escola</option>' + lista.map(e =>
+        '<option value="' + e.id + '">' + escaparHtml(e.nome) + '</option>'
+      ).join('');
+      if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+      else if (lista.length === 1) sel.value = lista[0].id;
+    }
+
     document.getElementById('novoUserRole').addEventListener('change', (e) => {
       const isProf = e.target.value === 'professor';
       const tutorCheck = document.getElementById('novoUserTutor');
-      tutorCheck.disabled = !isProf;
-      if (!isProf) tutorCheck.checked = false;
+      const tambemProf = document.getElementById('novoUserTambemProfessor');
+      tutorCheck.disabled = !(isProf || (tambemProf && tambemProf.checked));
+      if (!isProf && !(tambemProf && tambemProf.checked)) tutorCheck.checked = false;
+      if (tambemProf) tambemProf.disabled = isProf;
+      if (isProf && tambemProf) tambemProf.checked = true;
     });
+    const chkTambemProf = document.getElementById('novoUserTambemProfessor');
+    if (chkTambemProf) {
+      chkTambemProf.addEventListener('change', () => {
+        const role = document.getElementById('novoUserRole').value;
+        const tutorCheck = document.getElementById('novoUserTutor');
+        const podeTutor = role === 'professor' || chkTambemProf.checked;
+        tutorCheck.disabled = !podeTutor;
+        if (!podeTutor) tutorCheck.checked = false;
+      });
+    }
 
     document.getElementById('btnGerarSenhaUser').addEventListener('click', () => {
       document.getElementById('novoUserSenha').value = gerarSenhaProvisoria();
       mostrarToast('Senha provisória gerada. Anote e informe ao usuário.');
     });
 
+    function resetFormUsuario() {
+      document.getElementById('editUserId').value = '';
+      formUsuario.reset();
+      const titulo = document.getElementById('tituloFormUsuario');
+      const btn = document.getElementById('btnSalvarUsuario');
+      const cancel = document.getElementById('btnCancelarEdicaoUser');
+      if (titulo) titulo.textContent = 'Cadastrar usuário';
+      if (btn) btn.textContent = 'Salvar usuário';
+      if (cancel) cancel.classList.add('hidden');
+      const tambemProf = document.getElementById('novoUserTambemProfessor');
+      if (tambemProf) tambemProf.disabled = false;
+      preencherSelectEscolasUsuario();
+    }
+    function iniciarEdicaoUsuario(u) {
+      if (!u) return;
+      if (u.role === 'superadmin' && !ehSuperAdmin(sessaoAtual)) {
+        mostrarToast('Você não pode editar o admin full', 'error');
+        return;
+      }
+      document.getElementById('editUserId').value = u.id;
+      document.getElementById('novoUserNome').value = u.nome || '';
+      document.getElementById('novoUserLogin').value = u.usuario || '';
+      document.getElementById('novoUserEmail').value = u.email || '';
+      document.getElementById('novoUserSenha').value = '';
+      document.getElementById('novoUserRole').value = u.role === 'superadmin' ? 'admin' : (u.role || 'professor');
+      if (u.role === 'superadmin') {
+        mostrarToast('O admin full não tem perfil de escola editável aqui', 'error');
+        document.getElementById('editUserId').value = '';
+        return;
+      }
+      const tambemProf = document.getElementById('novoUserTambemProfessor');
+      if (tambemProf) {
+        tambemProf.checked = u.role === 'admin' && !!u.professor;
+        tambemProf.disabled = u.role === 'professor';
+      }
+      document.getElementById('novoUserTutor').checked = !!u.tutor;
+      document.getElementById('novoUserTutor').disabled = !(u.role === 'professor' || u.professor);
+      preencherSelectEscolasUsuario();
+      const selEsc = document.getElementById('novoUserEscola');
+      if (selEsc && u.escolaId) selEsc.value = u.escolaId;
+      const titulo = document.getElementById('tituloFormUsuario');
+      const btn = document.getElementById('btnSalvarUsuario');
+      const cancel = document.getElementById('btnCancelarEdicaoUser');
+      if (titulo) titulo.textContent = 'Editar usuário';
+      if (btn) btn.textContent = 'Salvar alterações';
+      if (cancel) cancel.classList.remove('hidden');
+      formUsuario.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    const btnCancelarEdicaoUser = document.getElementById('btnCancelarEdicaoUser');
+    if (btnCancelarEdicaoUser) btnCancelarEdicaoUser.addEventListener('click', resetFormUsuario);
+
     formUsuario.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const editId = (document.getElementById('editUserId') && document.getElementById('editUserId').value) || '';
       const nome = document.getElementById('novoUserNome').value.trim();
       const login = document.getElementById('novoUserLogin').value.trim().toLowerCase();
       const email = document.getElementById('novoUserEmail').value.trim();
       let senha = document.getElementById('novoUserSenha').value;
       const role = document.getElementById('novoUserRole').value;
-      const tutor = document.getElementById('novoUserTutor').checked && role === 'professor';
+      const tambemProfessor = !!(document.getElementById('novoUserTambemProfessor') && document.getElementById('novoUserTambemProfessor').checked);
+      const professorFlag = role === 'professor' || tambemProfessor;
+      const tutor = document.getElementById('novoUserTutor').checked && professorFlag;
+      let escolaId = (document.getElementById('novoUserEscola') && document.getElementById('novoUserEscola').value) || '';
+
+      if (!ehSuperAdmin(sessaoAtual)) {
+        escolaId = sessaoAtual && sessaoAtual.escolaId ? sessaoAtual.escolaId : escolaId;
+      }
+      if (!escolaId) {
+        mostrarToast('Selecione a escola do usuário', 'error');
+        return;
+      }
+      if (!licencaEscolaOk(escolaPorId(escolaId)) && !ehSuperAdmin(sessaoAtual)) {
+        mostrarToast('A escola está sem licença ativa', 'error');
+        return;
+      }
 
       if (!nome || !login) {
         mostrarToast('Preencha nome e usuário', 'error');
@@ -4027,16 +5154,63 @@ teste
         mostrarToast('Informe um e-mail válido', 'error');
         return;
       }
+      if (usuarios.some(u => u.usuario.toLowerCase() === login && u.id !== editId)) {
+        mostrarToast('Já existe um usuário com este login', 'error');
+        return;
+      }
+
+      if (editId) {
+        const alvo = usuarios.find(u => u.id === editId);
+        if (!alvo) {
+          mostrarToast('Usuário não encontrado', 'error');
+          return;
+        }
+        if (alvo.role === 'superadmin') {
+          mostrarToast('Não é possível alterar o admin full por este formulário', 'error');
+          return;
+        }
+        if (senha && !senhaAtendeRegras(senha, { usuario: login })) {
+          mostrarToast(mensagemRegrasSenha(), 'error');
+          return;
+        }
+        alvo.nome = nome;
+        alvo.usuario = login;
+        alvo.role = role;
+        alvo.email = email;
+        alvo.tutor = tutor;
+        alvo.professor = professorFlag;
+        alvo.escolaId = escolaId;
+        if (senha) {
+          await definirSenhaUsuario(alvo, senha);
+          alvo.mustChangePassword = true;
+        }
+        tocarRegistro(alvo);
+        salvarUsuarios();
+        registrarLog('usuario_editar', 'Alterou cadastro de @' + login + ' (' + nome + ')', alvo);
+        if (sessaoAtual && sessaoAtual.id === alvo.id) {
+          sessaoAtual.nome = alvo.nome;
+          sessaoAtual.role = alvo.role;
+          sessaoAtual.usuario = alvo.usuario;
+          sessaoAtual.tutor = !!alvo.tutor;
+          sessaoAtual.professor = podeSerProfessor(alvo);
+          sessaoAtual.escolaId = alvo.escolaId || '';
+          aplicarPermissoes(sessaoAtual);
+        }
+        resetFormUsuario();
+        renderizarListaUsuarios();
+        preencherSelectTutores();
+        mostrarToast(senha
+          ? 'Usuário atualizado. Nova senha provisória: ' + senha
+          : 'Dados do usuário atualizados');
+        return;
+      }
+
       if (!senha) {
         senha = gerarSenhaProvisoria();
         document.getElementById('novoUserSenha').value = senha;
       }
       if (!senhaAtendeRegras(senha, { usuario: login })) {
         mostrarToast(mensagemRegrasSenha(), 'error');
-        return;
-      }
-      if (usuarios.some(u => u.usuario.toLowerCase() === login)) {
-        mostrarToast('Já existe um usuário com este login', 'error');
         return;
       }
 
@@ -4046,46 +5220,73 @@ teste
         role,
         nome,
         tutor,
+        professor: professorFlag,
+        escolaId,
         email,
         mustChangePassword: true,
         senhasAnteriores: []
       };
       await definirSenhaUsuario(novo, senha);
       novo.mustChangePassword = true;
+      desmarcarRemovido('usuarios', novo);
       usuarios.push(tocarRegistro(novo));
       salvarUsuarios();
-      formUsuario.reset();
+      registrarLog('usuario_criar', 'Cadastrou @' + login + ' (' + nome + ') como ' + (role === 'admin' ? 'administrador' : 'professor'), novo);
+      resetFormUsuario();
       renderizarListaUsuarios();
       preencherSelectTutores();
       alert(
         'Usuário cadastrado.\n\n' +
         'Login: ' + login + '\n' +
-        'Senha provisória: ' + senha + '\n\n' +
+        'Senha provisória: ' + senha + '\n' +
+        'Escola: ' + ((escolaPorId(escolaId) && escolaPorId(escolaId).nome) || escolaId) + '\n\n' +
         'Entregue esses dados ao usuário. No primeiro acesso ele deverá trocar a senha.'
       );
       mostrarToast('Usuário cadastrado!');
     });
 
     function renderizarListaUsuarios() {
-      if (!usuarios.length) {
+      const escopo = escopoEscolaId();
+      const lista = usuarios.filter(u => {
+        if (u.role === 'superadmin') return ehSuperAdmin(sessaoAtual);
+        if (!escopo) return true;
+        return u.escolaId === escopo;
+      });
+      if (!lista.length) {
         listaUsuarios.innerHTML = '<div class="historico-vazio">Nenhum usuário cadastrado.</div>';
         return;
       }
-      listaUsuarios.innerHTML = usuarios.map(u => `
+      listaUsuarios.innerHTML = lista.map(u => {
+        const esc = escolaPorId(u.escolaId);
+        let perfil = 'Professor';
+        if (u.role === 'superadmin') perfil = 'Admin full';
+        else if (u.role === 'admin' && u.professor) perfil = 'Admin + Professor';
+        else if (u.role === 'admin') perfil = 'Administrador';
+        else if (u.tutor) perfil = 'Professor tutor';
+        return `
         <div class="lista-item">
           <div>
             <strong>${escaparHtml(u.nome)}</strong>
-            <div class="meta">@${escaparHtml(u.usuario)} · ${u.role === 'admin' ? 'Administrador' : 'Professor'}${u.tutor ? ' · Tutor' : ''}${u.email ? ' · ' + escaparHtml(u.email) : ''}${u.mustChangePassword ? ' · Troca de senha pendente' : ''}</div>
+            <div class="meta">@${escaparHtml(u.usuario)} · ${perfil}${esc ? ' · ' + escaparHtml(esc.nome) : ''}${u.email ? ' · ' + escaparHtml(u.email) : ''}${u.mustChangePassword ? ' · Troca de senha pendente' : ''}</div>
           </div>
           <div class="lista-item-actions">
+            ${u.role === 'superadmin' ? '' : '<button type="button" class="btn-item-edit" data-edit-user="' + u.id + '">Editar</button>'}
             <button type="button" class="btn-item-reset" data-reset-user="${u.id}">Alterar senha</button>
             <button type="button" class="btn-item-del" data-del-user="${u.id}">Excluir</button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     listaUsuarios.addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('[data-edit-user]');
+      if (editBtn) {
+        const alvo = usuarios.find(u => u.id === editBtn.dataset.editUser);
+        if (alvo) iniciarEdicaoUsuario(alvo);
+        return;
+      }
+
       const resetBtn = e.target.closest('[data-reset-user]');
       if (resetBtn) {
         const id = resetBtn.dataset.resetUser;
@@ -4104,13 +5305,19 @@ teste
       }
       const admins = usuarios.filter(u => u.role === 'admin');
       const alvo = usuarios.find(u => u.id === id);
+      if (alvo && alvo.role === 'superadmin' && !ehSuperAdmin(sessaoAtual)) {
+        mostrarToast('Você não pode excluir o admin full', 'error');
+        return;
+      }
       if (alvo && alvo.role === 'admin' && admins.length <= 1) {
         mostrarToast('É preciso manter ao menos um administrador', 'error');
         return;
       }
       if (!confirm('Excluir este usuário?')) return;
+      if (alvo) marcarRemovido('usuarios', alvo);
       usuarios = usuarios.filter(u => u.id !== id);
       salvarUsuarios();
+      registrarLog('usuario_excluir', 'Excluiu @' + (alvo && alvo.usuario ? alvo.usuario : id), alvo);
       alunos = alunos.map(a => a.tutorId === id ? { ...a, tutorId: '' } : a);
       salvarAlunos();
       renderizarListaUsuarios();
@@ -4201,12 +5408,130 @@ teste
       await definirSenhaUsuario(u, nova);
       u.mustChangePassword = !!forcar;
       salvarUsuarios();
+      registrarLog('usuario_senha', 'Redefiniu senha de @' + u.usuario, u);
       renderizarListaUsuarios();
       fecharModalAdminPwd();
       mostrarToast(forcar
         ? 'Senha alterada. O usuário deverá trocá-la no próximo login.'
         : 'Senha do usuário alterada com sucesso.');
     });
+
+    // ============================================================
+    //  ESCOLAS / LICENÇAS (superadmin)
+    // ============================================================
+    const formEscola = document.getElementById('formEscola');
+    const listaEscolasEl = document.getElementById('listaEscolas');
+
+    function renderizarListaEscolas() {
+      if (!listaEscolasEl) return;
+      if (!escolas.length) {
+        listaEscolasEl.innerHTML = '<div class="historico-vazio">Nenhuma escola cadastrada. Cadastre e libere a licença.</div>';
+        return;
+      }
+      listaEscolasEl.innerHTML = escolas.slice().sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR')).map(e => {
+        const st = statusLicencaEscola(e);
+        const qtdU = usuarios.filter(u => u.escolaId === e.id).length;
+        const qtdA = alunos.filter(a => a.escolaId === e.id).length;
+        return `
+          <div class="lista-item">
+            <div>
+              <strong>${escaparHtml(e.nome)}</strong>
+              <div class="meta">
+                ${escaparHtml(e.codigo || '—')}${e.cidade ? ' · ' + escaparHtml(e.cidade) : ''}<br>
+                Chave: ${escaparHtml(e.licencaChave || '—')} · ${st.ok ? '✓ ' : '✗ '}${escaparHtml(st.texto)}<br>
+                ${qtdU} usuário(s) · ${qtdA} aluno(s)
+              </div>
+            </div>
+            <div class="lista-item-actions">
+              <button type="button" class="btn-item-reset" data-toggle-licenca="${e.id}">${e.licencaAtiva ? 'Suspender' : 'Ativar'}</button>
+              <button type="button" class="btn-item-del" data-del-escola="${e.id}">Excluir</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    if (document.getElementById('btnGerarLicenca')) {
+      document.getElementById('btnGerarLicenca').addEventListener('click', () => {
+        document.getElementById('novaEscolaChave').value = gerarChaveLicenca();
+        mostrarToast('Chave de licença gerada');
+      });
+    }
+
+    if (formEscola) {
+      formEscola.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!sessaoAtual || sessaoAtual.role !== 'superadmin') {
+          mostrarToast('Apenas o Admin Full pode liberar escolas', 'error');
+          return;
+        }
+        const nome = document.getElementById('novaEscolaNome').value.trim();
+        const codigo = document.getElementById('novaEscolaCodigo').value.trim().toUpperCase();
+        const cidade = document.getElementById('novaEscolaCidade').value.trim();
+        const licencaAte = document.getElementById('novaEscolaValidade').value;
+        const licencaAtiva = document.getElementById('novaEscolaAtiva').checked;
+        let licencaChave = document.getElementById('novaEscolaChave').value.trim();
+        if (!nome) {
+          mostrarToast('Informe o nome da escola', 'error');
+          return;
+        }
+        if (!licencaChave) {
+          licencaChave = gerarChaveLicenca();
+          document.getElementById('novaEscolaChave').value = licencaChave;
+        }
+        const nova = tocarRegistro({
+          id: uid('esc'),
+          nome,
+          codigo: codigo || nome.slice(0, 8).toUpperCase().replace(/\s+/g, ''),
+          cidade,
+          licencaChave,
+          licencaAtiva,
+          licencaAte: licencaAte || '',
+          liberadaPor: sessaoAtual.usuario,
+          liberadaEm: new Date().toISOString(),
+          criadaEm: new Date().toISOString()
+        });
+        desmarcarRemovido('escolas', nova);
+        escolas.push(nova);
+        salvarEscolas();
+        formEscola.reset();
+        document.getElementById('novaEscolaAtiva').checked = true;
+        renderizarListaEscolas();
+        preencherSelectEscolasUsuario();
+        registrarLog('escola_criar', 'Cadastrou escola ' + nome + (licencaAtiva ? ' com licença ativa' : ' (licença inativa)'), nova);
+        mostrarToast('Escola cadastrada e licença ' + (licencaAtiva ? 'liberada' : 'salva inativa'));
+      });
+    }
+
+    if (listaEscolasEl) {
+      listaEscolasEl.addEventListener('click', (e) => {
+        const tog = e.target.closest('[data-toggle-licenca]');
+        if (tog) {
+          const esc = escolas.find(x => x.id === tog.dataset.toggleLicenca);
+          if (!esc) return;
+          esc.licencaAtiva = !esc.licencaAtiva;
+          tocarRegistro(esc);
+          salvarEscolas();
+          renderizarListaEscolas();
+          registrarLog('licenca', (esc.licencaAtiva ? 'Ativou' : 'Suspendeu') + ' licença de ' + esc.nome, esc);
+          mostrarToast(esc.licencaAtiva ? 'Licença ativada' : 'Licença suspensa');
+          return;
+        }
+        const del = e.target.closest('[data-del-escola]');
+        if (!del) return;
+        const id = del.dataset.delEscola;
+        const esc = escolas.find(x => x.id === id);
+        if (!esc) return;
+        if (!confirm('Excluir a escola "' + esc.nome + '"? Usuários vinculados ficarão sem escola.')) return;
+        marcarRemovido('escolas', esc);
+        escolas = escolas.filter(x => x.id !== id);
+        salvarEscolas();
+        renderizarListaEscolas();
+        preencherSelectEscolasUsuario();
+        registrarLog('escola_excluir', 'Excluiu escola ' + esc.nome, esc);
+        mostrarToast('Escola excluída');
+      });
+    }
 
     // ============================================================
     //  ALUNOS (admin) + CSV
@@ -4257,21 +5582,27 @@ teste
         return;
       }
 
-      alunos.push(tocarRegistro({
-        id: uid('a'), nome, ra, turma, responsavel, celular, email, tutorId
-      }));
+      const novoAluno = {
+        id: uid('a'),
+        nome, ra, turma, responsavel, celular, email, tutorId,
+        escolaId: escopoEscolaId() || (sessaoAtual && sessaoAtual.escolaId) || (escolas[0] && escolas[0].id) || ''
+      };
+      desmarcarRemovido('alunos', novoAluno);
+      alunos.push(tocarRegistro(novoAluno));
       salvarAlunos();
       formAluno.reset();
       renderizarListaAlunos();
+      registrarLog('aluno_criar', 'Cadastrou aluno ' + nome + ' (RA ' + ra + ')', novoAluno);
       mostrarToast('Aluno cadastrado!');
     });
 
     function renderizarListaAlunos() {
-      if (!alunos.length) {
+      const lista = alunosDaEscola(escopoEscolaId());
+      if (!lista.length) {
         listaAlunosEl.innerHTML = '<div class="historico-vazio">Nenhum aluno cadastrado. Cadastre ou importe um CSV.</div>';
         return;
       }
-      listaAlunosEl.innerHTML = alunos.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(a => `
+      listaAlunosEl.innerHTML = lista.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')).map(a => `
         <div class="lista-item">
           <div>
             <strong>${escaparHtml(a.nome)}</strong>
@@ -4286,9 +5617,12 @@ teste
       const btn = e.target.closest('[data-del-aluno]');
       if (!btn) return;
       if (!confirm('Excluir este aluno?')) return;
+      const alunoDel = alunos.find(a => a.id === btn.dataset.delAluno);
+      if (alunoDel) marcarRemovido('alunos', alunoDel);
       alunos = alunos.filter(a => a.id !== btn.dataset.delAluno);
       salvarAlunos();
       renderizarListaAlunos();
+      registrarLog('aluno_excluir', 'Excluiu aluno ' + ((alunoDel && alunoDel.nome) || btn.dataset.delAluno), alunoDel);
       mostrarToast('Aluno excluído');
     });
 
@@ -4362,7 +5696,7 @@ teste
           if (tutor) tutorId = tutor.id;
         }
 
-        alunos.push(tocarRegistro({
+        const alunoCsv = {
           id: uid('a'),
           nome,
           ra,
@@ -4370,11 +5704,17 @@ teste
           responsavel: iResp >= 0 ? (cols[iResp] || '').trim() : '',
           celular: iCel >= 0 ? (cols[iCel] || '').trim() : '',
           email: iEmail >= 0 ? (cols[iEmail] || '').trim() : '',
-          tutorId
-        }));
+          tutorId,
+          escolaId: escopoEscolaId() || (sessaoAtual && sessaoAtual.escolaId) || (escolas[0] && escolas[0].id) || ''
+        };
+        desmarcarRemovido('alunos', alunoCsv);
+        alunos.push(tocarRegistro(alunoCsv));
         ok++;
       }
-      if (ok) salvarAlunos();
+      if (ok) {
+        salvarAlunos();
+        registrarLog('aluno_csv', 'Importou CSV: ' + ok + ' aluno(s)' + (erros ? ', ' + erros + ' linha(s) ignorada(s)' : ''));
+      }
       return { ok, erros };
     }
 
@@ -4449,7 +5789,8 @@ teste
         alunoSugestoes.classList.remove('show');
         return;
       }
-      const hits = alunos.filter(a =>
+      const baseAlunos = alunosDaEscola(escopoEscolaId());
+      const hits = baseAlunos.filter(a =>
         a.nome.toLowerCase().includes(q) || a.ra.toLowerCase().includes(q)
       ).slice(0, 8);
 
@@ -4967,9 +6308,13 @@ teste
     //  ESTADO EM MEMÓRIA
     // ============================================================
     function carregarOcorrencias() {
-      return ocorrencias;
+      return ocorrenciasDaEscola(escopoEscolaId());
     }
     function salvarOcorrencia(oc) {
+      if (!oc.escolaId) {
+        oc.escolaId = escopoEscolaId() || (sessaoAtual && sessaoAtual.escolaId) || '';
+      }
+      desmarcarRemovido('ocorrencias', oc);
       ocorrencias.unshift(tocarRegistro(oc));
       salvarOcorrenciasStore();
     }
@@ -5113,8 +6458,10 @@ teste
 
     function limparHistorico() {
       if (!confirm('Limpar todo o histórico de ocorrências?')) return;
+      ocorrencias.forEach(oc => marcarRemovido('ocorrencias', oc));
       ocorrencias = [];
       salvarOcorrenciasStore();
+      registrarLog('historico_limpar', 'Limpou o histórico de ocorrências da escola');
       renderizarHistorico();
       renderizarTutorInbox();
       mostrarToast('Histórico limpo!', 'success');
@@ -5387,11 +6734,13 @@ teste
         tutorNome: dadosAluno.tutorNome,
         direcionadoGestao: nivelFinal !== 'verde',
         providencias: providenciasFinal,
-        responsavel: info.responsavel
+        responsavel: info.responsavel,
+        escolaId: escopoEscolaId() || (sessaoAtual && sessaoAtual.escolaId) || ''
       };
 
       ultimaOcorrencia = ocorrencia;
       salvarOcorrencia(ocorrencia);
+      registrarLog('ocorrencia', 'Registrou ocorrência ' + ocorrencia.protocolo + ' · ' + ocorrencia.aluno, ocorrencia);
 
       if (ocorrencia.email) {
         if (emailjsConfigurado()) {

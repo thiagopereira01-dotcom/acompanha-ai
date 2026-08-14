@@ -1,0 +1,1 @@
+window.ACOMPANHA_API_TOKEN = '';
