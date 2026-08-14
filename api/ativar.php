@@ -40,13 +40,14 @@ function escrever_arquivo($path, $conteudo) {
   return true;
 }
 
-function escrever_config($host, $name, $user, $pass, $token) {
+function escrever_config($host, $name, $user, $pass, $token, $cors = '') {
   $tpl = "<?php\n"
     . "define('DB_HOST', " . var_export($host, true) . ");\n"
     . "define('DB_NAME', " . var_export($name, true) . ");\n"
     . "define('DB_USER', " . var_export($user, true) . ");\n"
     . "define('DB_PASS', " . var_export($pass, true) . ");\n"
-    . "define('API_TOKEN', " . var_export($token, true) . ");\n";
+    . "define('API_TOKEN', " . var_export($token, true) . ");\n"
+    . "define('API_CORS_ORIGINS', " . var_export(trim($cors), true) . ");\n";
   return escrever_arquivo(__DIR__ . '/config.php', $tpl);
 }
 
@@ -67,7 +68,11 @@ function url_app() {
   return $scheme . '://' . $host . $base . '/';
 }
 
-function instalar($host, $name, $user, $pass) {
+function url_api() {
+  return rtrim(url_app(), '/') . '/api/index.php';
+}
+
+function instalar($host, $name, $user, $pass, $cors = '') {
   $host = trim($host);
   $name = trim($name);
   $user = trim($user);
@@ -141,7 +146,7 @@ function instalar($host, $name, $user, $pass) {
   $mysqli->close();
 
   $token = gerar_token();
-  $cfgOk = escrever_config($host, $name, $user, $pass, $token);
+  $cfgOk = escrever_config($host, $name, $user, $pass, $token, $cors);
   $jsOk = escrever_token_js($token);
 
   if (!$cfgOk || !$jsOk) {
@@ -163,16 +168,21 @@ function instalar($host, $name, $user, $pass) {
   return array(
     'ok' => true,
     'token' => $token,
-    'appUrl' => url_app()
+    'appUrl' => url_app(),
+    'apiUrl' => url_api(),
+    'cors' => trim($cors)
   );
 }
 
 $appUrl = url_app();
+$apiUrl = url_api();
 $hostVal = 'localhost';
 $nameVal = '';
 $userVal = '';
 $passVal = '';
+$corsVal = '';
 $tokenManual = '';
+$geradoCors = '';
 
 try {
   if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reinstalar'])) {
@@ -183,13 +193,16 @@ try {
     $nameVal = isset($_POST['db_name']) ? $_POST['db_name'] : '';
     $userVal = isset($_POST['db_user']) ? $_POST['db_user'] : '';
     $passVal = isset($_POST['db_pass']) ? $_POST['db_pass'] : '';
+    $corsVal = isset($_POST['cors_origins']) ? trim($_POST['cors_origins']) : '';
 
-    $resultado = instalar($hostVal, $nameVal, $userVal, $passVal);
+    $resultado = instalar($hostVal, $nameVal, $userVal, $passVal, $corsVal);
     if (!empty($resultado['ok'])) {
       $ok = true;
       $jaInstalado = true;
       $geradoToken = $resultado['token'];
+      $geradoCors = isset($resultado['cors']) ? $resultado['cors'] : $corsVal;
       $appUrl = isset($resultado['appUrl']) ? $resultado['appUrl'] : $appUrl;
+      $apiUrl = isset($resultado['apiUrl']) ? $resultado['apiUrl'] : $apiUrl;
     } else {
       $erro = isset($resultado['erro']) ? $resultado['erro'] : 'Falha na instalação.';
       if (!empty($resultado['token'])) {
@@ -265,10 +278,16 @@ $writable = is_writable(__DIR__) ? 'sim' : 'não';
     <?php if ($ok): ?>
       <p class="ok">Instalação concluída. Os dados passam a gravar no MySQL automaticamente.</p>
       <ol>
-        <li>Abra o sistema e use <strong>Ctrl+F5</strong>.</li>
+        <li>Se o site também está nesta HostGator, abra o sistema e use <strong>Ctrl+F5</strong>.</li>
+        <li>Se a página está no <strong>Render</strong>, baixe o <code>config.js</code> abaixo e envie junto com o <code>index.html</code>.</li>
         <li><strong>Apague</strong> <code>api/ativar.php</code> e <code>api/install.php</code>.</li>
       </ol>
-      <a class="btn" href="<?php echo h($appUrl); ?>">Abrir o Acompanha-Aí</a>
+      <p class="hint">API: <code><?php echo h($apiUrl); ?></code><?php if ($geradoCors): ?><br>CORS (Render): <code><?php echo h($geradoCors); ?></code><?php endif; ?></p>
+      <textarea readonly id="configJsBox">window.ACOMPANHA_API_URL = <?php echo json_encode($apiUrl); ?>;
+window.ACOMPANHA_API_TOKEN = <?php echo json_encode($geradoToken); ?>;
+</textarea>
+      <button type="button" class="btn-ghost" id="btnBaixarConfigJs">Baixar config.js (Render)</button>
+      <a class="btn" href="<?php echo h($appUrl); ?>">Abrir o Acompanha-Aí nesta HostGator</a>
 
     <?php elseif ($jaInstalado): ?>
       <p class="ok">O servidor já está instalado.</p>
@@ -296,6 +315,10 @@ $writable = is_writable(__DIR__) ? 'sim' : 'não';
 
         <label for="db_pass">Senha do banco</label>
         <input id="db_pass" name="db_pass" type="password" value="" autocomplete="new-password">
+
+        <label for="cors_origins">URL do site no Render (opcional)</label>
+        <input id="cors_origins" name="cors_origins" value="<?php echo h($corsVal); ?>" placeholder="https://seu-app.onrender.com" autocomplete="off">
+        <p style="margin:6px 0 0;font-size:.78rem;">Deixe vazio se o <code>index.html</code> também ficar nesta HostGator. Várias origens: separe por vírgula.</p>
 
         <button type="submit" name="instalar" value="1">Criar tabela e ativar</button>
       </form>
@@ -369,12 +392,15 @@ $writable = is_writable(__DIR__) ? 'sim' : 'não';
           for (var i = 0; i < 48; i++) token += chars[Math.floor(Math.random() * chars.length)];
 
           var openTag = '<' + '?php\n';
+          var corsEl = document.getElementById('cors_origins');
+          var cors = corsEl ? corsEl.value.trim() : '';
           var cfg = openTag
             + "define('DB_HOST', " + phpExport(host) + ");\n"
             + "define('DB_NAME', " + phpExport(name) + ");\n"
             + "define('DB_USER', " + phpExport(user) + ");\n"
             + "define('DB_PASS', " + phpExport(pass) + ");\n"
-            + "define('API_TOKEN', " + phpExport(token) + ");\n";
+            + "define('API_TOKEN', " + phpExport(token) + ");\n"
+            + "define('API_CORS_ORIGINS', " + phpExport(cors) + ");\n";
 
           var js = 'window.ACOMPANHA_API_TOKEN = ' + JSON.stringify(token) + ';\n';
           download('config.php', cfg);
@@ -383,6 +409,15 @@ $writable = is_writable(__DIR__) ? 'sim' : 'não';
           msg.style.display = 'block';
           msg.className = 'ok';
           msg.innerHTML = 'Arquivos gerados. Envie os dois para a pasta <code>api/</code> na HostGator (substituindo). Token: <code>' + token + '</code>';
+        });
+      }
+
+      var btnCfg = document.getElementById('btnBaixarConfigJs');
+      if (btnCfg) {
+        btnCfg.addEventListener('click', function () {
+          var t = document.getElementById('configJsBox');
+          download('config.js', t ? t.value : '');
+          btnCfg.textContent = 'config.js baixado';
         });
       }
 

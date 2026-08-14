@@ -14,14 +14,31 @@ Um usuário pode ser **administrador e professor** ao mesmo tempo (marque “Tam
 
 O sistema identifica a **escola** no topo da tela. Sem licença ativa, usuários daquela escola não entram.
 
-## Hospedagem na HostGator (recomendado)
+## Hospedagem: página no Render + dados na HostGator
+
+A tela (`index.html`) fica no Render. O MySQL e a API PHP ficam na HostGator.
+
+1. Na HostGator: crie o banco MySQL e envie **somente a pasta `api/`**.
+2. Abra `https://seudominio.com.br/api/ativar.php`.
+3. Preencha o banco e, em **URL do site no Render**, cole `https://seu-app.onrender.com` (sem barra no final).
+4. Baixe o `config.js` que o instalador gera.
+5. No Render (Static Site), publique `index.html` e o `config.js` (com a URL da API e o token).
+6. Apague `api/ativar.php` na HostGator.
+
+Se a API já estava instalada, edite `api/config.php` e acrescente:
+
+```php
+define('API_CORS_ORIGINS', 'https://seu-app.onrender.com');
+```
+
+Passo a passo da HostGator: [INSTALAR-HOSTGATOR.md](INSTALAR-HOSTGATOR.md).
+
+## Hospedagem só na HostGator
 
 1. Crie um banco MySQL no cPanel.
-2. Envie `index.html` e a pasta `api/` para `public_html`.
-3. Abra `https://seudominio.com.br/api/ativar.php` e preencha os dados do banco.
+2. Envie `index.html`, `config.js` e a pasta `api/` para `public_html`.
+3. Abra `https://seudominio.com.br/api/ativar.php` e preencha os dados do banco (URL do Render vazia).
 4. Apague `api/ativar.php` depois que o status ficar verde.
-
-Passo a passo: [INSTALAR-HOSTGATOR.md](INSTALAR-HOSTGATOR.md).
 
 ## Primeiro acesso (Admin full)
 

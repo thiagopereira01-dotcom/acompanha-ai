@@ -9,11 +9,55 @@ function json_out($data, $code = 200) {
   exit;
 }
 
+function cors_origens_permitidas() {
+  if (!defined('API_CORS_ORIGINS') || API_CORS_ORIGINS === '') {
+    return array();
+  }
+  $parts = preg_split('/[\s,]+/', API_CORS_ORIGINS, -1, PREG_SPLIT_NO_EMPTY);
+  return $parts ? $parts : array();
+}
+
+function aplicar_cors() {
+  $origin = isset($_SERVER['HTTP_ORIGIN']) ? trim($_SERVER['HTTP_ORIGIN']) : '';
+  $permitidas = cors_origens_permitidas();
+  if (!$permitidas) {
+    return;
+  }
+  $liberar = false;
+  $usarEstrela = false;
+  $originNorm = rtrim($origin, '/');
+  foreach ($permitidas as $p) {
+    $p = trim($p);
+    if ($p === '*') {
+      $liberar = true;
+      $usarEstrela = true;
+      break;
+    }
+    if ($originNorm !== '' && strcasecmp(rtrim($p, '/'), $originNorm) === 0) {
+      $liberar = true;
+      break;
+    }
+  }
+  if (!$liberar) {
+    return;
+  }
+  if ($usarEstrela && $origin === '') {
+    header('Access-Control-Allow-Origin: *');
+  } else {
+    header('Access-Control-Allow-Origin: ' . ($origin !== '' ? $origin : '*'));
+    header('Vary: Origin');
+  }
+  header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
+  header('Access-Control-Allow-Headers: Content-Type, Accept, X-Api-Token');
+  header('Access-Control-Max-Age: 86400');
+}
+
 if (!is_file(__DIR__ . '/config.php')) {
   json_out(array('ok' => false, 'erro' => 'nao_configurado'), 503);
 }
 
 require __DIR__ . '/config.php';
+aplicar_cors();
 
 $action = isset($_GET['action']) ? $_GET['action'] : 'ping';
 $method = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'GET';

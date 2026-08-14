@@ -2012,14 +2012,16 @@
           </div>
           <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
             <strong>Tudo é automático.</strong> Ao cadastrar aluno, usuário ou ocorrência, o sistema grava sozinho no MySQL da HostGator.
-            Os outros computadores atualizam sozinhos em poucos segundos — sem clicar em backup.
+            A página pode ficar no Render; os dados ficam na HostGator. Os outros computadores atualizam sozinhos em poucos segundos.
           </p>
           <div class="cloud-status" id="serverStatus">
             <span class="cloud-dot"></span>
             <span id="serverStatusText">Procurando servidor da escola…</span>
           </div>
+          <p id="serverApiUrlHint" style="font-size:.75rem;color:var(--ink-soft);margin-bottom:10px;word-break:break-all;"></p>
           <p style="font-size:.78rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
-            Status verde = sincronização automática ativa. Se ainda não instalou: pasta <code>api/</code> + <code>api/ativar.php</code>.
+            Status verde = sincronização automática ativa. Página no Render: preencha <code>config.js</code>.
+            Tudo na HostGator: pasta <code>api/</code> + <code>api/ativar.php</code>.
           </p>
           <details style="margin-bottom:18px;">
             <summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--ink-soft);">Ferramentas de emergência (opcional)</summary>
@@ -2282,7 +2284,7 @@
     <span id="toastMsg"></span>
   </div>
 
-  <script src="api/public-token.js"></script>
+  <script src="config.js"></script>
   <script>
     // ============================================================
     //  CAPA / SPLASH
@@ -3035,8 +3037,40 @@
     //  SERVIDOR DA ESCOLA (HostGator PHP + MySQL)
     // ============================================================
     // Fonte da verdade = MySQL. PC novo só BAIXA. Nunca envia base vazia.
+    // Página no Render: defina ACOMPANHA_API_URL em config.js.
+    function resolverApiUrl() {
+      const raw = String(window.ACOMPANHA_API_URL || '').trim();
+      if (!raw) return 'api/index.php';
+      let u = raw.replace(/\/+$/, '');
+      if (/index\.php$/i.test(u)) return u;
+      if (/\/api$/i.test(u)) return u + '/index.php';
+      return u + '/api/index.php';
+    }
+
+    function apiEhRemota(url) {
+      return /^https?:\/\//i.test(url);
+    }
+
+    function resolverTokenSrc(apiUrl) {
+      if (apiEhRemota(apiUrl)) {
+        return apiUrl.replace(/index\.php$/i, 'public-token.js');
+      }
+      return 'api/public-token.js';
+    }
+
+    function carregarTokenSeFaltar() {
+      if (serverToken()) return Promise.resolve(true);
+      return new Promise((resolve) => {
+        const s = document.createElement('script');
+        s.src = resolverTokenSrc(SERVER.url) + '?t=' + Date.now();
+        s.onload = () => resolve(true);
+        s.onerror = () => resolve(false);
+        document.head.appendChild(s);
+      });
+    }
+
     const SERVER = {
-      url: 'api/index.php',
+      url: resolverApiUrl(),
       ativo: false,
       version: 0,
       pollTimer: null,
@@ -3357,8 +3391,15 @@
     }
 
     async function iniciarServidor() {
+      const hint = document.getElementById('serverApiUrlHint');
+      if (hint) {
+        hint.textContent = apiEhRemota(SERVER.url)
+          ? 'API (HostGator): ' + SERVER.url
+          : 'API neste mesmo site: ' + SERVER.url;
+      }
       setServerStatus('syncing', 'Conectando ao servidor da escola…');
       try {
+        await carregarTokenSeFaltar();
         const { res, json } = await serverFetch('ping');
         if (!res.ok || !json || !json.ok) {
           SERVER.ativo = false;
@@ -3373,7 +3414,9 @@
         }
         if (json.precisaToken && !serverToken()) {
           SERVER.ativo = false;
-          setServerStatus('err', 'Falta o token (api/public-token.js). Rode api/ativar.php.');
+          setServerStatus('err', apiEhRemota(SERVER.url)
+            ? 'Falta o token. Cole-o em config.js ou confira api/public-token.js na HostGator.'
+            : 'Falta o token (api/public-token.js). Rode api/ativar.php.');
           return false;
         }
         SERVER.ativo = true;
@@ -3387,9 +3430,11 @@
       } catch (_) {
         SERVER.ativo = false;
         SERVER.inicializado = false;
-        setServerStatus('', 'Sem servidor · dados só neste navegador');
+        setServerStatus('err', apiEhRemota(SERVER.url)
+          ? 'Não conectou na API. Confira config.js e API_CORS_ORIGINS na HostGator (URL do Render).'
+          : 'Sem servidor · dados só neste navegador');
         const chip = document.getElementById('serverChip');
-        if (chip) chip.classList.add('hidden');
+        if (chip && !apiEhRemota(SERVER.url)) chip.classList.add('hidden');
         return false;
       }
     }
@@ -3892,7 +3937,7 @@
     if (btnServerPull) {
       btnServerPull.addEventListener('click', async () => {
         if (!SERVER.ativo) {
-          mostrarToast('Servidor não conectado. Verifique api/ativar.php', 'error');
+          mostrarToast('Servidor não conectado. Verifique a API na HostGator e o config.js', 'error');
           return;
         }
         const ok = await syncServidor({ somentePull: true });
@@ -3911,7 +3956,7 @@
     if (btnServerPush) {
       btnServerPush.addEventListener('click', async () => {
         if (!SERVER.ativo) {
-          mostrarToast('Servidor não conectado. Verifique api/ativar.php', 'error');
+          mostrarToast('Servidor não conectado. Verifique a API na HostGator e o config.js', 'error');
           return;
         }
         if (ehSnapshotSemente(montarSnapshot())) {
