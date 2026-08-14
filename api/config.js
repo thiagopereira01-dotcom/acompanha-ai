@@ -1,2 +1,2 @@
-window.ACOMPANHA_API_URL = "https:\/\/acompanha.projetostnpp.com\/api\/index.php";
-window.ACOMPANHA_API_TOKEN = "20016d73d5e3f6037936a70b612b2d2fa0727a9402c35185";
+window.ACOMPANHA_API_URL = "thia0249_acompanha\api\index.php";
+window.ACOMPANHA_API_TOKEN = "f97672b96b80b15e0c89b9c4ea44127dffb56a9921edf37d";
