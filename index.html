@@ -1172,6 +1172,76 @@
     margin-top:4px;
   }
 
+  .pills-acomp{
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px;
+    margin-top:6px;
+  }
+  .pill-ok, .pill-mid, .pill-wait{
+    font-size:.62rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    padding:2px 8px;
+    border-radius:999px;
+  }
+  .pill-ok{ background:var(--ok-tint); color:var(--ok); }
+  .pill-mid{ background:#E8F0FE; color:#1A56A8; }
+  .pill-wait{ background:var(--warn-tint); color:var(--warn); }
+
+  .acomp-box{
+    margin-top:16px;
+    padding:14px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:var(--bg);
+  }
+  .acomp-box h4{
+    font-size:.82rem;
+    font-weight:700;
+    margin:0 0 8px;
+    color:var(--ink);
+  }
+  .acomp-linha{
+    font-size:.8rem;
+    color:var(--ink-soft);
+    line-height:1.45;
+    margin-bottom:6px;
+  }
+  .acomp-linha strong{ color:var(--ink); font-weight:600; }
+  .acomp-box textarea{
+    width:100%;
+    min-height:78px;
+    margin-top:6px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    font:inherit;
+    resize:vertical;
+    background:var(--surface);
+  }
+  .acomp-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:10px;
+  }
+  .btn-acomp{
+    font-family:inherit;
+    font-size:.78rem;
+    font-weight:600;
+    border:none;
+    border-radius:999px;
+    padding:8px 12px;
+    cursor:pointer;
+  }
+  .btn-acomp.ok{ background:var(--ok-tint); color:var(--ok); }
+  .btn-acomp.mid{ background:#E8F0FE; color:#1A56A8; }
+  .btn-acomp.warn{ background:var(--warn-tint); color:var(--warn); }
+  .btn-acomp.ghost{ background:var(--surface); color:var(--ink); border:1px solid var(--line); }
+  .btn-acomp:disabled{ opacity:.55; cursor:default; }
+
   .item-footer{
     display:flex;
     justify-content:flex-end;
@@ -1764,7 +1834,13 @@
       <!-- ===== TUTOR INBOX (professor tutor) ===== -->
       <div class="card sidebar-card hidden" id="tutorInboxCard">
         <div class="historico">
-          <h3><span>Ocorrências dos meus tutorados</span></h3>
+          <h3>
+            <span>Ocorrências dos meus tutorados</span>
+            <span class="badge badge-slate" id="tutorPendentesBadge" style="font-weight:700;">0 pendente(s)</span>
+          </h3>
+          <p style="font-size:.78rem;color:var(--ink-soft);margin:0 0 12px;line-height:1.45;">
+            Marque ciência, registre a tratativa e confirme o envio ao responsável (WhatsApp ou e-mail). A gestão acompanha o mesmo registro.
+          </p>
           <div class="historico-lista" id="tutorInboxLista"></div>
         </div>
       </div>
@@ -1824,10 +1900,30 @@
                   <option value="vermelho">Vermelho</option>
                 </select>
               </div>
-              <div class="form-group span-2">
+              <div class="form-group">
                 <label for="filtroProfessor">Professor</label>
                 <select id="filtroProfessor">
                   <option value="">Todos</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="filtroTratativa">Tutor / tratativa</label>
+                <select id="filtroTratativa">
+                  <option value="">Todas</option>
+                  <option value="pendente">Tutor pendente</option>
+                  <option value="ciente">Tutor ciente</option>
+                  <option value="tratada">Com tratativa</option>
+                  <option value="gestao">Gestão acompanhou</option>
+                </select>
+              </div>
+              <div class="form-group span-2">
+                <label for="filtroFamilia">Envio ao responsável</label>
+                <select id="filtroFamilia">
+                  <option value="">Todos</option>
+                  <option value="pendente">Ainda não enviado</option>
+                  <option value="whatsapp">WhatsApp enviado</option>
+                  <option value="email">E-mail enviado</option>
+                  <option value="enviado">Enviado (qualquer canal)</option>
                 </select>
               </div>
             </div>
@@ -2005,14 +2101,14 @@
           <div class="lista-cadastro" id="listaEscolas"></div>
         </div>
 
-        <!-- Servidor HostGator + backups -->
+        <!-- Servidor Hostinger + backups -->
         <div class="admin-panel" id="panelNuvem">
           <div class="section-label" style="margin-bottom:14px;padding-bottom:10px;">
             <h2 style="font-size:1.05rem;">Servidor da escola</h2>
           </div>
           <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
-            <strong>Tudo é automático.</strong> Ao cadastrar aluno, usuário ou ocorrência, o sistema grava sozinho no MySQL da HostGator.
-            A página pode ficar no Render; os dados ficam na HostGator. Os outros computadores atualizam sozinhos em poucos segundos.
+            <strong>Tudo é automático.</strong> Ao cadastrar aluno, usuário ou ocorrência, o sistema grava sozinho no MySQL da Hostinger.
+            O site e os dados ficam no mesmo servidor. Os outros computadores atualizam sozinhos em poucos segundos.
           </p>
           <div class="cloud-status" id="serverStatus">
             <span class="cloud-dot"></span>
@@ -2020,8 +2116,7 @@
           </div>
           <p id="serverApiUrlHint" style="font-size:.75rem;color:var(--ink-soft);margin-bottom:10px;word-break:break-all;"></p>
           <p style="font-size:.78rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
-            Status verde = sincronização automática ativa. Página no Render: preencha <code>config.js</code>.
-            Tudo na HostGator: pasta <code>api/</code> + <code>api/ativar.php</code>.
+            Status verde = sincronização automática ativa. Site e API na Hostinger: pasta <code>api/</code> + <code>api/ativar.php</code>.
           </p>
           <details style="margin-bottom:18px;">
             <summary style="cursor:pointer;font-size:.82rem;font-weight:600;color:var(--ink-soft);">Ferramentas de emergência (opcional)</summary>
@@ -2038,7 +2133,7 @@
             <h2 style="font-size:1.05rem;">Google Drive</h2>
           </div>
           <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:14px;line-height:1.5;">
-            Backup extra (opcional). No dia a dia o MySQL da HostGator já replica entre os PCs.
+            Backup extra (opcional). No dia a dia o MySQL da Hostinger já replica entre os PCs.
             Use o Drive só se quiser uma cópia na conta Google da escola.
           </p>
 
@@ -2051,7 +2146,7 @@
             <li>Acesse <a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud Console</a> → crie um projeto.</li>
             <li>Ative a API <strong>Google Drive API</strong>.</li>
             <li>Credenciais → <strong>ID do cliente OAuth</strong> → tipo <strong>Aplicativo da Web</strong>.</li>
-            <li>Em origens JavaScript autorizadas, inclua a URL do site (ex.: <code>https://seu-app.onrender.com</code>) e <code>http://localhost</code> se testar local.</li>
+            <li>Em origens JavaScript autorizadas, inclua a URL do site (ex.: <code>https://seudominio.com.br</code>) e <code>http://localhost</code> se testar local.</li>
             <li>Cole o Client ID abaixo, conecte a conta da escola e use <strong>Salvar no Drive</strong> / <strong>Carregar do Drive</strong>.</li>
           </ol>
 
@@ -2176,10 +2271,10 @@
         <div class="stamp" id="stamp">REGISTRADO<br><span id="stampProto"></span></div>
         <div id="resultadoConteudo"></div>
         <div class="resultado-actions">
-          <button class="btn-wa" onclick="enviarWhatsApp()">WhatsApp + anexo</button>
-          <button class="btn-email" onclick="reenviarEmail()">E-mail</button>
-          <button class="btn-copy" onclick="copiarOcorrencia()">Copiar</button>
-          <button class="btn-pdf" onclick="baixarPDF()">PDF</button>
+          <button class="btn-wa hidden" id="btnEnviarWhatsApp" type="button">WhatsApp + anexo</button>
+          <button class="btn-email hidden" id="btnEnviarEmail" type="button">E-mail</button>
+          <button class="btn-copy" type="button" onclick="copiarOcorrencia()">Copiar</button>
+          <button class="btn-pdf" type="button" onclick="baixarPDF()">PDF</button>
         </div>
       </div>
       <div class="protocolo-strip" id="protocolo"></div>
@@ -2285,6 +2380,7 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="api/public-token.php"></script>
   <script>
     // ============================================================
     //  CAPA / SPLASH
@@ -3034,11 +3130,14 @@
     }
 
     // ============================================================
-    //  SERVIDOR DA ESCOLA (HostGator PHP + MySQL)
+    //  SERVIDOR DA ESCOLA (Hostinger PHP + MySQL)
     // ============================================================
     // Fonte da verdade = MySQL. PC novo só BAIXA. Nunca envia base vazia.
-    // Página no Render: defina ACOMPANHA_API_URL em config.js.
+    // Site na Hostinger: ACOMPANHA_API_URL em config.js aponta para api/index.php.
     function resolverApiUrl() {
+      if (location.protocol !== 'file:') {
+        return 'api/index.php';
+      }
       const raw = String(window.ACOMPANHA_API_URL || '').trim();
       if (!raw) return 'api/index.php';
       let u = raw.replace(/\/+$/, '');
@@ -3053,9 +3152,9 @@
 
     function resolverTokenSrc(apiUrl) {
       if (apiEhRemota(apiUrl)) {
-        return apiUrl.replace(/index\.php$/i, 'public-token.js');
+        return apiUrl.replace(/index\.php$/i, 'public-token.php');
       }
-      return 'api/public-token.js';
+      return 'api/public-token.php';
     }
 
     function carregarTokenSeFaltar() {
@@ -3118,13 +3217,19 @@
       const o = opts || {};
       const headers = { 'Accept': 'application/json' };
       const token = serverToken();
-      if (token) headers['X-Api-Token'] = token;
+      if (token) {
+        headers['X-Api-Token'] = token;
+        headers['Authorization'] = 'Bearer ' + token;
+      }
       if (o.body) headers['Content-Type'] = 'application/json';
-      const res = await fetch(SERVER.url + '?action=' + encodeURIComponent(action), {
+      let url = SERVER.url + '?action=' + encodeURIComponent(action);
+      if (token) url += '&token=' + encodeURIComponent(token);
+      const res = await fetch(url, {
         method: o.method || 'GET',
         headers,
         body: o.body ? JSON.stringify(o.body) : undefined,
-        cache: 'no-store'
+        cache: 'no-store',
+        credentials: 'same-origin'
       });
       let json = null;
       try { json = await res.json(); } catch (_) { json = null; }
@@ -3390,12 +3495,42 @@
       }, 4000);
     }
 
+    function mensagemFalhaServidor(res, json, causa) {
+      const erro = (json && json.erro) ? String(json.erro) : '';
+      const detalhe = (json && json.detalhe) ? String(json.detalhe) : '';
+      const status = res && res.status ? res.status : 0;
+      if (location.protocol === 'file:') {
+        return 'Abra o site pelo endereço https da Hostinger, não pelo arquivo no computador.';
+      }
+      if (erro === 'nao_configurado' || status === 503) {
+        return 'API ainda não instalada. Abra /api/ativar.php, preencha o MySQL e clique em ativar.';
+      }
+      if (erro === 'db_conexao' || erro === 'config_incompleta') {
+        return 'MySQL não conectou. No hPanel, confira banco, usuário (nome completo) e senha, depois rode /api/ativar.php de novo.'
+          + (detalhe ? ' (' + detalhe + ')' : '');
+      }
+      if (erro === 'db_tabela') {
+        return 'Conectou no MySQL, mas não criou a tabela. Rode /api/ativar.php ou o SQL do guia INSTALAR-HOSTINGER.md.';
+      }
+      if (status === 500) {
+        return 'A Hostinger devolveu erro 500. Apague o .htaccess da pasta public_html (se existir) e recarregue. Se continuar, abra /api/teste.php.';
+      }
+      if (status === 404) {
+        return 'Não achou api/index.php. Envie a pasta api/ para public_html na Hostinger.';
+      }
+      if (status === 401 || erro === 'token_invalido') {
+        return 'Token inválido. Rode /api/ativar.php de novo e recarregue com Ctrl+F5.';
+      }
+      if (causa) {
+        return 'Não conectou na API (' + SERVER.url + '). Use o domínio https da Hostinger e envie index.html, config.js e a pasta api/.';
+      }
+      return 'Servidor não respondeu' + (status ? ' (HTTP ' + status + ')' : '') + (erro ? ' · ' + erro : '') + '. URL: ' + SERVER.url;
+    }
+
     async function iniciarServidor() {
       const hint = document.getElementById('serverApiUrlHint');
       if (hint) {
-        hint.textContent = apiEhRemota(SERVER.url)
-          ? 'API (HostGator): ' + SERVER.url
-          : 'API neste mesmo site: ' + SERVER.url;
+        hint.textContent = 'API neste mesmo site: ' + SERVER.url;
       }
       setServerStatus('syncing', 'Conectando ao servidor da escola…');
       try {
@@ -3403,20 +3538,15 @@
         const { res, json } = await serverFetch('ping');
         if (!res.ok || !json || !json.ok) {
           SERVER.ativo = false;
-          if (res.status === 503) {
-            setServerStatus('err', 'API ainda não instalada. Abra api/ativar.php na HostGator.');
-          } else {
-            setServerStatus('', 'Sem servidor · dados só neste navegador');
-          }
-          const chip = document.getElementById('serverChip');
-          if (chip) chip.classList.add('hidden');
+          setServerStatus('err', mensagemFalhaServidor(res, json));
           return false;
+        }
+        if (json.token) {
+          window.ACOMPANHA_API_TOKEN = String(json.token);
         }
         if (json.precisaToken && !serverToken()) {
           SERVER.ativo = false;
-          setServerStatus('err', apiEhRemota(SERVER.url)
-            ? 'Falta o token. Cole-o em config.js ou confira api/public-token.js na HostGator.'
-            : 'Falta o token (api/public-token.js). Rode api/ativar.php.');
+          setServerStatus('err', 'Falta o token. Envie api/index.php e api/public-token.php atualizados para a Hostinger.');
           return false;
         }
         SERVER.ativo = true;
@@ -3427,14 +3557,10 @@
         SERVER.inicializado = true;
         iniciarPollServidor();
         return true;
-      } catch (_) {
+      } catch (e) {
         SERVER.ativo = false;
         SERVER.inicializado = false;
-        setServerStatus('err', apiEhRemota(SERVER.url)
-          ? 'Não conectou na API. Confira config.js e API_CORS_ORIGINS na HostGator (URL do Render).'
-          : 'Sem servidor · dados só neste navegador');
-        const chip = document.getElementById('serverChip');
-        if (chip && !apiEhRemota(SERVER.url)) chip.classList.add('hidden');
+        setServerStatus('err', mensagemFalhaServidor(null, null, e));
         return false;
       }
     }
@@ -3842,7 +3968,7 @@
       await migrarUsuarios();
       await garantirAdminAcesso();
       CLOUD.inicializada = true;
-      // JSONBlob continua manual. A fonte compartilhada é o servidor HostGator.
+      // JSONBlob continua manual. A fonte compartilhada é o servidor Hostinger.
       if (!CLOUD_AUTO) {
         const id = getBlobId();
         if (id && !SERVER.ativo) {
@@ -3937,7 +4063,7 @@
     if (btnServerPull) {
       btnServerPull.addEventListener('click', async () => {
         if (!SERVER.ativo) {
-          mostrarToast('Servidor não conectado. Verifique a API na HostGator e o config.js', 'error');
+          mostrarToast('Servidor não conectado. Verifique a API na Hostinger e o config.js', 'error');
           return;
         }
         const ok = await syncServidor({ somentePull: true });
@@ -3956,7 +4082,7 @@
     if (btnServerPush) {
       btnServerPush.addEventListener('click', async () => {
         if (!SERVER.ativo) {
-          mostrarToast('Servidor não conectado. Verifique a API na HostGator e o config.js', 'error');
+          mostrarToast('Servidor não conectado. Verifique a API na Hostinger e o config.js', 'error');
           return;
         }
         if (ehSnapshotSemente(montarSnapshot())) {
@@ -4425,6 +4551,8 @@
         await emailjs.send(cfg.serviceId, cfg.templateId, montarParamsEmail(oc, destino));
         oc.emailEnviado = true;
         oc.emailErro = '';
+        oc.emailEnviadoEm = formatarData();
+        oc.emailEnviadoPor = (sessaoAtual && sessaoAtual.nome) || '';
         return { ok: true };
       } catch (e) {
         oc.emailEnviado = false;
@@ -4434,6 +4562,10 @@
     }
 
     async function reenviarEmail() {
+      if (!podeMarcarEnvioFamilia()) {
+        mostrarToast('Somente a gestão envia a ocorrência ao responsável', 'error');
+        return;
+      }
       if (!ultimaOcorrencia) {
         mostrarToast('Nenhuma ocorrência para enviar', 'error');
         return;
@@ -4449,8 +4581,8 @@
       mostrarToast('Enviando e-mail...');
       const r = await enviarEmailOcorrencia(ultimaOcorrencia);
       if (r.ok) {
-        salvarOcorrenciasStore();
-        resultadoConteudo.innerHTML = montarDL(ultimaOcorrencia, false);
+        persistirOcorrencia(ultimaOcorrencia);
+        exibirOcorrencia(ultimaOcorrencia, false);
         mostrarToast('E-mail enviado ao responsável!');
       } else {
         mostrarToast('Falha ao enviar e-mail' + (r.erro ? ': ' + r.erro : ''), 'error');
@@ -5935,7 +6067,15 @@
 
     function renderizarTutorInbox() {
       if (!sessaoAtual || !sessaoAtual.tutor) return;
-      const lista = ocorrencias.filter(o => o.tutorId === sessaoAtual.id);
+      const lista = ocorrencias.filter(o => o.tutorId === sessaoAtual.id || (o.tutorNome && o.tutorNome === sessaoAtual.nome))
+        .slice()
+        .sort((a, b) => {
+          const ordem = { pendente: 0, ciente: 1, tratada: 2, sem_tutor: 3 };
+          return (ordem[statusTutorOcorrencia(a)] || 9) - (ordem[statusTutorOcorrencia(b)] || 9);
+        });
+      const pendentes = lista.filter(o => statusTutorOcorrencia(o) === 'pendente').length;
+      const badgePend = document.getElementById('tutorPendentesBadge');
+      if (badgePend) badgePend.textContent = pendentes + ' pendente(s)';
       if (!lista.length) {
         tutorInboxLista.innerHTML = '<div class="historico-vazio">Nenhuma ocorrência direcionada a você ainda.</div>';
         return;
@@ -5953,6 +6093,7 @@
           </div>
           <div class="item-sub">${escaparHtml(formatarListaTipos(oc))} · ${escaparHtml(oc.turma)} · Prof. ${escaparHtml(oc.professor)}</div>
           <div class="item-data">${escaparHtml(oc.data)} · ${escaparHtml(oc.protocolo)}</div>
+          ${htmlPillsAcompanhamento(oc)}
         `;
         item.addEventListener('click', () => mostrarDetalhes(oc));
         tutorInboxLista.appendChild(item);
@@ -6084,6 +6225,8 @@
     const filtroData = document.getElementById('filtroData');
     const filtroProfessor = document.getElementById('filtroProfessor');
     const filtroNivel = document.getElementById('filtroNivel');
+    const filtroTratativa = document.getElementById('filtroTratativa');
+    const filtroFamilia = document.getElementById('filtroFamilia');
     const btnLimparFiltros = document.getElementById('btnLimparFiltros');
     const filtroResultado = document.getElementById('filtroResultado');
 
@@ -6364,6 +6507,61 @@
       salvarOcorrenciasStore();
     }
 
+    function persistirOcorrencia(oc) {
+      if (!oc) return;
+      tocarRegistro(oc);
+      const i = ocorrencias.findIndex(o => o.protocolo === oc.protocolo);
+      if (i >= 0) ocorrencias[i] = oc;
+      else ocorrencias.unshift(oc);
+      salvarOcorrenciasStore();
+      if (ultimaOcorrencia && ultimaOcorrencia.protocolo === oc.protocolo) ultimaOcorrencia = oc;
+    }
+
+    function podeGestaoOcorrencia() {
+      return !!(sessaoAtual && (sessaoAtual.role === 'admin' || sessaoAtual.role === 'superadmin'));
+    }
+    function ehTutorDaOcorrencia(oc) {
+      if (!sessaoAtual || !oc) return false;
+      if (oc.tutorId && sessaoAtual.id && oc.tutorId === sessaoAtual.id) return true;
+      if (oc.tutorNome && sessaoAtual.nome && oc.tutorNome === sessaoAtual.nome && sessaoAtual.tutor) return true;
+      return false;
+    }
+    function podeTratarOcorrencia(oc) {
+      return podeGestaoOcorrencia() || ehTutorDaOcorrencia(oc);
+    }
+    function podeMarcarEnvioFamilia() {
+      return podeGestaoOcorrencia();
+    }
+    function atualizarBotoesEnvioFamilia() {
+      const wa = document.getElementById('btnEnviarWhatsApp');
+      const em = document.getElementById('btnEnviarEmail');
+      const liberar = podeMarcarEnvioFamilia();
+      if (wa) wa.classList.toggle('hidden', !liberar);
+      if (em) em.classList.toggle('hidden', !liberar);
+    }
+    function statusTutorOcorrencia(oc) {
+      if (oc && oc.tratativa) return 'tratada';
+      if (oc && oc.tutorCiente) return 'ciente';
+      if (oc && (oc.tutorId || oc.tutorNome)) return 'pendente';
+      return 'sem_tutor';
+    }
+    function familiaFoiNotificada(oc) {
+      return !!(oc && (oc.whatsappEnviado || oc.emailEnviado));
+    }
+    function htmlPillsAcompanhamento(oc) {
+      const partes = [];
+      const st = statusTutorOcorrencia(oc);
+      if (st === 'tratada') partes.push('<span class="pill-ok">Tutor tratou</span>');
+      else if (st === 'ciente') partes.push('<span class="pill-mid">Tutor ciente</span>');
+      else if (st === 'pendente') partes.push('<span class="pill-wait">Tutor pendente</span>');
+      if (oc && oc.gestaoAcompanhou) partes.push('<span class="pill-mid">Gestão acompanhou</span>');
+      if (oc && oc.whatsappEnviado) partes.push('<span class="pill-ok">WhatsApp enviado</span>');
+      else if (oc && oc.celular) partes.push('<span class="pill-wait">WhatsApp pendente</span>');
+      if (oc && oc.emailEnviado) partes.push('<span class="pill-ok">E-mail enviado</span>');
+      else if (oc && oc.email) partes.push('<span class="pill-wait">E-mail pendente</span>');
+      return partes.length ? `<div class="pills-acomp">${partes.join('')}</div>` : '';
+    }
+
     // ============================================================
     //  STATS + HISTÓRICO + FILTROS
     // ============================================================
@@ -6389,16 +6587,31 @@
       const data = filtroData.value;
       const professor = filtroProfessor.value;
       const nivel = filtroNivel.value;
+      const trat = filtroTratativa ? filtroTratativa.value : '';
+      const fam = filtroFamilia ? filtroFamilia.value : '';
       return lista.filter(oc => {
         if (data && dataOcorrenciaISO(oc) !== data) return false;
         if (professor && oc.professor !== professor) return false;
         if (nivel && oc.nivel !== nivel) return false;
+        if (trat) {
+          const st = statusTutorOcorrencia(oc);
+          if (trat === 'gestao' && !oc.gestaoAcompanhou) return false;
+          if (trat !== 'gestao' && st !== trat) return false;
+        }
+        if (fam) {
+          if (fam === 'pendente' && familiaFoiNotificada(oc)) return false;
+          if (fam === 'enviado' && !familiaFoiNotificada(oc)) return false;
+          if (fam === 'whatsapp' && !oc.whatsappEnviado) return false;
+          if (fam === 'email' && !oc.emailEnviado) return false;
+        }
         return true;
       });
     }
 
     function filtrosAtivos() {
-      return !!(filtroData.value || filtroProfessor.value || filtroNivel.value);
+      return !!(filtroData.value || filtroProfessor.value || filtroNivel.value
+        || (filtroTratativa && filtroTratativa.value)
+        || (filtroFamilia && filtroFamilia.value));
     }
 
     function atualizarStats(listaCompleta, listaFiltrada) {
@@ -6455,22 +6668,23 @@
           </div>
           <div class="item-sub">${escaparHtml(formatarListaTipos(oc))} · ${escaparHtml(oc.turma)} · ${escaparHtml(oc.professor)}${oc.tutorNome ? ` · Tutor: ${escaparHtml(oc.tutorNome)}` : ''}</div>
           <div class="item-data">${escaparHtml(oc.data)} · ${escaparHtml(oc.protocolo)}</div>
+          ${htmlPillsAcompanhamento(oc)}
           <div class="item-footer">
-            <button class="btn-reenviar" data-protocolo="${oc.protocolo}">${oc.celular ? 'Reenviar' : 'Ver detalhes'}</button>
+            <button class="btn-reenviar" data-protocolo="${escaparHtml(oc.protocolo)}">${podeMarcarEnvioFamilia() && (oc.celular || oc.email) ? 'Enviar à família' : 'Ver detalhes'}</button>
           </div>
         `;
         item.title = 'Clique para ver detalhes';
         item.addEventListener('click', () => mostrarDetalhes(oc));
         item.querySelector('.btn-reenviar').addEventListener('click', (ev) => {
           ev.stopPropagation();
-          if (oc.celular) reenviarOcorrencia(oc.protocolo);
+          if (podeMarcarEnvioFamilia() && oc.celular) reenviarOcorrencia(oc.protocolo);
           else mostrarDetalhes(oc);
         });
         historicoLista.appendChild(item);
       });
     }
 
-    [filtroData, filtroProfessor, filtroNivel].forEach(el => {
+    [filtroData, filtroProfessor, filtroNivel, filtroTratativa, filtroFamilia].filter(Boolean).forEach(el => {
       el.addEventListener('change', renderizarHistorico);
     });
 
@@ -6478,20 +6692,186 @@
       filtroData.value = '';
       filtroProfessor.value = '';
       filtroNivel.value = '';
+      if (filtroTratativa) filtroTratativa.value = '';
+      if (filtroFamilia) filtroFamilia.value = '';
       renderizarHistorico();
     });
 
     function mostrarDetalhes(oc) {
+      exibirOcorrencia(oc, false);
+    }
+
+    function htmlPainelAcompanhamento(oc) {
+      const st = statusTutorOcorrencia(oc);
+      const tutorTxt = st === 'tratada'
+        ? `Tutor ciente e com tratativa${oc.tratativaEm ? ' em ' + escaparHtml(oc.tratativaEm) : ''}${oc.tratativaPor ? ' · ' + escaparHtml(oc.tratativaPor) : ''}.`
+        : st === 'ciente'
+          ? `Tutor ciente${oc.tutorCienteEm ? ' em ' + escaparHtml(oc.tutorCienteEm) : ''}${oc.tutorCientePor ? ' · ' + escaparHtml(oc.tutorCientePor) : ''}. Aguardando tratativa.`
+          : st === 'pendente'
+            ? 'Aguardando ciência e tratativa do professor tutor.'
+            : 'Sem tutor vinculado — a gestão pode registrar a tratativa.';
+      const waTxt = oc.whatsappEnviado
+        ? `WhatsApp enviado${oc.whatsappEnviadoEm ? ' em ' + escaparHtml(oc.whatsappEnviadoEm) : ''}${oc.whatsappEnviadoPor ? ' · ' + escaparHtml(oc.whatsappEnviadoPor) : ''}.`
+        : (oc.celular ? 'WhatsApp ainda não confirmado como enviado ao responsável.' : 'Sem WhatsApp nesta ocorrência.');
+      const emTxt = oc.emailEnviado
+        ? `E-mail enviado${oc.emailEnviadoEm ? ' em ' + escaparHtml(oc.emailEnviadoEm) : ''}${oc.emailEnviadoPor ? ' · ' + escaparHtml(oc.emailEnviadoPor) : ''}.`
+        : (oc.email ? 'E-mail ainda não confirmado como enviado ao responsável.' : 'Sem e-mail nesta ocorrência.');
+      const gestaoTxt = oc.gestaoAcompanhou
+        ? `Gestão acompanhou${oc.gestaoAcompanhouEm ? ' em ' + escaparHtml(oc.gestaoAcompanhouEm) : ''}${oc.gestaoAcompanhouPor ? ' · ' + escaparHtml(oc.gestaoAcompanhouPor) : ''}.`
+        : 'A gestão ainda não registrou o acompanhamento desta tratativa.';
+      const podeT = podeTratarOcorrencia(oc);
+      const podeE = podeMarcarEnvioFamilia();
+      const btns = [];
+      if (podeT && !oc.tutorCiente) {
+        btns.push('<button type="button" class="btn-acomp mid" data-acomp="ciente">Estou ciente</button>');
+      }
+      if (podeT) {
+        btns.push('<button type="button" class="btn-acomp ok" data-acomp="tratativa">Salvar tratativa</button>');
+      }
+      if (podeGestaoOcorrencia() && !oc.gestaoAcompanhou) {
+        btns.push('<button type="button" class="btn-acomp mid" data-acomp="gestao">Gestão acompanhou</button>');
+      } else if (podeGestaoOcorrencia()) {
+        btns.push('<button type="button" class="btn-acomp ghost" data-acomp="gestao">Atualizar observação da gestão</button>');
+      }
+      if (podeE && oc.celular && !oc.whatsappEnviado) {
+        btns.push('<button type="button" class="btn-acomp warn" data-acomp="wa">Marcar WhatsApp enviado</button>');
+      }
+      if (podeE && oc.email && !oc.emailEnviado) {
+        btns.push('<button type="button" class="btn-acomp warn" data-acomp="email">Marcar e-mail enviado</button>');
+      }
+      return `
+        <div class="acomp-box" id="painelAcompanhamento">
+          <h4>Acompanhamento da ocorrência</h4>
+          ${htmlPillsAcompanhamento(oc)}
+          <div class="acomp-linha" style="margin-top:8px;"><strong>Tutor:</strong> ${tutorTxt}</div>
+          ${oc.tratativa ? `<div class="acomp-linha"><strong>Tratativa:</strong> ${escaparHtml(oc.tratativa)}</div>` : ''}
+          <div class="acomp-linha"><strong>Responsável:</strong> ${waTxt} ${!podeMarcarEnvioFamilia() ? 'O envio é feito pela gestão.' : ''}</div>
+          <div class="acomp-linha">${emTxt}</div>
+          <div class="acomp-linha"><strong>Gestão:</strong> ${gestaoTxt}</div>
+          ${oc.gestaoObs ? `<div class="acomp-linha"><strong>Obs. da gestão:</strong> ${escaparHtml(oc.gestaoObs)}</div>` : ''}
+          ${podeT ? `
+            <label for="txtTratativa" style="display:block;font-size:.78rem;font-weight:600;margin-top:10px;">Registrar ou atualizar tratativa</label>
+            <textarea id="txtTratativa" placeholder="Descreva a tratativa tomada com o aluno/família">${escaparHtml(oc.tratativa || '')}</textarea>
+          ` : ''}
+          ${podeGestaoOcorrencia() ? `
+            <label for="txtGestaoObs" style="display:block;font-size:.78rem;font-weight:600;margin-top:10px;">Observação da gestão (opcional)</label>
+            <textarea id="txtGestaoObs" placeholder="Anote o acompanhamento da gestão">${escaparHtml(oc.gestaoObs || '')}</textarea>
+          ` : ''}
+          ${btns.length ? `<div class="acomp-actions">${btns.join('')}</div>` : ''}
+        </div>
+      `;
+    }
+
+    function marcarCienciaTutor(oc) {
+      oc.tutorCiente = true;
+      oc.tutorCienteEm = formatarData();
+      oc.tutorCientePor = (sessaoAtual && sessaoAtual.nome) || '';
+      persistirOcorrencia(oc);
+      registrarLog('tutor_ciente', 'Tutor ciente da ocorrência ' + oc.protocolo, oc);
+      renderizarHistorico();
+      renderizarTutorInbox();
+      exibirOcorrencia(oc, false);
+      mostrarToast('Ciência do tutor registrada');
+    }
+
+    function salvarTratativaOcorrencia(oc, texto) {
+      const t = String(texto || '').trim();
+      if (!t) {
+        mostrarToast('Descreva a tratativa antes de salvar', 'error');
+        return;
+      }
+      oc.tutorCiente = true;
+      if (!oc.tutorCienteEm) {
+        oc.tutorCienteEm = formatarData();
+        oc.tutorCientePor = (sessaoAtual && sessaoAtual.nome) || '';
+      }
+      oc.tratativa = t;
+      oc.tratativaEm = formatarData();
+      oc.tratativaPor = (sessaoAtual && sessaoAtual.nome) || '';
+      persistirOcorrencia(oc);
+      registrarLog('tutor_tratativa', 'Registrou tratativa da ocorrência ' + oc.protocolo, oc);
+      renderizarHistorico();
+      renderizarTutorInbox();
+      exibirOcorrencia(oc, false);
+      mostrarToast('Tratativa salva — a gestão já pode acompanhar');
+    }
+
+    function marcarGestaoAcompanhou(oc) {
+      const obsEl = document.getElementById('txtGestaoObs');
+      oc.gestaoAcompanhou = true;
+      oc.gestaoAcompanhouEm = formatarData();
+      oc.gestaoAcompanhouPor = (sessaoAtual && sessaoAtual.nome) || '';
+      if (obsEl) oc.gestaoObs = obsEl.value.trim();
+      persistirOcorrencia(oc);
+      registrarLog('gestao_acompanhou', 'Gestão acompanhou a ocorrência ' + oc.protocolo, oc);
+      renderizarHistorico();
+      renderizarTutorInbox();
+      exibirOcorrencia(oc, false);
+      mostrarToast('Acompanhamento da gestão registrado');
+    }
+
+    function marcarEnvioCanal(oc, canal, opts) {
+      const o = opts || {};
+      const quando = formatarData();
+      const quem = (sessaoAtual && sessaoAtual.nome) || '';
+      if (canal === 'whatsapp') {
+        oc.whatsappEnviado = true;
+        oc.whatsappEnviadoEm = quando;
+        oc.whatsappEnviadoPor = quem;
+        registrarLog('envio_whatsapp', 'Confirmou envio da ocorrência ' + oc.protocolo + ' ao responsável via WhatsApp', oc);
+      } else if (canal === 'email') {
+        oc.emailEnviado = true;
+        oc.emailErro = '';
+        oc.emailEnviadoEm = quando;
+        oc.emailEnviadoPor = quem;
+        registrarLog('envio_email', 'Confirmou envio da ocorrência ' + oc.protocolo + ' ao responsável via e-mail', oc);
+      }
+      persistirOcorrencia(oc);
+      renderizarHistorico();
+      renderizarTutorInbox();
+      if (!o.silencioso) {
+        exibirOcorrencia(oc, false);
+        mostrarToast(canal === 'whatsapp' ? 'WhatsApp marcado como enviado ao responsável' : 'E-mail marcado como enviado ao responsável');
+      }
+    }
+
+    function vincularAcompanhamento(oc) {
+      const box = document.getElementById('painelAcompanhamento');
+      if (!box) return;
+      box.querySelectorAll('[data-acomp]').forEach(btn => {
+        btn.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          const acao = btn.getAttribute('data-acomp');
+          if (acao === 'ciente') marcarCienciaTutor(oc);
+          else if (acao === 'tratativa') {
+            const ta = document.getElementById('txtTratativa');
+            salvarTratativaOcorrencia(oc, ta ? ta.value : '');
+          } else if (acao === 'gestao') marcarGestaoAcompanhou(oc);
+          else if (acao === 'wa') marcarEnvioCanal(oc, 'whatsapp');
+          else if (acao === 'email') marcarEnvioCanal(oc, 'email');
+        });
+      });
+    }
+
+    function exibirOcorrencia(oc, novo) {
       ultimaOcorrencia = oc;
       resultadoDiv.classList.add('show');
       resultadoDiv.className = 'resultado show nivel-' + (oc.nivel || 'verde');
       stampProto.textContent = oc.protocolo;
-      resultadoConteudo.innerHTML = montarDL(oc, false);
-      protocoloDiv.textContent = '';
-      resultadoDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      resultadoConteudo.innerHTML = montarDL(oc, !!novo) + htmlPainelAcompanhamento(oc);
+      vincularAcompanhamento(oc);
+      atualizarBotoesEnvioFamilia();
+      if (!novo) {
+        protocoloDiv.textContent = '';
+        resultadoDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
     }
 
     function reenviarOcorrencia(protocolo) {
+      if (!podeMarcarEnvioFamilia()) {
+        mostrarToast('Somente a gestão envia a ocorrência ao responsável', 'error');
+        return;
+      }
       const lista = carregarOcorrencias();
       const oc = lista.find(o => o.protocolo === protocolo);
       if (!oc) { mostrarToast('Ocorrência não encontrada', 'error'); return; }
@@ -6606,8 +6986,11 @@
     <tr><td>Tutor</td><td>${escaparHtml(oc.tutorNome || '—')}</td></tr>
     <tr><td>Tipo</td><td>${escaparHtml(formatarListaTipos(oc))}</td></tr>
     <tr><td>Descrição</td><td>${escaparHtml(oc.descricao)}</td></tr>
-    <tr><td>WhatsApp</td><td>${escaparHtml(oc.celular || '—')}</td></tr>
-    <tr><td>Email Responsável</td><td>${escaparHtml(oc.email || '—')}</td></tr>
+    <tr><td>WhatsApp</td><td>${escaparHtml(oc.celular || '—')}${oc.whatsappEnviado ? ' — enviado ao responsável' + (oc.whatsappEnviadoEm ? ' em ' + escaparHtml(oc.whatsappEnviadoEm) : '') : ''}</td></tr>
+    <tr><td>Email Responsável</td><td>${escaparHtml(oc.email || '—')}${oc.emailEnviado ? ' — enviado' + (oc.emailEnviadoEm ? ' em ' + escaparHtml(oc.emailEnviadoEm) : '') : ''}</td></tr>
+    <tr><td>Ciência do tutor</td><td>${oc.tutorCiente ? ('Ciente' + (oc.tutorCienteEm ? ' em ' + escaparHtml(oc.tutorCienteEm) : '') + (oc.tutorCientePor ? ' · ' + escaparHtml(oc.tutorCientePor) : '')) : 'Pendente'}</td></tr>
+    <tr><td>Tratativa</td><td>${escaparHtml(oc.tratativa || 'Ainda não registrada')}${oc.tratativaEm ? ' (' + escaparHtml(oc.tratativaEm) + ')' : ''}</td></tr>
+    <tr><td>Gestão</td><td>${oc.gestaoAcompanhou ? ('Acompanhou' + (oc.gestaoAcompanhouEm ? ' em ' + escaparHtml(oc.gestaoAcompanhouEm) : '')) : 'Aguardando acompanhamento'}${oc.gestaoObs ? '<br>' + escaparHtml(oc.gestaoObs) : ''}</td></tr>
   </table>
   <p style="margin-top:20px;font-weight:600;">Providências a serem tomadas</p>
   <ul>${provRows || '<li>Nenhuma providência selecionada</li>'}</ul>
@@ -6657,6 +7040,10 @@
     }
 
     async function enviarWhatsApp() {
+      if (!podeMarcarEnvioFamilia()) {
+        mostrarToast('Somente a gestão envia a ocorrência ao responsável', 'error');
+        return;
+      }
       if (!ultimaOcorrencia) {
         mostrarToast('Nenhuma ocorrência para enviar', 'error');
         return;
@@ -6679,6 +7066,9 @@
             text: texto
           });
           mostrarToast('Compartilhe no WhatsApp com o anexo');
+          if (!oc.whatsappEnviado && confirm('Marcar que esta ocorrência foi enviada ao responsável pelo WhatsApp?')) {
+            marcarEnvioCanal(oc, 'whatsapp');
+          }
           return;
         }
       } catch (e) {
@@ -6687,6 +7077,9 @@
 
       window.open(`https://wa.me/55${cel}?text=${encodeURIComponent(texto)}`, '_blank');
       mostrarToast('Documento baixado — anexe no WhatsApp');
+      if (!oc.whatsappEnviado && confirm('Marcar que esta ocorrência foi enviada ao responsável pelo WhatsApp?')) {
+        marcarEnvioCanal(oc, 'whatsapp');
+      }
     }
 
     // ============================================================
@@ -6696,10 +7089,15 @@
       const info = NIVEIS[oc.nivel] || {};
       const emailMsg = oc.email
         ? (oc.emailEnviado
-          ? `<div class="email-note">E-mail enviado para ${escaparHtml(oc.email)}</div>`
+          ? `<div class="email-note">E-mail enviado para ${escaparHtml(oc.email)}${oc.emailEnviadoEm ? ' em ' + escaparHtml(oc.emailEnviadoEm) : ''}</div>`
           : oc.emailErro
             ? `<div class="email-note">Falha ao enviar e-mail para ${escaparHtml(oc.email)}: ${escaparHtml(oc.emailErro)}</div>`
-            : `<div class="email-note">E-mail do responsável: ${escaparHtml(oc.email)}</div>`)
+            : `<div class="email-note">E-mail do responsável: ${escaparHtml(oc.email)} — envio ainda não confirmado</div>`)
+        : '';
+      const waMsg = oc.celular
+        ? (oc.whatsappEnviado
+          ? `<div class="email-note">WhatsApp enviado para ${escaparHtml(oc.celular)}${oc.whatsappEnviadoEm ? ' em ' + escaparHtml(oc.whatsappEnviadoEm) : ''}</div>`
+          : `<div class="email-note">WhatsApp do responsável: ${escaparHtml(oc.celular)} — envio ainda não confirmado</div>`)
         : '';
       const destino = oc.tutorNome
         ? `<div class="email-note">Direcionada ao tutor <strong>${escaparHtml(oc.tutorNome)}</strong> e à gestão.</div>`
@@ -6731,6 +7129,7 @@
         ${oc.reclassificado ? `<div class="email-note"><strong>Reclassificação automática:</strong> ${escaparHtml(oc.motivoReclassificacao || 'Verde → Amarelo por reincidência do mesmo tipo.')}</div>` : ''}
         ${fluxoExtra}
         ${provList ? `<div class="email-note" style="font-style:normal;margin-top:12px;"><strong>Providências a serem tomadas</strong><ul style="margin:6px 0 0;padding-left:18px;">${provList}</ul></div>` : ''}
+        ${waMsg}
         ${emailMsg}
       `;
     }
@@ -6780,14 +7179,31 @@
         direcionadoGestao: nivelFinal !== 'verde',
         providencias: providenciasFinal,
         responsavel: info.responsavel,
-        escolaId: escopoEscolaId() || (sessaoAtual && sessaoAtual.escolaId) || ''
+        escolaId: escopoEscolaId() || (sessaoAtual && sessaoAtual.escolaId) || '',
+        tutorCiente: false,
+        tutorCienteEm: '',
+        tutorCientePor: '',
+        tratativa: '',
+        tratativaEm: '',
+        tratativaPor: '',
+        gestaoAcompanhou: false,
+        gestaoAcompanhouEm: '',
+        gestaoAcompanhouPor: '',
+        gestaoObs: '',
+        whatsappEnviado: false,
+        whatsappEnviadoEm: '',
+        whatsappEnviadoPor: '',
+        emailEnviado: false,
+        emailEnviadoEm: '',
+        emailEnviadoPor: '',
+        emailErro: ''
       };
 
       ultimaOcorrencia = ocorrencia;
       salvarOcorrencia(ocorrencia);
       registrarLog('ocorrencia', 'Registrou ocorrência ' + ocorrencia.protocolo + ' · ' + ocorrencia.aluno, ocorrencia);
 
-      if (ocorrencia.email) {
+      if (ocorrencia.email && podeMarcarEnvioFamilia()) {
         if (emailjsConfigurado()) {
           const envio = await enviarEmailOcorrencia(ocorrencia);
           if (envio.ok) {
@@ -6804,7 +7220,9 @@
 
       resultadoDiv.className = 'resultado show nivel-' + ocorrencia.nivel;
       stampProto.textContent = ocorrencia.protocolo;
-      resultadoConteudo.innerHTML = montarDL(ocorrencia, true);
+      resultadoConteudo.innerHTML = montarDL(ocorrencia, true) + htmlPainelAcompanhamento(ocorrencia);
+      vincularAcompanhamento(ocorrencia);
+      atualizarBotoesEnvioFamilia();
 
       let statusFluxo = 'registrada pelo professor';
       if (ocorrencia.nivel === 'amarelo' || ocorrencia.nivel === 'vermelho') {

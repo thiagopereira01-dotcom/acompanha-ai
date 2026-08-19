@@ -1,4 +1,4 @@
-# Minimal — evita 500 em hospedagens que restringem Options/Require
+# Minimal — evita HTTP 500 em hospedagens que restringem Options/Require
 <Files "config.php">
   Order allow,deny
   Deny from all

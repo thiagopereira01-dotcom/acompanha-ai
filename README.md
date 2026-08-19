@@ -14,31 +14,16 @@ Um usuário pode ser **administrador e professor** ao mesmo tempo (marque “Tam
 
 O sistema identifica a **escola** no topo da tela. Sem licença ativa, usuários daquela escola não entram.
 
-## Hospedagem: página no Render + dados na HostGator
+## Hospedagem na Hostinger
 
-A tela (`index.html`) fica no Render. O MySQL e a API PHP ficam na HostGator.
+O site (`index.html`) e os dados (MySQL + API PHP) ficam no **mesmo servidor** da Hostinger.
 
-1. Na HostGator: crie o banco MySQL e envie **somente a pasta `api/`**.
+1. No hPanel: crie o banco MySQL e envie `index.html`, `config.js` e a pasta `api/` para `public_html`.
 2. Abra `https://seudominio.com.br/api/ativar.php`.
-3. Preencha o banco e, em **URL do site no Render**, cole `https://seu-app.onrender.com` (sem barra no final).
-4. Baixe o `config.js` que o instalador gera.
-5. No Render (Static Site), publique `index.html` e o `config.js` (com a URL da API e o token).
-6. Apague `api/ativar.php` na HostGator.
+3. Preencha o banco (host `localhost`, nomes **completos** do hPanel). Deixe a URL extra vazia.
+4. Confirme o status verde no login e apague `api/ativar.php`.
 
-Se a API já estava instalada, edite `api/config.php` e acrescente:
-
-```php
-define('API_CORS_ORIGINS', 'https://seu-app.onrender.com');
-```
-
-Passo a passo da HostGator: [INSTALAR-HOSTGATOR.md](INSTALAR-HOSTGATOR.md).
-
-## Hospedagem só na HostGator
-
-1. Crie um banco MySQL no cPanel.
-2. Envie `index.html`, `config.js` e a pasta `api/` para `public_html`.
-3. Abra `https://seudominio.com.br/api/ativar.php` e preencha os dados do banco (URL do Render vazia).
-4. Apague `api/ativar.php` depois que o status ficar verde.
+Passo a passo: [INSTALAR-HOSTINGER.md](INSTALAR-HOSTINGER.md).
 
 ## Primeiro acesso (Admin full)
 
@@ -55,7 +40,7 @@ Administradores antigos com login `admin` continuam válidos (escola migrada aut
 
 ## Persistência
 
-Com a API na HostGator, o MySQL é a fonte da verdade. O navegador só guarda um cache.
+Com a API na Hostinger, o MySQL é a fonte da verdade. O navegador só guarda um cache.
 
 Backups extras (aba **Servidor**): Google Drive, exportar/importar JSON.
 

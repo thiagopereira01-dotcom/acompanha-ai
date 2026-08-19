@@ -1,9 +1,9 @@
 <?php
 /**
  * Copie este arquivo para config.php e preencha os dados do MySQL
- * (cPanel → Bancos de Dados MySQL).
+ * (hPanel Hostinger → Bancos de Dados → MySQL).
  *
- * O instalador (install.php) também gera o config.php automaticamente.
+ * O instalador (ativar.php) também gera o config.php automaticamente.
  */
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'seu_banco');
@@ -14,8 +14,8 @@ define('DB_PASS', 'sua_senha');
 define('API_TOKEN', 'troque-por-um-segredo-longo');
 
 /**
- * Origens do site estático (Render), separadas por vírgula.
- * Vazio = só o mesmo domínio (instalação clássica na HostGator).
- * Ex.: https://seu-app.onrender.com
+ * Origens extras do site, separadas por vírgula.
+ * Vazio = só o mesmo domínio (recomendado: site e API na Hostinger).
+ * Ex.: https://outro-dominio.com
  */
 define('API_CORS_ORIGINS', '');

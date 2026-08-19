@@ -1,4 +1,8 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 header('X-Content-Type-Options: nosniff');
@@ -8,6 +12,10 @@ function json_out($data, $code = 200) {
   echo json_encode($data, JSON_UNESCAPED_UNICODE);
   exit;
 }
+
+set_exception_handler(function ($e) {
+  json_out(array('ok' => false, 'erro' => 'excecao', 'detalhe' => $e->getMessage()), 500);
+});
 
 function cors_origens_permitidas() {
   if (!defined('API_CORS_ORIGINS') || API_CORS_ORIGINS === '') {
@@ -67,25 +75,42 @@ if ($method === 'OPTIONS') {
   exit;
 }
 
-function api_token_ok() {
-  if (!defined('API_TOKEN') || API_TOKEN === '') {
-    return true;
+function ler_token_recebido() {
+  if (isset($_GET['token']) && $_GET['token'] !== '') {
+    return (string) $_GET['token'];
   }
-  $hdr = '';
-  if (isset($_SERVER['HTTP_X_API_TOKEN'])) {
-    $hdr = $_SERVER['HTTP_X_API_TOKEN'];
-  } elseif (function_exists('getallheaders')) {
+  if (isset($_SERVER['HTTP_X_API_TOKEN']) && $_SERVER['HTTP_X_API_TOKEN'] !== '') {
+    return (string) $_SERVER['HTTP_X_API_TOKEN'];
+  }
+  if (isset($_SERVER['HTTP_AUTHORIZATION']) && stripos($_SERVER['HTTP_AUTHORIZATION'], 'Bearer ') === 0) {
+    return trim(substr($_SERVER['HTTP_AUTHORIZATION'], 7));
+  }
+  if (function_exists('getallheaders')) {
     $headers = getallheaders();
     if (is_array($headers)) {
       foreach ($headers as $k => $v) {
-        if (strtolower($k) === 'x-api-token') {
-          $hdr = $v;
-          break;
+        $lk = strtolower($k);
+        if ($lk === 'x-api-token' && $v !== '') {
+          return (string) $v;
+        }
+        if ($lk === 'authorization' && stripos($v, 'Bearer ') === 0) {
+          return trim(substr($v, 7));
         }
       }
     }
   }
-  return hash_equals(API_TOKEN, (string) $hdr);
+  return '';
+}
+
+function api_token_ok() {
+  if (!defined('API_TOKEN') || API_TOKEN === '') {
+    return true;
+  }
+  $recebido = ler_token_recebido();
+  if ($recebido === '') {
+    return false;
+  }
+  return hash_equals(API_TOKEN, $recebido);
 }
 
 function exigir_token() {
@@ -185,6 +210,7 @@ if ($action === 'ping') {
   json_out(array(
     'ok' => true,
     'precisaToken' => defined('API_TOKEN') && API_TOKEN !== '',
+    'token' => (defined('API_TOKEN') ? API_TOKEN : ''),
     'version' => $store['version'],
     'updated_at' => $store['updated_at']
   ));

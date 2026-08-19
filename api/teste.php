@@ -1,6 +1,6 @@
 <?php
 /**
- * Teste rápido da pasta api/ na HostGator.
+ * Teste rápido da pasta api/ na Hostinger.
  * Abra: https://seudominio/api/teste.php
  * Apague depois.
  */

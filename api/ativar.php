@@ -1,6 +1,6 @@
 <?php
 /**
- * Instalador Acompanha-Aí — HostGator
+ * Instalador Acompanha-Aí — Hostinger
  * Formulário clássico (POST) + proteção contra exceções do PHP 8/mysqli.
  */
 error_reporting(E_ALL);
@@ -56,6 +56,12 @@ function escrever_token_js($token) {
   return escrever_arquivo(__DIR__ . '/public-token.js', $js);
 }
 
+function escrever_config_js_raiz($token) {
+  $js = "window.ACOMPANHA_API_URL = \"api/index.php\";\n"
+    . 'window.ACOMPANHA_API_TOKEN = ' . json_encode($token) . ";\n";
+  return escrever_arquivo(dirname(__DIR__) . '/config.js', $js);
+}
+
 function url_app() {
   $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (isset($_SERVER['SERVER_PORT']) && (string) $_SERVER['SERVER_PORT'] === '443')
@@ -83,11 +89,11 @@ function instalar($host, $name, $user, $pass, $cors = '') {
   if (!extension_loaded('mysqli') && !class_exists('mysqli')) {
     return array(
       'ok' => false,
-      'erro' => 'A extensão mysqli não está ativa. No cPanel: Select PHP Version → Extensions → marque mysqli → Save.'
+      'erro' => 'A extensão mysqli não está ativa. No hPanel: Avançado → Configuração PHP → Extensions → marque mysqli → Salvar.'
     );
   }
 
-  // PHP 8+ lança exceção em falha de conexão — sem isso a HostGator devolve HTTP 500.
+  // PHP 8+ lança exceção em falha de conexão — sem isso a Hostinger devolve HTTP 500.
   if (function_exists('mysqli_report')) {
     mysqli_report(MYSQLI_REPORT_OFF);
   }
@@ -99,13 +105,13 @@ function instalar($host, $name, $user, $pass, $cors = '') {
     return array(
       'ok' => false,
       'erro' => 'Não conectou no MySQL: ' . $e->getMessage()
-        . '. Confira host (geralmente localhost), nome completo do banco/usuário e senha no cPanel.'
+        . '. Confira host (geralmente localhost), nome completo do banco/usuário e senha no hPanel.'
     );
   } catch (Throwable $e) {
     return array(
       'ok' => false,
       'erro' => 'Não conectou no MySQL: ' . $e->getMessage()
-        . '. Confira host (geralmente localhost), nome completo do banco/usuário e senha no cPanel.'
+        . '. Confira host (geralmente localhost), nome completo do banco/usuário e senha no hPanel.'
     );
   }
 
@@ -114,7 +120,7 @@ function instalar($host, $name, $user, $pass, $cors = '') {
     return array(
       'ok' => false,
       'erro' => 'Não conectou no MySQL: ' . $msg
-        . '. Use o nome completo do cPanel (ex.: usuario_acompanha) e host localhost.'
+        . '. Use o nome completo do hPanel (ex.: u123456789_acompanha) e host localhost.'
     );
   }
 
@@ -148,12 +154,13 @@ function instalar($host, $name, $user, $pass, $cors = '') {
   $token = gerar_token();
   $cfgOk = escrever_config($host, $name, $user, $pass, $token, $cors);
   $jsOk = escrever_token_js($token);
+  escrever_config_js_raiz($token);
 
   if (!$cfgOk || !$jsOk) {
     return array(
       'ok' => false,
       'erro' => 'Conectou no banco e criou a tabela, mas a pasta api/ não deixou gravar arquivos (permissão). '
-        . 'No Gerenciador de Arquivos: pasta api → Permissões → 755 (ou 775). '
+        . 'No Gerenciador de Arquivos da Hostinger: pasta api → Permissões → 755 (ou 775). '
         . 'Depois use o bloco “Baixar config.php” abaixo e envie os arquivos manualmente.',
       'token' => $token,
       'manual' => true,
@@ -227,7 +234,7 @@ $writable = is_writable(__DIR__) ? 'sim' : 'não';
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ativar Acompanha-Aí · HostGator</title>
+<title>Ativar Acompanha-Aí · Hostinger</title>
 <style>
   :root { font-family: system-ui, sans-serif; }
   body {
@@ -278,16 +285,16 @@ $writable = is_writable(__DIR__) ? 'sim' : 'não';
     <?php if ($ok): ?>
       <p class="ok">Instalação concluída. Os dados passam a gravar no MySQL automaticamente.</p>
       <ol>
-        <li>Se o site também está nesta HostGator, abra o sistema e use <strong>Ctrl+F5</strong>.</li>
-        <li>Se a página está no <strong>Render</strong>, baixe o <code>config.js</code> abaixo e envie junto com o <code>index.html</code>.</li>
-        <li><strong>Apague</strong> <code>api/ativar.php</code> e <code>api/install.php</code>.</li>
+        <li>Abra o sistema e use <strong>Ctrl+F5</strong> para recarregar.</li>
+        <li>Confirme o status verde em <strong>Servidor</strong> (sincronização com o MySQL da Hostinger).</li>
+        <li><strong>Apague</strong> <code>api/ativar.php</code>, <code>api/install.php</code> e <code>api/teste.php</code>.</li>
       </ol>
-      <p class="hint">API: <code><?php echo h($apiUrl); ?></code><?php if ($geradoCors): ?><br>CORS (Render): <code><?php echo h($geradoCors); ?></code><?php endif; ?></p>
+      <p class="hint">API: <code><?php echo h($apiUrl); ?></code><?php if ($geradoCors): ?><br>CORS extra: <code><?php echo h($geradoCors); ?></code><?php endif; ?></p>
       <textarea readonly id="configJsBox">window.ACOMPANHA_API_URL = <?php echo json_encode($apiUrl); ?>;
 window.ACOMPANHA_API_TOKEN = <?php echo json_encode($geradoToken); ?>;
 </textarea>
-      <button type="button" class="btn-ghost" id="btnBaixarConfigJs">Baixar config.js (Render)</button>
-      <a class="btn" href="<?php echo h($appUrl); ?>">Abrir o Acompanha-Aí nesta HostGator</a>
+      <button type="button" class="btn-ghost" id="btnBaixarConfigJs">Baixar config.js</button>
+      <a class="btn" href="<?php echo h($appUrl); ?>">Abrir o Acompanha-Aí nesta Hostinger</a>
 
     <?php elseif ($jaInstalado): ?>
       <p class="ok">O servidor já está instalado.</p>
@@ -298,8 +305,8 @@ window.ACOMPANHA_API_TOKEN = <?php echo json_encode($geradoToken); ?>;
 
     <?php else: ?>
       <p class="hint">
-        Use o <strong>nome completo</strong> do banco e do usuário do cPanel
-        (ex.: <code>seucpanel_acompanha</code>). Host: <code>localhost</code>.
+        Use o <strong>nome completo</strong> do banco e do usuário do hPanel
+        (ex.: <code>u123456789_acompanha</code>). Host: <code>localhost</code>.
       </p>
       <?php if ($erro): ?><p class="err"><?php echo h($erro); ?></p><?php endif; ?>
 
@@ -316,9 +323,9 @@ window.ACOMPANHA_API_TOKEN = <?php echo json_encode($geradoToken); ?>;
         <label for="db_pass">Senha do banco</label>
         <input id="db_pass" name="db_pass" type="password" value="" autocomplete="new-password">
 
-        <label for="cors_origins">URL do site no Render (opcional)</label>
-        <input id="cors_origins" name="cors_origins" value="<?php echo h($corsVal); ?>" placeholder="https://seu-app.onrender.com" autocomplete="off">
-        <p style="margin:6px 0 0;font-size:.78rem;">Deixe vazio se o <code>index.html</code> também ficar nesta HostGator. Várias origens: separe por vírgula.</p>
+        <label for="cors_origins">URL extra (opcional)</label>
+        <input id="cors_origins" name="cors_origins" value="<?php echo h($corsVal); ?>" placeholder="https://outro-dominio.com" autocomplete="off">
+        <p style="margin:6px 0 0;font-size:.78rem;">Deixe vazio se o site e a API ficarem no mesmo domínio da Hostinger (recomendado). Várias origens: separe por vírgula.</p>
 
         <button type="submit" name="instalar" value="1">Criar tabela e ativar</button>
       </form>
@@ -326,7 +333,7 @@ window.ACOMPANHA_API_TOKEN = <?php echo json_encode($geradoToken); ?>;
       <details open>
         <summary><strong>Instalação manual (se o botão der erro)</strong></summary>
         <ol>
-          <li>cPanel → <strong>phpMyAdmin</strong> → selecione o banco → aba SQL → cole e execute:</li>
+          <li>hPanel → <strong>phpMyAdmin</strong> → selecione o banco → aba SQL → cole e execute:</li>
         </ol>
         <textarea readonly id="sqlBox">CREATE TABLE IF NOT EXISTS acompanha_store (
   id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
@@ -408,7 +415,7 @@ window.ACOMPANHA_API_TOKEN = <?php echo json_encode($geradoToken); ?>;
 
           msg.style.display = 'block';
           msg.className = 'ok';
-          msg.innerHTML = 'Arquivos gerados. Envie os dois para a pasta <code>api/</code> na HostGator (substituindo). Token: <code>' + token + '</code>';
+          msg.innerHTML = 'Arquivos gerados. Envie os dois para a pasta <code>api/</code> na Hostinger (substituindo). Token: <code>' + token + '</code>';
         });
       }
 
