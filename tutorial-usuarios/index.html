@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Como usar o Acompanha-Aí</title>
+<meta name="theme-color" content="#C62828">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#C62828;
+    --deep:#7A1010;
+    --ink:#1A1212;
+    --soft:#6B5757;
+    --ok:#1A7A4C;
+    --am:#D4A017;
+    --vm:#C43C3C;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#140808;color:#fff;font-family:Outfit,system-ui,sans-serif}
+  .app{min-height:100%;display:flex;flex-direction:column;max-width:1100px;margin:0 auto;padding:16px 16px 24px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .brand{display:flex;align-items:center;gap:10px;font-family:Manrope,sans-serif;font-weight:800}
+  .mark{width:36px;height:36px;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(198,40,40,.35)}
+  .mark img{width:100%;height:100%;object-fit:cover;transform:scale(1.12);display:block}
+  .back{color:#FFB59E;text-decoration:none;font-size:.9rem}
+  .stage{
+    position:relative;flex:1;min-height:520px;border-radius:22px;overflow:hidden;
+    background:radial-gradient(ellipse 80% 50% at 20% 0%, rgba(229,57,53,.35), transparent 55%), #1A0808;
+    border:1px solid rgba(255,255,255,.08);
+  }
+  .slide{position:absolute;inset:0;padding:28px 32px 96px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .45s ease}
+  .slide.on{opacity:1;visibility:visible;pointer-events:auto}
+  .kicker{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:#FFB59E;margin:0 0 8px}
+  h1,h2{font-family:Manrope,sans-serif;margin:0 0 10px;line-height:1.15}
+  h1{font-size:clamp(1.8rem,4vw,2.8rem)}
+  h2{font-size:clamp(1.35rem,3vw,2rem)}
+  .lead{color:rgba(255,245,245,.82);max-width:52ch;line-height:1.55;font-size:1.05rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:22px}
+  .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
+  .card strong{display:block;margin-bottom:6px}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:middle}
+  .mock{margin-top:18px;background:#F6F1F1;color:#1A1212;border-radius:16px;padding:16px;max-width:640px}
+  .mock label{display:block;font-size:.72rem;color:#6B5757;margin:8px 0 4px}
+  .mock .inp{background:#fff;border:1px solid #E0D4D4;border-radius:10px;padding:10px 12px;font-size:.92rem}
+  .niveis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+  .nv{border:2px solid #E0D4D4;border-radius:12px;padding:10px;background:#fff;font-size:.82rem}
+  .nv b{display:block;margin-bottom:4px}
+  .nv.v{border-color:#1A7A4C;background:#EAF8F0}
+  .nv.a{border-color:#D4A017;background:#FFF8E8}
+  .nv.r{border-color:#C43C3C;background:#FDF0F0}
+  .pill{display:inline-block;background:#C62828;color:#fff;border-radius:999px;padding:8px 16px;font-size:.85rem;margin-top:12px}
+  .steps{margin:16px 0 0;padding:0;list-style:none}
+  .steps li{display:flex;gap:10px;margin:0 0 10px;align-items:flex-start}
+  .num{flex:0 0 26px;height:26px;border-radius:50%;background:#C62828;display:grid;place-items:center;font-size:.78rem;font-weight:700}
+  .controls{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    margin-top:-72px;position:relative;z-index:2;padding:0 22px 8px;
+  }
+  button.ctrl{
+    border:0;border-radius:999px;padding:10px 18px;font-weight:700;cursor:pointer;
+    background:#C62828;color:#fff;font-family:inherit
+  }
+  button.ghost{background:rgba(255,255,255,.12)}
+  .bar{flex:1;min-width:140px;height:6px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;cursor:pointer}
+  .bar>i{display:block;height:100%;width:0;background:#FF6B4A}
+  .meta{font-size:.8rem;color:rgba(255,245,245,.65)}
+  .chapters{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .chapters button{
+    background:transparent;border:1px solid rgba(255,255,255,.18);color:#fff;
+    border-radius:999px;padding:6px 10px;font-size:.75rem;cursor:pointer;font-family:inherit
+  }
+  .chapters button.on{border-color:#FF6B4A;color:#FFB59E}
+  @media (max-width:640px){
+    .slide{padding:20px 16px 110px}
+    .niveis{grid-template-columns:1fr}
+    .controls{margin-top:-88px}
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand"><span class="mark"><img src="../img/logo-icon.png" alt=""></span> Acompanha<span style="color:#FF8A80">-Aí</span> · tutorial</div>
+      <a class="back" href="../index.html">Voltar ao sistema</a>
+    </header>
+    <div class="stage" id="stage"></div>
+    <div class="controls">
+      <button class="ctrl" id="btnPlay" type="button">▶ Assistir</button>
+      <button class="ctrl ghost" id="btnPrev" type="button">Anterior</button>
+      <button class="ctrl ghost" id="btnNext" type="button">Próximo</button>
+      <button class="ctrl ghost" id="btnMute" type="button">Som ligado</button>
+      <div class="bar" id="bar" title="Progresso"><i id="fill"></i></div>
+      <span class="meta" id="pos">1 / 12</span>
+    </div>
+    <div class="chapters" id="chapters"></div>
+  </div>
+<script>
+const SLIDES = [
+  {
+    cap: 'Início',
+    say: 'Bem-vindo ao Acompanha-Aí. Este vídeo mostra como professores, tutores e a gestão usam o sistema de ocorrências da escola.',
+    html: `<p class="kicker">Sistema de ocorrência escolar</p>
+      <h1>Como usar o Acompanha-Aí</h1>
+      <p class="lead">Do registro em sala à comunicação com a família. Assista com o som ligado: a narração explica cada passo.</p>`
+  },
+  {
+    cap: 'Entrar',
+    say: 'Abra o site da escola, toque em Começar e entre com o usuário e a senha que a gestão cadastrou para você. O sistema identifica sozinho se você é professor, tutor ou administrador.',
+    html: `<p class="kicker">Passo 1</p><h2>Entrar no sistema</h2>
+      <div class="mock">
+        <div class="inp" style="text-align:center;font-weight:800;color:#C62828">Acompanha-Aí</div>
+        <label>Usuário</label><div class="inp">seu.usuario</div>
+        <label>Senha</label><div class="inp">••••••••</div>
+        <span class="pill">Entrar</span>
+      </div>`
+  },
+  {
+    cap: 'Avisos',
+    say: 'No topo da tela, clique em Ativar avisos e permita as notificações. Assim o tutor recebe o aviso no celular ou no computador, mesmo com a aba fechada.',
+    html: `<p class="kicker">Passo 2</p><h2>Ativar avisos</h2>
+      <p class="lead">O tutor é avisado já na ocorrência verde. A gestão também é avisada nas amarelas e vermelhas.</p>
+      <div class="mock"><strong>Topbar</strong><div style="margin-top:8px"><span class="pill">Ativar avisos</span></div>
+      <p style="font-size:.85rem;color:#6B5757;margin:12px 0 0">Permita as notificações do navegador neste aparelho.</p></div>`
+  },
+  {
+    cap: 'Modos',
+    say: 'Quem é administrador e também professor pode alternar no topo entre Gestão e Ocorrência. Gestão vê relatórios e cadastros. Ocorrência é a tela para registrar o que aconteceu em sala.',
+    html: `<p class="kicker">Passo 3</p><h2>Gestão ou Ocorrência</h2>
+      <div class="mock" style="display:flex;gap:8px">
+        <div class="inp" style="background:#C62828;color:#fff;font-weight:700">Gestão</div>
+        <div class="inp">Ocorrência</div>
+      </div>
+      <div class="grid">
+        <div class="card"><strong>Gestão</strong>Relatório, usuários, alunos e acompanhamento.</div>
+        <div class="card"><strong>Ocorrência</strong>Formulário para registrar o fato em sala.</div>
+      </div>`
+  },
+  {
+    cap: 'Aluno',
+    say: 'Na ficha, confirme o seu nome e a turma. Busque o aluno pelo nome ou R A. Se ele tiver tutor, o sistema já mostra para quem a ocorrência será enviada.',
+    html: `<p class="kicker">Passo 4</p><h2>Identificar o aluno</h2>
+      <div class="mock">
+        <label>Aluno</label><div class="inp">Buscar por nome ou RA...</div>
+        <div class="inp" style="margin-top:8px;background:#FCE8E8">Maria Silva · RA 12345 · 8º A · Tutor: Ana</div>
+        <p style="font-size:.85rem;margin:10px 0 0;color:#7A1010">Esta ocorrência será direcionada ao tutor Ana e à gestão.</p>
+      </div>`
+  },
+  {
+    cap: 'Níveis',
+    say: 'Escolha o nível. Verde é leve e fica com o professor. Amarelo é moderado e vai para a gestão e o tutor. Vermelho é grave e pede atendimento imediato.',
+    html: `<p class="kicker">Passo 5</p><h2>Verde, amarelo ou vermelho</h2>
+      <div class="niveis">
+        <div class="nv v"><b><span class="dot" style="background:#1A7A4C"></span>Verde</b>Leve · professor</div>
+        <div class="nv a"><b><span class="dot" style="background:#D4A017"></span>Amarelo</b>Moderado · gestão e tutor</div>
+        <div class="nv r"><b><span class="dot" style="background:#C43C3C"></span>Vermelho</b>Grave · imediato</div>
+      </div>`
+  },
+  {
+    cap: 'Reincidência',
+    say: 'Se você registrar uma verde e aquele aluno já teve o mesmo tipo, o sistema sobe sozinho para amarelo. A primeira permanência excessiva no banheiro também começa verde. A segunda vira amarelo.',
+    html: `<p class="kicker">Regra importante</p><h2>Reincidência vira amarelo</h2>
+      <ul class="steps">
+        <li><span class="num">1</span><span>Primeira ocorrência daquele tipo: <strong>Verde</strong>.</span></li>
+        <li><span class="num">2</span><span>Segunda do mesmo tipo: o sistema coloca <strong>Amarelo</strong> e avisa gestão e tutor.</span></li>
+        <li><span class="num">3</span><span>Banheiro por tempo excessivo segue a mesma regra.</span></li>
+      </ul>`
+  },
+  {
+    cap: 'Registrar',
+    say: 'Marque o tipo, as providências e descreva o que aconteceu. WhatsApp e e-mail da família são opcionais. Toque em Registrar ocorrência. O protocolo aparece na hora.',
+    html: `<p class="kicker">Passo 6</p><h2>Completar e registrar</h2>
+      <div class="mock">
+        <label>Tipo</label><div class="inp">Conversas paralelas</div>
+        <label>Descrição</label><div class="inp">Conversava durante a explicação, após orientação verbal.</div>
+        <span class="pill">Registrar ocorrência</span>
+      </div>`
+  },
+  {
+    cap: 'Tutor',
+    say: 'O professor tutor vê as ocorrências dos seus alunos na caixa Ocorrências dos meus tutorados. Marque estou ciente, escreva a tratativa e, se houver contato, confirme o envio de WhatsApp ou e-mail.',
+    html: `<p class="kicker">Passo 7</p><h2>Se você é tutor</h2>
+      <div class="mock">
+        <strong>Ocorrências dos meus tutorados</strong>
+        <div class="inp" style="margin-top:10px">VD-20260905-0142 · Maria Silva · Verde</div>
+        <p style="font-size:.85rem;margin:10px 0 0">Estou ciente → salvar tratativa → marcar WhatsApp ou e-mail enviado.</p>
+      </div>`
+  },
+  {
+    cap: 'Gestão',
+    say: 'Na gestão, use o relatório para filtrar por data, turma, aluno ou classificação. Acompanhe se o tutor já tratou e se a família foi comunicada. Cadastre usuários e alunos nas abas correspondentes.',
+    html: `<p class="kicker">Passo 8</p><h2>Se você é da gestão</h2>
+      <div class="grid">
+        <div class="card"><strong>Relatório</strong>Filtros, totais e exportação.</div>
+        <div class="card"><strong>Usuários</strong>Professores, tutores e administradores.</div>
+        <div class="card"><strong>Alunos</strong>Turma, tutor e contato da família.</div>
+      </div>`
+  },
+  {
+    cap: 'Banheiro',
+    say: 'O Minha Vez, a fila do banheiro, pode gerar ocorrência automática de permanência excessiva. A primeira fica verde. Se repetir, vai para amarelo no Acompanha-Aí.',
+    html: `<p class="kicker">Integração</p><h2>Fila do banheiro</h2>
+      <p class="lead">Não é preciso redigitar. O registro chega no Acompanha-Aí com o aluno, a turma e o tempo no banheiro.</p>`
+  },
+  {
+    cap: 'Pronto',
+    say: 'Esse é o fluxo do dia a dia. Em caso de dúvida, fale com a gestão da escola. Para repetir este vídeo, toque em Assistir outra vez.',
+    html: `<p class="kicker">Fim</p><h2>Pronto para usar</h2>
+      <p class="lead">Abra o Acompanha-Aí, ative os avisos no seu aparelho e registre a ocorrência no momento em que ela acontecer.</p>
+      <a class="pill" href="../index.html" style="text-decoration:none">Ir para o sistema</a>`
+  }
+];
+
+const stage = document.getElementById('stage');
+const chapters = document.getElementById('chapters');
+const fill = document.getElementById('fill');
+const pos = document.getElementById('pos');
+const btnPlay = document.getElementById('btnPlay');
+const btnMute = document.getElementById('btnMute');
+let i = 0, playing = false, muted = false, timer = null;
+
+SLIDES.forEach((s, n) => {
+  const el = document.createElement('div');
+  el.className = 'slide' + (n === 0 ? ' on' : '');
+  el.innerHTML = s.html;
+  stage.appendChild(el);
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = (n + 1) + '. ' + s.cap;
+  b.addEventListener('click', () => go(n, playing));
+  chapters.appendChild(b);
+});
+
+function slidesEls(){ return [...stage.querySelectorAll('.slide')]; }
+function stopVoice(){ try { speechSynthesis.cancel(); } catch(_){} }
+function speak(text, onend){
+  stopVoice();
+  if (muted || !window.speechSynthesis) { onend && setTimeout(onend, Math.max(5000, text.length * 70)); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'pt-BR';
+  u.rate = 1.02;
+  const voices = speechSynthesis.getVoices().filter(v => /pt-BR|Portuguese/i.test(v.lang + v.name));
+  if (voices[0]) u.voice = voices[0];
+  u.onend = onend;
+  u.onerror = () => onend && onend();
+  speechSynthesis.speak(u);
+}
+
+function render(){
+  slidesEls().forEach((el, n) => {
+    const on = n === i;
+    el.classList.toggle('on', on);
+    el.setAttribute('aria-hidden', on ? 'false' : 'true');
+  });
+  [...chapters.children].forEach((b, n) => b.classList.toggle('on', n === i));
+  pos.textContent = (i + 1) + ' / ' + SLIDES.length;
+  fill.style.width = ((i) / (SLIDES.length - 1) * 100) + '%';
+}
+
+function go(n, keepPlaying){
+  i = Math.max(0, Math.min(SLIDES.length - 1, n));
+  clearTimeout(timer);
+  render();
+  if (keepPlaying) playCurrent();
+  else { playing = false; stopVoice(); btnPlay.textContent = '▶ Assistir'; }
+}
+
+function playCurrent(){
+  playing = true;
+  btnPlay.textContent = '❚❚ Pausar';
+  speak(SLIDES[i].say, () => {
+    if (!playing) return;
+    if (i < SLIDES.length - 1) go(i + 1, true);
+    else { playing = false; btnPlay.textContent = '▶ Assistir outra vez'; fill.style.width = '100%'; }
+  });
+}
+
+btnPlay.addEventListener('click', () => {
+  if (playing) { playing = false; stopVoice(); btnPlay.textContent = '▶ Continuar'; return; }
+  if (i === SLIDES.length - 1) i = 0;
+  render();
+  playCurrent();
+});
+btnPrev.addEventListener('click', () => go(i - 1, playing));
+btnNext.addEventListener('click', () => go(i + 1, playing));
+btnMute.addEventListener('click', () => {
+  muted = !muted;
+  btnMute.textContent = muted ? 'Som mudo' : 'Som ligado';
+  if (muted) stopVoice();
+});
+document.getElementById('bar').addEventListener('click', (e) => {
+  const r = e.currentTarget.getBoundingClientRect();
+  const p = (e.clientX - r.left) / r.width;
+  go(Math.round(p * (SLIDES.length - 1)), playing);
+});
+if (speechSynthesis.getVoices().length === 0) {
+  speechSynthesis.addEventListener('voiceschanged', () => {});
+}
+render();
+</script>
+</body>
+</html>

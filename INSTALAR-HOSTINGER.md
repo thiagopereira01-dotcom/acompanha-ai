@@ -2,7 +2,7 @@
 
 Com isso, **qualquer computador da escola** abre o mesmo site e já vê alunos, usuários e ocorrências atualizados. Não precisa clicar em backup.
 
-O site e o MySQL ficam juntos na Hostinger. Envie `index.html`, `config.js` e a pasta `api/`.
+O site e o MySQL ficam juntos na Hostinger. Envie `index.html`, `config.js`, `sw.js`, `manifest.webmanifest`, `.htaccess` e a pasta `api/`.
 
 ## 1. Criar o banco MySQL
 
@@ -25,11 +25,18 @@ No **Gerenciador de Arquivos** (hPanel → Arquivos), envie para `public_html` (
 
 - `index.html`
 - `config.js`
+- `sw.js`
+- `manifest.webmanifest`
+- `.htaccess` (evita os computadores da escola ficarem com versão velha em cache)
 - pasta `api/` (inteira)
 
 Ligue o SSL do domínio (`https://seudominio.com.br`) em **Segurança** → **SSL**.
 
 PHP recomendado: **8.1** ou **8.2** (hPanel → Avançado → Configuração PHP). A extensão **mysqli** precisa estar marcada.
+
+Depois de enviar os arquivos, em **cada computador da escola** abra o site com **Ctrl+F5** (uma vez). Isso limpa a página antiga que o Chrome guardou.
+
+**Não apague** `api/config.php` ao atualizar o site. Esse arquivo só existe na Hostinger (não vai no GitHub) e sem ele o sistema não conecta no servidor.
 
 ## 3. Rodar o instalador
 
@@ -80,6 +87,27 @@ CREATE TABLE IF NOT EXISTS acompanha_store (
   version INT UNSIGNED NOT NULL DEFAULT 1,
   updated_at DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS acompanha_push_vapid (
+  id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
+  public_key VARCHAR(255) NOT NULL,
+  private_d VARCHAR(255) NOT NULL,
+  subject VARCHAR(255) NOT NULL,
+  updated_at DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS acompanha_push_subs (
+  endpoint_hash CHAR(64) NOT NULL PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL,
+  escola_id VARCHAR(64) NOT NULL DEFAULT '',
+  endpoint TEXT NOT NULL,
+  p256dh VARCHAR(255) NOT NULL,
+  auth_key VARCHAR(255) NOT NULL,
+  user_agent VARCHAR(255) NOT NULL DEFAULT '',
+  updated_at DATETIME NOT NULL,
+  INDEX idx_user (user_id),
+  INDEX idx_escola (escola_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ```
 
 2. Copie `api/config.example.php` para `api/config.php` e preencha:
@@ -105,7 +133,7 @@ window.ACOMPANHA_API_TOKEN = 'cole-o-mesmo-segredo-longo-aqui';
 ## Servidor offline / erro 500
 
 1. Abra o site pelo **https do domínio**, não pelo arquivo no computador.
-2. Se a página inteira der erro 500, no Gerenciador de Arquivos **apague** o `.htaccess` que estiver em `public_html` (não o da pasta `api/`).
+2. Se a página inteira der erro 500, no Gerenciador de Arquivos **apague** o `.htaccess` que estiver em `public_html` (não o da pasta `api/`). O anti-cache do HTML continua valendo pelos scripts com `?v=`.
 3. Abra `https://seudominio.com.br/api/teste.php`. Precisa aparecer `mysqli: OK`. Apague esse arquivo depois.
 4. Abra `https://seudominio.com.br/api/ativar.php`, preencha o MySQL (nomes completos, host `localhost`) e ative.
 5. Recarregue o sistema com **Ctrl+F5**. O status precisa ficar verde.

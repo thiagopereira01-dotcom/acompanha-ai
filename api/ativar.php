@@ -31,6 +31,23 @@ function gerar_token() {
   return sha1(uniqid('acompanha', true) . mt_rand());
 }
 
+function token_existente() {
+  $candidatos = array(
+    __DIR__ . '/public-token.js',
+    dirname(__DIR__) . '/config.js'
+  );
+  foreach ($candidatos as $js) {
+    if (!is_file($js)) continue;
+    $txt = @file_get_contents($js);
+    if (!is_string($txt) || $txt === '') continue;
+    if (preg_match('/ACOMPANHA_API_TOKEN\s*=\s*[\'"]([^\'"]+)[\'"]/', $txt, $m)) {
+      $t = trim($m[1]);
+      if ($t !== '') return $t;
+    }
+  }
+  return '';
+}
+
 function escrever_arquivo($path, $conteudo) {
   $ok = @file_put_contents($path, $conteudo);
   if ($ok === false) {
@@ -135,12 +152,35 @@ function instalar($host, $name, $user, $pass, $cors = '') {
     updated_at DATETIME NOT NULL
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
 
+  $sqlPushVapid = "CREATE TABLE IF NOT EXISTS acompanha_push_vapid (
+    id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
+    public_key VARCHAR(255) NOT NULL,
+    private_d VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    updated_at DATETIME NOT NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+  $sqlPushSubs = "CREATE TABLE IF NOT EXISTS acompanha_push_subs (
+    endpoint_hash CHAR(64) NOT NULL PRIMARY KEY,
+    user_id VARCHAR(64) NOT NULL,
+    escola_id VARCHAR(64) NOT NULL DEFAULT '',
+    endpoint TEXT NOT NULL,
+    p256dh VARCHAR(255) NOT NULL,
+    auth_key VARCHAR(255) NOT NULL,
+    user_agent VARCHAR(255) NOT NULL DEFAULT '',
+    updated_at DATETIME NOT NULL,
+    INDEX idx_user (user_id),
+    INDEX idx_escola (escola_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
   try {
     if (!$mysqli->query($sql)) {
       $err = $mysqli->error;
       $mysqli->close();
       return array('ok' => false, 'erro' => 'Conectou, mas não criou a tabela: ' . $err);
     }
+    $mysqli->query($sqlPushVapid);
+    $mysqli->query($sqlPushSubs);
   } catch (Exception $e) {
     @$mysqli->close();
     return array('ok' => false, 'erro' => 'Erro ao criar tabela: ' . $e->getMessage());
@@ -151,7 +191,8 @@ function instalar($host, $name, $user, $pass, $cors = '') {
 
   $mysqli->close();
 
-  $token = gerar_token();
+  $token = token_existente();
+  if ($token === '') $token = gerar_token();
   $cfgOk = escrever_config($host, $name, $user, $pass, $token, $cors);
   $jsOk = escrever_token_js($token);
   escrever_config_js_raiz($token);
@@ -340,6 +381,27 @@ window.ACOMPANHA_API_TOKEN = <?php echo json_encode($geradoToken); ?>;
   payload LONGTEXT NOT NULL,
   version INT UNSIGNED NOT NULL DEFAULT 1,
   updated_at DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS acompanha_push_vapid (
+  id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
+  public_key VARCHAR(255) NOT NULL,
+  private_d VARCHAR(255) NOT NULL,
+  subject VARCHAR(255) NOT NULL,
+  updated_at DATETIME NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS acompanha_push_subs (
+  endpoint_hash CHAR(64) NOT NULL PRIMARY KEY,
+  user_id VARCHAR(64) NOT NULL,
+  escola_id VARCHAR(64) NOT NULL DEFAULT '',
+  endpoint TEXT NOT NULL,
+  p256dh VARCHAR(255) NOT NULL,
+  auth_key VARCHAR(255) NOT NULL,
+  user_agent VARCHAR(255) NOT NULL DEFAULT '',
+  updated_at DATETIME NOT NULL,
+  INDEX idx_user (user_id),
+  INDEX idx_escola (escola_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;</textarea>
         <button type="button" class="btn-ghost" id="btnCopiarSql">Copiar SQL</button>
 

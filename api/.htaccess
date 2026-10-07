@@ -3,3 +3,7 @@
   Order allow,deny
   Deny from all
 </Files>
+<Files "webpush.lib.php">
+  Order allow,deny
+  Deny from all
+</Files>
